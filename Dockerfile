@@ -18,7 +18,7 @@ RUN php artisan config:cache && \
 FROM nginx:alpine
 COPY --from=base /var/www /var/www
 COPY --from=base /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
-COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./default.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /var/www
 EXPOSE 80
