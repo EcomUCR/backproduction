@@ -37,7 +37,9 @@ Route::get('/products/search', [ProductController::class, 'search']);      // bu
 Route::get('/products/{id}', [ProductController::class, 'show']);          // detalle
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
 
-
+Route::get('/db-test', function () {
+    return DB::select('select current_database(), inet_server_addr()');
+});
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
