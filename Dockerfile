@@ -15,7 +15,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
-
+RUN php artisan migrate --force
 # Nginx config
 COPY ./default.conf /etc/nginx/sites-available/default
 RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
