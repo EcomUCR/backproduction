@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -38,7 +39,12 @@ Route::get('/products/{id}', [ProductController::class, 'show']);          // de
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
 
 Route::get('/db-test', function () {
-    return DB::select('select current_database(), inet_server_addr()');
+    try {
+        $result = DB::select('select current_database() as db, inet_server_addr() as host');
+        return response()->json($result);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
 });
 /*
 |--------------------------------------------------------------------------
