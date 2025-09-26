@@ -2,7 +2,7 @@ FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl unzip libpq-dev libonig-dev libzip-dev zip \
+    git curl unzip libpq-dev libzip-dev zip \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql pdo_sqlite mbstring zip
 
 # Install Composer
