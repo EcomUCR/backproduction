@@ -38,6 +38,10 @@ Route::get('/products/search', [ProductController::class, 'search']);      // bu
 Route::get('/products/{id}', [ProductController::class, 'show']);          // detalle
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
 
+Route::get('/products/{id}/images', [ProductImageController::class, 'index']);// listar imágenes de un producto
+Route::post('/product-images', [ProductImageController::class, 'store']);// subir nueva imagen
+Route::delete('/product-images/{id}', [ProductImageController::class, 'destroy']);// eliminar imagen
+
 Route::get('/db-test', function () {
     try {
         $result = DB::select('select current_database() as db, inet_server_addr() as host');
