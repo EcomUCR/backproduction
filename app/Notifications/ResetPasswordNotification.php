@@ -23,7 +23,7 @@ class ResetPasswordNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $url = url("https://ecomapi-kruj.onrender.com/reset-password?token={$this->token}&email={$this->email}");
+        $url = url("https://ecomapi-kruj.onrender.com/api/reset-password?token={$this->token}&email={$this->email}");
 
         return (new MailMessage)
                     ->subject('Restablecer contraseña')
