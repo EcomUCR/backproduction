@@ -53,7 +53,7 @@ class NewPasswordController extends Controller
         if ($status == Password::PASSWORD_RESET) {
             return response()->json([
                 'message' => 'Contraseña actualizada correctamente',
-                'redirect' => 'https://ecomproduccion.vercel.app/api/login' // URL del frontend
+                'redirect' => 'https://vercel.com/ecoms-projects-6d6754e3/ecomproduccion/GSxRCUcNVZ6KQnaqXJtHjwK4KbL2/login' // URL del frontend
             ], 200);
         }
 
