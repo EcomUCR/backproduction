@@ -17,7 +17,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'http://localhost:5173', // tu entorno local de React/Vite
+       /*>>>>>>>>>>>>>>>> */ 'https://TUDOMINIO.FRONTEND.com', // tu futuro dominio de producción (opcional) //RECORDAR CAMBIAR<<<<<<<<<<<<<<<<<<<<<<<<
+        // Puedes agregar otros orígenes aquí
+    ],
 
     'allowed_origins_patterns' => [],
 
