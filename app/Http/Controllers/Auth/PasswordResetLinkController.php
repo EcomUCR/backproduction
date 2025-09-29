@@ -33,18 +33,14 @@ class PasswordResetLinkController extends Controller
             'email' => 'required|email',
         ]);
         try {
+            \Log::info('Entrando a Password::sendResetLink');
             $status = Password::sendResetLink($request->only('email'));
-
-            if ($status === Password::RESET_LINK_SENT) {
-                return response()->json(['message' => __($status)], 200);
-            }
-
-            return response()->json(['message' => __($status)], 422);
+            \Log::info('Resultado de Password::sendResetLink', [$status]);
+            // ...
         } catch (\Throwable $e) {
-            // SOLO para depuración, luego bórralo
+            \Log::error('Error en Password Reset: ' . $e->getMessage());
             return response()->json([
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error' => $e->getMessage()
             ], 500);
         }
     }
