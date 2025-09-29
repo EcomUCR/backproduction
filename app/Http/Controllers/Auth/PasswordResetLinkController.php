@@ -41,10 +41,10 @@ class PasswordResetLinkController extends Controller
 
             return response()->json(['message' => __($status)], 422);
         } catch (\Throwable $e) {
-            // ⚠️ SOLO PARA DEBUG: muestra error real del backend
+            // SOLO para depuración, luego bórralo
             return response()->json([
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(), // puedes omitirlo si lo ves muy largo
+                'trace' => $e->getTraceAsString(),
             ], 500);
         }
     }
