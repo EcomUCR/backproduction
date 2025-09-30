@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductImageController; // <-- FALTABA ESTE IMPORT
 
 /*
 |--------------------------------------------------------------------------
@@ -38,10 +40,9 @@ Route::get('/products/search', [ProductController::class, 'search']);      // bu
 Route::get('/products/{id}', [ProductController::class, 'show']);          // detalle
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
 
-Route::get('/products/{id}/images', [ProductImageController::class, 'index']);// listar imágenes de un producto
-Route::post('/product-images', [ProductImageController::class, 'store']);// subir nueva imagen
-Route::delete('/product-images/{id}', [ProductImageController::class, 'destroy']);// eliminar imagen
 
+
+// Prueba DB
 Route::get('/db-test', function () {
     try {
         $result = DB::select('select current_database() as db, inet_server_addr() as host');
@@ -50,6 +51,7 @@ Route::get('/db-test', function () {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
@@ -77,4 +79,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+
+    // Imágenes de producto 
+    Route::get('/products/{id}/images', [ProductImageController::class, 'index']);        // listar imágenes de un producto
+    Route::post('/product-images', [ProductImageController::class, 'store']);             // subir nueva imagen
+    Route::delete('/product-images/{id}', [ProductImageController::class, 'destroy']);    // eliminar imagen
 });
