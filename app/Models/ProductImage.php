@@ -8,6 +8,10 @@ class ProductImage extends Model
 {
     protected $fillable = ['product_id', 'url', 'order'];
 
+    protected $casts = [
+        'order' => 'integer',
+    ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);
