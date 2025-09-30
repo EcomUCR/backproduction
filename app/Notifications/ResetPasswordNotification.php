@@ -23,7 +23,7 @@ class ResetPasswordNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $url = url("http://localhost:5173/reset-password?token={$this->token}&email={$this->email}");
+        $url = url("http://localhost:5173/resetPassword?token={$this->token}&email={$this->email}");
 
         return (new MailMessage)
                     ->subject('Restablecer contraseña')

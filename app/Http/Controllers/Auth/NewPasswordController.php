@@ -53,7 +53,7 @@ class NewPasswordController extends Controller
         if ($status == Password::PASSWORD_RESET) {
             return response()->json([
                 'message' => 'Contraseña actualizada correctamente',
-                'redirect' => 'http://localhost:5173/login' // URL del frontend
+                'redirect' => 'http://localhost:5173/loginRegister' // URL del frontend
             ], 200);
         }
 

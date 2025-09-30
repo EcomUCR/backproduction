@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
-    protected $fillable = ['sku', 'name', 'description', 'discount', 'stock', 'price', 'status', 'vendor_id'];
+    protected $fillable = ['name', 'description', 'discount', 'stock', 'price', 'status', 'vendor_id'];
 
     public function vendor()
     {
