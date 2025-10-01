@@ -10,6 +10,17 @@ use Illuminate\Http\JsonResponse;
 
 class ProductImageController extends Controller
 {
+    private function publicUrl(string $path): string
+    {
+        // Para bucket público en Supabase:
+        // {SUPABASE_PROJECT_URL}/storage/v1/object/public/{bucket}/{path}
+        $base   = rtrim(env('SUPABASE_PROJECT_URL'), '/');
+        $bucket = env('SUPABASE_PUBLIC_BUCKET');
+        $path   = ltrim($path, '/');
+
+        return "{$base}/storage/v1/object/public/{$bucket}/{$path}";
+    }
+
     /**
      * Listar imágenes de un producto
      */
@@ -17,25 +28,15 @@ class ProductImageController extends Controller
     {
         $product = Product::with('images')->findOrFail($productId);
 
-        // Opcional: normalizar las URLs (si en BD están guardadas absolutas, ya vienen listas)
-        $images = $product->images->map(function ($img) {
-            // Si guardaste la URL absoluta, no toques nada
-            if (preg_match('/^https?:\/\//', $img->url) || str_starts_with($img->url, config('app.url'))) {
-                return $img;
-            }
-            // Si guardaste path relativo (p.ej. products/abc.jpg), exponla como absoluta
-            $img->url = Storage::disk('public')->url(ltrim(str_replace('/storage/', '', $img->url), '/'));
-            return $img;
-        });
-
+        // Ya guardamos URL pública en BD, no hay que convertir nada
         return response()->json([
             'product' => $product->name,
-            'images'  => $images,
+            'images'  => $product->images,
         ]);
     }
 
     /**
-     * Guardar nueva imagen de un producto
+     * Guardar nueva imagen de un producto (Supabase Storage - S3)
      */
     public function store(Request $request): JsonResponse
     {
@@ -44,19 +45,28 @@ class ProductImageController extends Controller
             'image'      => 'required|image|mimes:jpg,jpeg,png,webp,avif|max:4096',
         ]);
 
-        // Guardar archivo en storage/app/public/products
-        $path = $request->file('image')->store('products', 'public');
+        $disk = Storage::disk('s3');
 
-        // URL pública absoluta (APP_URL/storage/products/...)
-        $publicUrl = Storage::disk('public')->url($path);
+        // Carpeta por producto: products/{product_id}/YYYY/MM/
+        $subdir   = 'products/' . $request->product_id . '/' . date('Y/m');
+        $filename = uniqid('img_', true) . '.' . $request->file('image')->getClientOriginalExtension();
+        $path     = $subdir . '/' . $filename;
 
-        // Calcular order = max + 1 (resistente a huecos por borrados)
+        // Sube a Supabase S3
+        $disk->put($path, file_get_contents($request->file('image')->getRealPath()), [
+            'visibility'   => 'public', // si el bucket es público
+            'CacheControl' => 'public, max-age=31536000, immutable',
+        ]);
+
+        // Construye URL pública
+        $publicUrl = $this->publicUrl($path);
+
+        // order = max + 1
         $nextOrder = (int) ProductImage::where('product_id', $request->product_id)->max('order') + 1;
 
-        // Guardar registro en la base de datos
         $image = ProductImage::create([
             'product_id' => $request->product_id,
-            'url'        => $publicUrl, // guardamos URL absoluta, React la puede consumir directo
+            'url'        => $publicUrl,
             'order'      => $nextOrder,
         ]);
 
@@ -73,23 +83,19 @@ class ProductImageController extends Controller
     {
         $image = ProductImage::findOrFail($id);
 
-        // Convertir la URL absoluta a path relativo del disco 'public' si aplica
-        $disk = Storage::disk('public');
-        $publicBase = rtrim($disk->url(''), '/'); // e.g. http://localhost:8000/storage
+        // Convertir URL pública a path relativo del bucket
+        $bucket = env('SUPABASE_PUBLIC_BUCKET');
+        $prefix = rtrim(env('SUPABASE_PROJECT_URL'), '/') . '/storage/v1/object/public/' . $bucket . '/';
 
-        $relativePath = $image->url;
-
-        // Si la URL empieza por el base público, quedarnos con el resto como path relativo
-        if (str_starts_with($image->url, $publicBase)) {
-            $relativePath = ltrim(str_replace($publicBase, '', $image->url), '/'); // e.g. products/abc.jpg
-        } else {
-            // Si guardaste "/storage/..." o "storage/..."
-            $relativePath = ltrim(str_replace(['storage/', '/storage/'], '', $image->url), '/');
+        $path = $image->url;
+        if (str_starts_with($path, $prefix)) {
+            $path = ltrim(substr($path, strlen($prefix)), '/'); // queda solo {path} relativo
         }
 
-        // Borrar archivo físico si existe
-        if ($relativePath && $disk->exists($relativePath)) {
-            $disk->delete($relativePath);
+        $disk = Storage::disk('s3');
+
+        if ($path && $disk->exists($path)) {
+            $disk->delete($path);
         }
 
         $image->delete();
