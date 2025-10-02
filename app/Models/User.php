@@ -1,37 +1,58 @@
 <?php
 
 namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Auth\Passwords\CanResetPassword;
-use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable, CanResetPassword;
+    use HasFactory, Notifiable;
 
-    protected $fillable = ['email', 'password'];
-    protected $hidden = ['password'];
+    protected $fillable = [
+        'email',
+        'password',
+        'first_name',
+        'last_name',
+        'image',
+        'status',
+        'phone_number',
+        'role'
+    ];
 
-    public function sendPasswordResetNotification($token)
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    public function stores()
     {
-        $this->notify(new ResetPasswordNotification($token, $this->email));
+        return $this->hasMany(Store::class);
     }
 
-    public function client()
+    public function orders()
     {
-        return $this->hasOne(Client::class);
+        return $this->hasMany(Order::class);
     }
 
-    public function vendor()
+    public function addresses()
     {
-        return $this->hasOne(Vendor::class);
+        return $this->hasMany(Address::class, 'customer_id');
     }
 
-    public function staff()
+    public function productReviews()
     {
-        return $this->hasOne(Staff::class);
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function storeReviews()
+    {
+        return $this->hasMany(StoreReview::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
     }
 }
-

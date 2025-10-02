@@ -5,18 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\StoreSocial;
 use Illuminate\Http\Request;
 
-class SocialMediaController extends Controller
+class StoreSocialController extends Controller
 {
     public function index()
     {
-        $socialMedias = StoreSocial::all();
-        return response()->json($socialMedias);
+        $storeSocials = StoreSocial::all();
+        return response()->json($storeSocials);
     }
 
     public function show($id)
     {
-        $socialMedia = StoreSocial::findOrFail($id);
-        return response()->json($socialMedia);
+        $storeSocial = StoreSocial::findOrFail($id);
+        return response()->json($storeSocial);
     }
 
     public function store(Request $request)
@@ -27,14 +27,14 @@ class SocialMediaController extends Controller
             'url' => 'required|string',
         ]);
 
-        $socialMedia = StoreSocial::create($validatedData);
+        $storeSocial = StoreSocial::create($validatedData);
 
-        return response()->json($socialMedia, 201);
+        return response()->json($storeSocial, 201);
     }
 
     public function update(Request $request, $id)
     {
-        $socialMedia = StoreSocial::findOrFail($id);
+        $storeSocial = StoreSocial::findOrFail($id);
 
         $validatedData = $request->validate([
             'store_id' => 'sometimes|exists:stores,id',
@@ -42,15 +42,15 @@ class SocialMediaController extends Controller
             'url' => 'sometimes|string',
         ]);
 
-        $socialMedia->update($validatedData);
+        $storeSocial->update($validatedData);
 
-        return response()->json($socialMedia);
+        return response()->json($storeSocial);
     }
 
     public function destroy($id)
     {
-        $socialMedia = StoreSocial::findOrFail($id);
-        $socialMedia->delete();
+        $storeSocial = StoreSocial::findOrFail($id);
+        $storeSocial->delete();
 
         return response()->json(null, 204);
     }

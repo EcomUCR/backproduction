@@ -7,60 +7,47 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    /**
-     * Listar todas las categorías
-     */
     public function index()
     {
-        return Category::all();
+        $categories = Category::all();
+        return response()->json($categories);
     }
 
-    /**
-     * Mostrar una sola categoría
-     */
     public function show($id)
     {
-        return Category::findOrFail($id);
+        $category = Category::findOrFail($id);
+        return response()->json($category);
     }
 
-    /**
-     * Crear categoría
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:50|unique:categories,name',
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:50|unique:categories',
         ]);
 
-        $category = Category::create($validated);
+        $category = Category::create($validatedData);
 
         return response()->json($category, 201);
     }
 
-    /**
-     * Actualizar categoría
-     */
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:50|unique:categories,name,' . $category->id,
+        $validatedData = $request->validate([
+            'name' => 'sometimes|string|max:50|unique:categories,name,'.$category->id,
         ]);
 
-        $category->update($validated);
+        $category->update($validatedData);
 
         return response()->json($category);
     }
 
-    /**
-     * Eliminar categoría
-     */
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
         $category->delete();
 
-        return response()->json(['message' => 'Categoría eliminada']);
+        return response()->json(null, 204);
     }
 }

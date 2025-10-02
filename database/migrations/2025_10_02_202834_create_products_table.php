@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->id(); // Primary Key
+            $table->foreignId('store_id')->constrained('stores')->onDelete('cascade'); // Foreign Key to Stores
+            $table->string('sku', 30)->unique(); // SKU
+            $table->string('name', 80)->notNull(); // Name
+            $table->text('description')->nullable(); // Description
+            $table->decimal('price', 10, 2)->notNull(); // Price
+            $table->decimal('discount_price', 10, 2)->default(0); // Discount Price
+            $table->integer('stock')->default(0); // Stock
+            $table->boolean('status')->default(true); // Status
+            $table->boolean('is_featured')->default(false); // Is Featured
+            $table->timestamps(); // Created At & Updated At
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('products');
+    }
+};

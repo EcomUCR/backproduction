@@ -1,25 +1,43 @@
 <?php
 
 namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
-    protected $fillable = ['name', 'description', 'discount', 'stock', 'price', 'status', 'vendor_id'];
+    use HasFactory;
 
-    public function vendor()
+    protected $fillable = [
+        'store_id',
+        'sku',
+        'name',
+        'description',
+        'price',
+        'discount_price',
+        'stock',
+        'status',
+        'is_featured'
+    ];
+
+    public function store()
     {
-        return $this->belongsTo(Vendor::class);
+        return $this->belongsTo(Store::class);
     }
 
-    public function images()
-    {
-        return $this->hasMany(ProductImage::class);
-    }
-
-    public function categories(): BelongsToMany
+    public function categories()
     {
         return $this->belongsToMany(Category::class, 'product_category');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

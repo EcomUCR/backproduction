@@ -2,154 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Client;
-use App\Models\Vendor;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    use AuthorizesRequests;
-
-    // 🔹 Register User as Client or Vendor
-    public function register(Request $request)
+    public function index()
     {
-        $request->validate([
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'type' => 'required|in:client,vendor',
-        ]);
-
-        $user = User::create([
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        if ($request->type === 'client') {
-            Client::create([
-                'user_id' => $user->id,
-                'username' => $request->username,
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'address' => $request->address ?? null,
-            ]);
-        } else if ($request->type === 'vendor') {
-            Vendor::create([
-                'user_id' => $user->id,
-                'name' => $request->name,
-                'phone_number' => $request->phone_number ?? null,
-            ]);
-        }
-
-        return response()->json(['message' => 'Registered successfully']);
+        $users = User::all();
+        return response()->json($users);
     }
 
-    // 🔹 Login
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $user = User::where('email', $request->email)->with('vendor')->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages(['email' => 'Invalid credentials']);
-        }
-
-        // 🔹 Update last login timestamp
-        $user->last_login_at = now();
-        $user->save();
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user,
-            'vendor_id' => $user->vendor ? $user->vendor->id : null,
-        ]);
-    }
-
-    // 🔹 Change Password
-    public function changePassword(Request $request)
-    {
-        $request->validate([
-            'old_password' => 'required',
-            'new_password' => 'required|min:6|confirmed',
-            // "confirmed" => espera también new_password_confirmation
-        ]);
-
-        $user = $request->user();
-
-        // Verificar que la contraseña actual es correcta
-        if (!Hash::check($request->old_password, $user->password)) {
-            return response()->json([
-                'message' => 'La contraseña actual no es correcta'
-            ], 422);
-        }
-
-        // Actualizar la contraseña
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        return response()->json([
-            'message' => 'Contraseña actualizada correctamente ✅'
-        ]);
-    }
-
-    // 🔹 Get logged-in user info
-    public function me(Request $request)
-    {
-        $user = $request->user();
-        return response()->json([
-            'user' => $user,
-            'client' => $user->client,
-            'vendor' => $user->vendor,
-            'staff' => $user->staff,
-        ]);
-    }
-
-    // 🔹 Logout
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
-    }
-    // 🔹 Show User by ID
     public function show($id)
     {
-        $user = User::with(['client', 'vendor', 'staff'])->findOrFail($id);
+        $user = User::findOrFail($id);
         return response()->json($user);
     }
-    // 🔹 Delete a user by ID
-    public function destroy($id)
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'email' => 'required|string|email|max:100|unique:users',
+            'password' => 'required|string|min:6',
+            'first_name' => 'nullable|string|max:80',
+            'last_name' => 'nullable|string|max:80',
+            'phone_number' => 'nullable|string|max:20',
+            'role' => 'required|string|in:ADMIN,SELLER,CUSTOMER',
+        ]);
+
+        $validatedData['password'] = bcrypt($validatedData['password']);
+        $user = User::create($validatedData);
+
+        return response()->json($user, 201);
+    }
+
+    public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        // Optional: you can also delete related client/vendor/staff
-        if ($user->client)
-            $user->client->delete();
-        if ($user->vendor)
-            $user->vendor->delete();
-        if ($user->staff)
-            $user->staff->delete();
+        $validatedData = $request->validate([
+            'email' => 'sometimes|string|email|max:100|unique:users,email,'.$user->id,
+            'password' => 'sometimes|string|min:6',
+            'first_name' => 'nullable|string|max:80',
+            'last_name' => 'nullable|string|max:80',
+            'phone_number' => 'nullable|string|max:20',
+            'role' => 'sometimes|string|in:ADMIN,SELLER,CUSTOMER',
+        ]);
 
-        $user->delete();
+        if (isset($validatedData['password'])) {
+            $validatedData['password'] = bcrypt($validatedData['password']);
+        }
 
-        return response()->json(['message' => 'User deleted successfully']);
+        $user->update($validatedData);
+
+        return response()->json($user);
     }
 
-    // 🔹 List Users
-    public function listUsers()
+    public function destroy($id)
     {
-        $this->authorize('viewAny', User::class);
-        $users = User::with(['client', 'vendor', 'staff'])->get();
-        return response()->json($users);
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return response()->json(null, 204);
     }
 }
