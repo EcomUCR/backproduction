@@ -41,7 +41,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validatedData = $request->validate([
-            'email' => 'sometimes|string|email|max:100|unique:users,email,'.$user->id,
+            'email' => 'sometimes|string|email|max:100|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:6',
             'first_name' => 'nullable|string|max:80',
             'last_name' => 'nullable|string|max:80',
@@ -56,6 +56,31 @@ class UserController extends Controller
         $user->update($validatedData);
 
         return response()->json($user);
+    }
+    public function login(Request $request)
+    {
+        // Validar credenciales
+        $credentials = $request->validate([
+            'email' => 'required|string|email|max:100',
+            'password' => 'required|string|min:6',
+        ]);
+
+        // Verificar si el usuario existe
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user || !\Hash::check($credentials['password'], $user->password)) {
+            return response()->json([
+                'error' => 'Credenciales inválidas'
+            ], 401);
+        }
+
+        // Generar un nuevo token de acceso con Sanctum
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token
+        ]);
     }
 
     public function destroy($id)

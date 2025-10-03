@@ -30,7 +30,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 */
 
 // Registro y login
-Route::post('/register', [UserController::class, 'register']);
+Route::post('/users', [UserController::class, 'store']);
 Route::post('/login', [UserController::class, 'login']);
 
 // Categorías
