@@ -18,7 +18,8 @@ class Product extends Model
         'discount_price',
         'stock',
         'status',
-        'is_featured'
+        'is_featured',
+        'image_url'
     ];
 
     public function store()
