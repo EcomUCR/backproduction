@@ -26,13 +26,13 @@ class BrevoTransport implements TransportInterface
         $payload = [
             'sender' => [
                 'email' => env('MAIL_FROM_ADDRESS'),
-                'name'  => env('MAIL_FROM_NAME'),
+                'name' => env('MAIL_FROM_NAME'),
             ],
             'to' => collect($email->getTo())->map(fn($addr) => [
                 'email' => $addr->getAddress(),
-                'name'  => $addr->getName()
+                'name' => $addr->getName() ?: $addr->getAddress()
             ])->values()->toArray(),
-            'subject'     => $email->getSubject(),
+            'subject' => $email->getSubject(),
             'htmlContent' => $email->getHtmlBody() ?? $email->getTextBody(),
         ];
 
