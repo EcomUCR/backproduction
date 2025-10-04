@@ -21,8 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Registrar transport personalizado "brevo"
-        Mail::extend('brevo', function () {
+        // Aquí registramos el nuevo driver "brevo"
+        Mail::extend('brevo', function (array $config = []) {
             return new BrevoTransport();
         });
     }

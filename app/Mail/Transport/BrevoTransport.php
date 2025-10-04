@@ -5,33 +5,45 @@ namespace App\Mail\Transport;
 use Brevo\Client\Api\TransactionalEmailsApi;
 use Brevo\Client\Configuration;
 use GuzzleHttp\Client;
-use Illuminate\Mail\Transport\Transport;
-use Swift_Mime_SimpleMessage;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\SentMessage;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mime\RawMessage;
+use Symfony\Component\Mime\MessageConverter;
 
-class BrevoTransport extends Transport
+class BrevoTransport implements TransportInterface
 {
-    public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = null)
+    public function send(RawMessage $message, Envelope $envelope = null): ?SentMessage
     {
+        // Convertir el RawMessage a Email
+        $email = MessageConverter::toEmail($message);
+
         $config = Configuration::getDefaultConfiguration()
             ->setApiKey('api-key', env('BREVO_API_KEY'));
 
         $apiInstance = new TransactionalEmailsApi(new Client(), $config);
 
-        $email = [
+        $payload = [
             'sender' => [
                 'email' => env('MAIL_FROM_ADDRESS'),
                 'name'  => env('MAIL_FROM_NAME'),
             ],
-            'to' => collect($message->getTo())->map(fn($name, $email) => [
-                'email' => $email,
-                'name'  => $name
+            'to' => collect($email->getTo())->map(fn($addr) => [
+                'email' => $addr->getAddress(),
+                'name'  => $addr->getName()
             ])->values()->toArray(),
-            'subject' => $message->getSubject(),
-            'htmlContent' => $message->getBody(),
+            'subject'     => $email->getSubject(),
+            'htmlContent' => $email->getHtmlBody() ?? $email->getTextBody(),
         ];
 
-        $apiInstance->sendTransacEmail($email);
+        $apiInstance->sendTransacEmail($payload);
 
-        return $this->numberOfRecipients($message);
+        // Symfony espera devolver un SentMessage
+        return new SentMessage($message, $envelope ?? Envelope::create($email));
+    }
+
+    public function __toString(): string
+    {
+        return 'brevo';
     }
 }
