@@ -22,6 +22,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            'username' => 'required|string|max:100|unique:users',
             'email' => 'required|string|email|max:100|unique:users',
             'password' => 'required|string|min:6',
             'first_name' => 'nullable|string|max:80',
@@ -41,6 +42,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validatedData = $request->validate([
+            'username' => 'sometimes|string|max:100|unique:users,',
             'email' => 'sometimes|string|email|max:100|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:6',
             'first_name' => 'nullable|string|max:80',
