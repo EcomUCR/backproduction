@@ -60,20 +60,33 @@ class UserController extends Controller
     public function login(Request $request)
     {
         // Validar credenciales
+
         $credentials = $request->validate([
             'email' => 'required|string|email|max:100',
             'password' => 'required|string|min:6',
         ]);
-
+        \Log::info('POST /login recibido', [
+            'request_all' => $request->all(),
+            'credentials' => $credentials,
+        ]);
         // Verificar si el usuario existe
         $user = User::where('email', $credentials['email'])->first();
-
+        \Log::info('Usuario encontrado', [
+            'user' => $user ? $user->toArray() : null,
+        ]);
         if (!$user || !\Hash::check($credentials['password'], $user->password)) {
             return response()->json([
                 'error' => 'Credenciales inválidas'
             ], 401);
         }
-
+        if ($user) {
+            $check = \Hash::check($credentials['password'], $user->password);
+            \Log::info('Result de Hash::check', [
+                'check' => $check,
+                'written' => $credentials['password'],
+                'hash_in_db' => $user->password,
+            ]);
+        }
         // Generar un nuevo token de acceso con Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
