@@ -97,6 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/change-password', [UserController::class, 'changePassword']);
+    Route::get('/users/{id}/store', [UserController::class, 'getStore']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
     //Tiendas

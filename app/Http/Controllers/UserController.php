@@ -131,6 +131,26 @@ class UserController extends Controller
         ]);
     }
 
+    public function getStore($id)
+{
+    // Busca al usuario junto con su tienda
+    $user = \App\Models\User::with('store')->find($id);
+
+    // Si no existe el usuario
+    if (!$user) {
+        return response()->json(['message' => 'Usuario no encontrado'], 404);
+    }
+
+    // Si el usuario no tiene tienda
+    if (!$user->store) {
+        return response()->json(['message' => 'El usuario no tiene una tienda asociada'], 404);
+    }
+
+    // Devuelve la tienda del usuario
+    return response()->json($user->store);
+}
+
+
     public function destroy($id)
     {
         $user = User::findOrFail($id);
