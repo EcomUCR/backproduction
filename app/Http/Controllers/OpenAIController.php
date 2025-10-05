@@ -13,7 +13,7 @@ class OpenAIController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $productName = $request->product_name;
+        $productName = $request->name;
 
         $client = \OpenAI::client(env('OPENAI_API_KEY'));
 
