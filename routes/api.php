@@ -44,6 +44,13 @@ Route::get('/test-env', function () {
         'config' => config('cloudinary.cloud_url'),
     ];
 });
+Route::get('/debug-cloudinary', function () {
+    return [
+        'config_raw' => config('cloudinary'),
+        'cloud_url' => config('cloudinary.cloud_url'),
+        'env' => env('CLOUDINARY_URL')
+    ];
+});
 // Registro y login
 Route::post('/users', [UserController::class, 'store']);
 Route::post('/login', [UserController::class, 'login']);
