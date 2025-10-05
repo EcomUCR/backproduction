@@ -101,7 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Tiendas
     Route::get('/stores', [StoreController::class, 'index']);
-    Route::get('/stores/{id}', [StoreController::class, 'show']);
+    Route::get('/stores/{user_id}', [StoreController::class, 'show']);
 
 
     // Perfiles
