@@ -1,30 +1,28 @@
 FROM php:8.2-cli
 
-# Instala dependencias del sistema necesarias
+# Instala dependencias de sistema
 RUN apt-get update && apt-get install -y \
     git curl unzip libpq-dev libzip-dev zip libsqlite3-dev libonig-dev \
     && docker-php-ext-install pdo pdo_pgsql mbstring zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copia Composer desde el contenedor oficial
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Copia SÓLO los archivos necesarios para instalar dependencias primero (cache eficiente de Docker)
+# 1. Copia SÓLO composer files primero
 COPY composer.json composer.lock ./
 
-# Limpia vendor antes de instalar (evita vendor cacheado)
-RUN rm -rf vendor/ && \
-    composer install --no-dev --optimize-autoloader
+# 2. Instala dependencias (NO ejecutará el post-install ni artisan scripts porque no hay artisan aún, y eso es correcto)
+RUN composer install --no-dev --optimize-autoloader
 
-# Copia el resto del código (después del vendor para el cache de capas)
+# 3. Ahora sí, copia el resto del código (incluye artisan y todo lo demás)
 COPY . .
 
-# Permisos - SÓLO para quien lo necesite, usar en desarrollo o si app lo requiere
+# 4. Permisos (opcional)
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Limpia todos los caches y publica enlaces antes de arrancar
+# 5. Ahora sí, ejecuta comandos artisan
 RUN php artisan config:clear \
     && php artisan cache:clear \
     && php artisan route:clear \
@@ -34,5 +32,4 @@ RUN php artisan config:clear \
 
 EXPOSE $PORT
 
-# Ejecuta el servidor
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT}"]
