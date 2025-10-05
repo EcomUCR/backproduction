@@ -35,8 +35,27 @@ class UserController extends Controller
         ]);
 
         $validatedData['password'] = bcrypt($validatedData['password']);
-        $user = User::create($validatedData);
 
+        $user = User::create($validatedData);
+        // Si el rol es SELLER, crea un store automático
+        if ($validatedData['role'] === 'SELLER') {
+            // Si tienes StoreCategory predeterminada, obtén su ID aquí. Si no, pon NULL.
+            $defaultCategoryId = 1; // O busca una por defecto si quieres
+            $storeData = [
+                'user_id' => $user->id,
+                'name' => $user->username,
+                'slug' => \Str::slug($user->username) . '-' . $user->id, // evita colisiones
+                'description' => null,
+                'category_id' => $defaultCategoryId,
+                'business_name' => null,
+                'tax_id' => null,
+                'legal_type' => null,
+                'support_email' => null,
+                'support_phone' => null,
+                'status' => 'ACTIVE',
+            ];
+            \App\Models\Store::create($storeData);
+        }
         return response()->json($user, 201);
     }
 

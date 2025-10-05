@@ -16,6 +16,7 @@ use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\ImageUploadController;
 // NOT FOUND CONTROLLERS
 // use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
@@ -28,6 +29,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 |--------------------------------------------------------------------------
 | Rutas que no requieren autenticación
 */
+//Imagenes
+Route::post('/upload-image', [ImageUploadController::class, 'upload']);
 
 // Registro y login
 Route::post('/users', [UserController::class, 'store']);
