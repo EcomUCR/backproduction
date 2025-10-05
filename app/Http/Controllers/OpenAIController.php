@@ -10,7 +10,7 @@ class OpenAIController extends Controller
     public function generateDescription(Request $request)
     {
         $request->validate([
-            'product_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
         ]);
 
         $productName = $request->product_name;
