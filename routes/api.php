@@ -31,7 +31,14 @@ use App\Http\Controllers\ImageUploadController;
 */
 //Imagenes
 Route::post('/upload-image', [ImageUploadController::class, 'upload']);
-
+Route::get('/cloudinary-debug', function () {
+    return [
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+        'api_key' => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET') ? "set" : "not set",
+        'cloud_url' => env('CLOUDINARY_URL'),
+    ];
+});
 // Registro y login
 Route::post('/users', [UserController::class, 'store']);
 Route::post('/login', [UserController::class, 'login']);
@@ -94,7 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Route::get('/products/{id}/images', [ProductImageController::class, 'index']);        
     //Route::post('/product-images', [ProductImageController::class, 'store']);             
     //Route::delete('/product-images/{id}', [ProductImageController::class, 'destroy']);   
-    
+
     // Ordenes (CRUD)
     Route::apiResource('orders', OrderController::class);
 
