@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
 use Illuminate\Http\Request;
-
+use App\Services\BrevoMailer;
 class ContactMessageController extends Controller
 {
     public function index()
@@ -29,7 +29,21 @@ class ContactMessageController extends Controller
             'read' => 'nullable|boolean',
         ]);
 
+        // Guarda en la base de datos (opcional)
         $contactMessage = ContactMessage::create($validatedData);
+
+        // Arma el correo
+        $subject = 'Nuevo mensaje desde el formulario de contacto';
+        $to = env('MAIL_FROM_ADDRESS', 'ecomucr2025@gmail.com');
+        $body = view('emails.contact', [
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'subject' => $validatedData['subject'] ?? '',
+            'messageContent' => $validatedData['message']
+        ])->render();
+
+        // ENVÍA EL CORREO
+        BrevoMailer::send($to, $subject, $body);
 
         return response()->json($contactMessage, 201);
     }
