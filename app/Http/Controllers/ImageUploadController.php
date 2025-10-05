@@ -3,25 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Cloudinary;
 
 class ImageUploadController extends Controller
 {
     public function upload(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|max:4096', // 4MB
+            'image' => 'required|image|max:4096',
         ]);
 
-        // Subir la imagen a Cloudinary
-        $uploadedFileUrl = Cloudinary::upload(
-            $request->file('image')->getRealPath(),
-            ['folder' => 'marketplace/products'] // carpeta opcional
-        )->getSecurePath();
+        // Instancia Cloudinary con los datos de tu .env
+        $cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME', 'dpbghs8ep'),
+                'api_key'    => env('CLOUDINARY_API_KEY', '487757492116512'),
+                'api_secret' => env('CLOUDINARY_API_SECRET', 'uiPutUcwrquKbm7ooeRuYL6szAs'),
+            ],
+        ]);
 
-        // Devolver la URL pública
+        $upload = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath(), [
+            'folder' => 'marketplace/products'
+        ]);
+
         return response()->json([
-            'url' => $uploadedFileUrl
+            'url' => $upload['secure_url'],
         ]);
     }
 }
