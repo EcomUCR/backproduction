@@ -18,9 +18,9 @@ use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\OpenAIController;
+use App\Http\Controllers\StoreController;
 
 // NOT FOUND CONTROLLERS
-// use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
 // use App\Http\Controllers\StoreReviewController;
 // use App\Http\Controllers\StoreSocialController;
@@ -96,6 +96,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/change-password', [UserController::class, 'changePassword']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    //Tiendas
+    Route::get('/stores', [StoreController::class, 'index']);
+    Route::get('/stores/{id}', [StoreController::class, 'show']);
+
 
     // Perfiles
     Route::get('/profiles/{id}', [ProfileController::class, 'show']);
