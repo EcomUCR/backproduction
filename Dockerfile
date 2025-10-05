@@ -16,10 +16,10 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE $PORT
 
-CMD php artisan storage:link && \
-    php artisan serve --host=0.0.0.0 --port=${PORT} && \
-    php artisan config:clear && \
+CMD php artisan config:clear && \
     php artisan cache:clear && \
     php artisan route:clear && \
     php artisan view:clear && \
-    php artisan optimize:clear
+    php artisan optimize:clear && \
+    php artisan storage:link && \
+    php artisan serve --host=0.0.0.0 --port=${PORT}
