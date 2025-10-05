@@ -15,7 +15,8 @@ class UserController extends Controller
     }
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user()->load('store');
+        return response()->json($user);
     }
     public function show($id)
     {

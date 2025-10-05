@@ -37,9 +37,9 @@ class User extends Authenticatable
     }
 
     // Relaciones de tu modelo nuevo
-    public function stores()
+    public function store()
     {
-        return $this->hasMany(Store::class);
+        return $this->hasOne(Store::class, 'user_id');
     }
 
     public function orders()
