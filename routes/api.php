@@ -17,6 +17,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ImageUploadController;
+use App\Http\Controllers\OpenAIController;
+
 // NOT FOUND CONTROLLERS
 // use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
@@ -29,6 +31,11 @@ use App\Http\Controllers\ImageUploadController;
 |--------------------------------------------------------------------------
 | Rutas que no requieren autenticación
 */
+
+//OpenAI API
+Route::post('/openai/description', [OpenAIController::class, 'generateDescription'])
+    ->middleware('throttle:10,1'); // opcional: 10 peticiones por minuto por IP
+
 //Imagenes
 Route::post('/upload-image', [ImageUploadController::class, 'upload']);
 Route::get('/test-env', function () {
