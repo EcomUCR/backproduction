@@ -55,13 +55,13 @@ class ProductController extends Controller
     }
 
     public function showByStore($store_id)
-{
+    {
     $products = Product::where('store_id', $store_id)->get();
     if ($products->isEmpty()) {
         return response()->json(['message' => 'No hay productos para esta tienda'], 404);
     }
     return response()->json($products);
-}
+    }
 
     public function update(Request $request, $id)
     {
