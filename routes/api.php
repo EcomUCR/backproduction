@@ -71,9 +71,9 @@ Route::post('/contact-messages', [ContactMessageController::class, 'store']);
 // Productos públicos (solo lectura)
 Route::get('/products', [ProductController::class, 'index']);              // todos los productos
 Route::get('/products/search', [ProductController::class, 'search']);      // buscar
+Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/{id}', [ProductController::class, 'show']);          // detalle
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
-
 // DB Test
 Route::get('/db-test', function () {
     try {

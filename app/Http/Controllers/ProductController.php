@@ -38,14 +38,18 @@ class ProductController extends Controller
 
         return response()->json($product, 201);
     }
-
+    public function featured()
+    {
+        $featured = Product::where('is_featured', true)->limit(5)->get();
+        return response()->json($featured);
+    }
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
 
         $validatedData = $request->validate([
             'store_id' => 'sometimes|exists:stores,id',
-            'sku' => 'sometimes|string|max:30|unique:products,sku,'.$product->id,
+            'sku' => 'sometimes|string|max:30|unique:products,sku,' . $product->id,
             'name' => 'sometimes|string|max:80',
             'image_url' => 'sometimes|string',
             'description' => 'nullable|string',
