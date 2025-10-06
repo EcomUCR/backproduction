@@ -23,7 +23,7 @@ class ProductController extends Controller
     {
         $validatedData = $request->validate([
             'store_id' => 'required|exists:stores,id',
-            'sku' => 'required|string|max:200|unique:products',
+            'sku' => 'required|string|unique:products',
             'name' => 'required|string|max:80',
             'image_url' => 'required|string',
             'description' => 'nullable|string',
@@ -70,7 +70,7 @@ class ProductController extends Controller
 
         $validatedData = $request->validate([
             'store_id' => 'sometimes|exists:stores,id',
-            'sku' => 'sometimes|string|max:30|unique:products,sku,' . $product->id,
+            'sku' => 'sometimes|string|unique:products,sku,' . $product->id,
             'name' => 'sometimes|string|max:80',
             'image_url' => 'sometimes|string',
             'description' => 'nullable|string',
