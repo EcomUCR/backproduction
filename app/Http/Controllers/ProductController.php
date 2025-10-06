@@ -34,6 +34,10 @@ class ProductController extends Controller
             'is_featured' => 'nullable|boolean',
         ]);
 
+        if (empty($validatedData['discount_price']) && $validatedData['discount_price'] !== 0 && $validatedData['discount_price'] !== '0') {
+            unset($validatedData['discount_price']);
+        }
+
         $product = Product::create($validatedData);
 
         return response()->json($product, 201);
