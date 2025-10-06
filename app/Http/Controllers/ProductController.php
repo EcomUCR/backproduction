@@ -39,25 +39,25 @@ class ProductController extends Controller
         }
 
         $product = Product::create($validatedData);
-        $product->load('store:id,name', 'categories');
+        $product->load('store', 'categories');
 
         return response()->json($product, 201);
     }
     public function featured()
     {
-        $featured = Product::with('store:id,name', 'categories')->where('is_featured', true)->limit(10)->get();
+        $featured = Product::with('store', 'categories')->where('is_featured', true)->limit(10)->get();
         return response()->json($featured);
     }
 
     public function notFeatured()
     {
-        $notFeatured = Product::with('store:id,name', 'categories')->where('is_featured', false)->limit(10)->get();
+        $notFeatured = Product::with('store', 'categories')->where('is_featured', false)->limit(10)->get();
         return response()->json($notFeatured);
     }
 
     public function showByStore($store_id)
     {
-    $products = Product::with('store:id,name', 'categories')->where('store_id', $store_id)->get();
+    $products = Product::with('store', 'categories')->where('store_id', $store_id)->get();
     if ($products->isEmpty()) {
         return response()->json(['message' => 'No hay productos para esta tienda'], 404);
     }
@@ -66,7 +66,7 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        $product = Product::with('store:id,name', 'categories')->findOrFail($id);
+        $product = Product::with('store', 'categories')->findOrFail($id);
 
         $validatedData = $request->validate([
             'store_id' => 'sometimes|exists:stores,id',
@@ -88,7 +88,7 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        $product = Product::with('store:id,name', 'categories')->findOrFail($id);
+        $product = Product::with('store', 'categories')->findOrFail($id);
         $product->delete();
 
         return response()->json(null, 204);
