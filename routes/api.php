@@ -112,6 +112,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
+
     
     // Ordenes (CRUD)
     Route::apiResource('orders', OrderController::class);
