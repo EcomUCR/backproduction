@@ -44,13 +44,13 @@ class ProductController extends Controller
     }
     public function featured()
     {
-        $featured = Product::where('is_featured', true)->limit(5)->get();
+        $featured = Product::where('is_featured', true)->limit(10)->get();
         return response()->json($featured);
     }
 
     public function notFeatured()
     {
-        $notFeatured = Product::where('is_featured', false)->limit(5)->get();
+        $notFeatured = Product::where('is_featured', false)->limit(10)->get();
         return response()->json($notFeatured);
     }
 
