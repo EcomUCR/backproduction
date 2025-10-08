@@ -53,7 +53,7 @@ class DiscountCodeController extends Controller
             'store_id' => 'nullable|exists:stores,id',
             'product_id' => 'nullable|exists:products,id',
             'discount_pct' => 'sometimes|integer',
-            'max_uses' => 'sometimes|integer',
+            'max_uses' => 'sometimes|integer' ,
             'used_count' => 'nullable|integer',
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date',
