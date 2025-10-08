@@ -14,84 +14,111 @@ class UserController extends Controller
         return response()->json($users);
     }
     public function me(Request $request)
-    {
-        $user = $request->user()->load('store');
-        return response()->json($user);
+{
+    // Verificar si hay usuario autenticado
+    $user = $request->user();
+
+    if (!$user) {
+        return response()->json([
+            'message' => 'No se encontró un usuario autenticado.'
+        ], 401);
     }
+
+    // Cargar la tienda y opcionalmente productos o relaciones adicionales
+    $user->load([
+        'store:id,user_id,name,slug,status', // campos específicos de la tienda
+    ]);
+
+    return response()->json([
+        'user' => $user,
+        'store' => $user->store ?? null, // por si no tiene tienda
+    ]);
+}
+
     public function show($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('store:id,user_id,name,slug,status')->findOrFail($id);
         return response()->json($user);
     }
 
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'username' => 'required|string|max:100|unique:users',
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|min:6',
-            'first_name' => 'nullable|string|max:80',
-            'last_name' => 'nullable|string|max:80',
-            'phone_number' => 'nullable|string|max:20',
-            'role' => 'required|string|in:ADMIN,SELLER,CUSTOMER',
-        ]);
+ public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'username' => 'required|string|max:100|unique:users',
+        'email' => 'required|string|email|max:100|unique:users',
+        'password' => 'required|string|min:6',
+        'first_name' => 'nullable|string|max:80',
+        'last_name' => 'nullable|string|max:80',
+        'phone_number' => 'nullable|string|max:20',
+        'role' => 'required|string|in:ADMIN,SELLER,CUSTOMER',
+    ]);
 
-        $validatedData['password'] = bcrypt($validatedData['password']);
+    $validatedData['password'] = bcrypt($validatedData['password']);
 
+    DB::beginTransaction();
+
+    try {
         $user = User::create($validatedData);
-        // Si el rol es SELLER, crea un store automático
-        try {
-            if ($validatedData['role'] === 'SELLER') {
-                $defaultCategoryId = 1;
 
-                $storeData = [
-                    'user_id' => $user->id,
-                    'name' => $user->username,
-                    'slug' => Str::slug($user->username) . '-' . $user->id,
-                    'description' => null,
-                    'category_id' => $defaultCategoryId,
-                    'business_name' => null,
-                    'tax_id' => null,
-                    'legal_type' => null,
-                    'support_email' => null,
-                    'support_phone' => null,
-                    'status' => 'ACTIVE',
-                ];
+        if ($user->role === 'SELLER') {
+            $defaultCategoryId = 1;
 
-                \App\Models\Store::create($storeData);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'No se pudo crear el store',
-                'details' => $e->getMessage()
-            ], 500);
+            $store = $user->store()->create([
+                'name' => $user->username,
+                'slug' => Str::slug($user->username) . '-' . $user->id,
+                'category_id' => $defaultCategoryId,
+                'status' => 'ACTIVE',
+            ]);
+
+            $user->setRelation('store', $store);
         }
 
-        return response()->json($user, 201);
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Usuario creado correctamente',
+            'user' => $user
+        ], 201);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'error' => 'Error al crear el usuario o la tienda',
+            'details' => $e->getMessage()
+        ], 500);
     }
+}
+
+
 
     public function update(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
+{
+    $user = User::findOrFail($id);
 
-        $validatedData = $request->validate([
-            'username' => 'sometimes|string|max:100|unique:users,',
-            'email' => 'sometimes|string|email|max:100|unique:users,email,' . $user->id,
-            'password' => 'sometimes|string|min:6',
-            'first_name' => 'nullable|string|max:80',
-            'last_name' => 'nullable|string|max:80',
-            'phone_number' => 'nullable|string|max:20',
-            'role' => 'sometimes|string|in:ADMIN,SELLER,CUSTOMER',
-        ]);
+    $validatedData = $request->validate([
+        'username' => 'sometimes|string|max:100|unique:users,username,' . $user->id,
+        'email' => 'sometimes|string|email|max:100|unique:users,email,' . $user->id,
+        'password' => 'sometimes|string|min:6',
+        'first_name' => 'nullable|string|max:80',
+        'last_name' => 'nullable|string|max:80',
+        'phone_number' => 'nullable|string|max:20',
+        'role' => 'sometimes|string|in:ADMIN,SELLER,CUSTOMER',
+    ]);
 
-        if (isset($validatedData['password'])) {
-            $validatedData['password'] = bcrypt($validatedData['password']);
-        }
-
-        $user->update($validatedData);
-
-        return response()->json($user);
+    if (isset($validatedData['password'])) {
+        $validatedData['password'] = bcrypt($validatedData['password']);
     }
+
+    $user->update($validatedData);
+
+    // Cargar relación si existe
+    $user->load('store:id,user_id,name,slug,status');
+
+    return response()->json([
+        'message' => 'Usuario actualizado correctamente',
+        'user' => $user
+    ]);
+}
+
     public function login(Request $request)
     {
         // Validar credenciales
@@ -131,31 +158,63 @@ class UserController extends Controller
         ]);
     }
 
-    public function getStore($id)
+   public function getStore($id)
 {
-    // Busca al usuario junto con su tienda
-    $user = \App\Models\User::with('store')->find($id);
+    // Buscar el usuario junto con su tienda y relaciones relevantes
+    $user = User::with([
+        'store' => function ($query) {
+            $query->select('id', 'user_id', 'name', 'slug', 'description', 'category_id', 'status')
+                  ->with(['products:id,store_id,name,price,image_url', 'storeSocials', 'banners']);
+        }
+    ])->findOrFail($id);
 
-    // Si no existe el usuario
-    if (!$user) {
-        return response()->json(['message' => 'Usuario no encontrado'], 404);
-    }
-
-    // Si el usuario no tiene tienda
+    // Validar que el usuario tenga una tienda
     if (!$user->store) {
-        return response()->json(['message' => 'El usuario no tiene una tienda asociada'], 404);
+        return response()->json([
+            'message' => 'El usuario no tiene una tienda asociada'
+        ], 404);
     }
 
-    // Devuelve la tienda del usuario
-    return response()->json($user->store);
+    // Respuesta limpia y estructurada
+    return response()->json([
+        'message' => 'Tienda encontrada correctamente',
+        'store' => $user->store
+    ]);
 }
 
 
-    public function destroy($id)
-    {
-        $user = User::findOrFail($id);
+   public function destroy($id)
+{
+    try {
+        $user = User::with(['store.products', 'store.banners', 'store.storeSocials', 'orders', 'addresses', 'productReviews', 'storeReviews', 'transactions'])->findOrFail($id);
+
+        if ($user->store) {
+            foreach ($user->store->products as $product) {
+                $product->productReviews()->delete();
+            }
+
+            $user->store->banners()->delete();
+            $user->store->storeSocials()->delete();
+            $user->store->products()->delete();
+            $user->store->delete();
+        }
+
+        $user->orders()->delete();
+        $user->addresses()->delete();
+        $user->productReviews()->delete();
+        $user->storeReviews()->delete();
+        $user->transactions()->delete();
+
         $user->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Usuario y sus relaciones eliminados correctamente'], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error al eliminar el usuario',
+            'details' => $e->getMessage()
+        ], 500);
     }
+}
+
+
 }

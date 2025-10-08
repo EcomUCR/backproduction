@@ -9,13 +9,13 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with('store', 'categories')->get();
+        $products = Product::get();
         return response()->json($products);
     }
 
     public function show($id)
     {
-        $product = Product::with(['store', 'categories'])->findOrFail($id);
+        $product = Product::with(['store:id,name', 'categories'])->findOrFail($id);
         return response()->json($product);
     }
 

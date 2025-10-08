@@ -23,7 +23,7 @@ class Product extends Model
         'image_2_url',
         'image_3_url',
     ];
-    protected $with = ['store', 'categories', 'reviews', 'orderItems'];
+
 
     public function store()
     {

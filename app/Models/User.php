@@ -19,7 +19,7 @@ class User extends Authenticatable
         'password',
         'first_name',
         'last_name',
-        'image',
+        'profile_image_url',
         'status',
         'phone_number',
         'role'
