@@ -25,7 +25,9 @@ class ProductController extends Controller
             'store_id' => 'required|exists:stores,id',
             'sku' => 'required|string|unique:products',
             'name' => 'required|string|max:80',
-            'image_url' => 'required|string',
+            'image_1_url' => 'required|string',
+            'image_2_url' => 'nullable|string',
+            'image_3_url' => 'nullable|string',
             'description' => 'nullable|string',
             'price' => 'required|numeric',
             'discount_price' => 'nullable|numeric',
@@ -57,11 +59,11 @@ class ProductController extends Controller
 
     public function showByStore($store_id)
     {
-    $products = Product::with('store', 'categories')->where('store_id', $store_id)->get();
-    if ($products->isEmpty()) {
-        return response()->json(['message' => 'No hay productos para esta tienda'], 404);
-    }
-    return response()->json($products);
+        $products = Product::with('store', 'categories')->where('store_id', $store_id)->get();
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'No hay productos para esta tienda'], 404);
+        }
+        return response()->json($products);
     }
 
     public function update(Request $request, $id)
@@ -72,7 +74,9 @@ class ProductController extends Controller
             'store_id' => 'sometimes|exists:stores,id',
             'sku' => 'sometimes|string|unique:products,sku,' . $product->id,
             'name' => 'sometimes|string|max:80',
-            'image_url' => 'sometimes|string',
+            'image_1_url' => 'sometimes|string',
+            'image_2_url' => 'nullable|string',
+            'image_3_url' => 'nullable|string',
             'description' => 'nullable|string',
             'price' => 'sometimes|numeric',
             'discount_price' => 'nullable|numeric',

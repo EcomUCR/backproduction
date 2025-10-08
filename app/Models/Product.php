@@ -19,8 +19,11 @@ class Product extends Model
         'stock',
         'status',
         'is_featured',
-        'image_url'
+        'image_1_url',
+        'image_2_url',
+        'image_3_url',
     ];
+    protected $with = ['store', 'categories', 'reviews', 'orderItems'];
 
     public function store()
     {
@@ -41,4 +44,6 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+
 }

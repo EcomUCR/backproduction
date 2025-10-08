@@ -15,7 +15,9 @@ return new class extends Migration {
             $table->foreignId('store_id')->constrained('stores')->onDelete('cascade'); // Foreign Key to Stores
             $table->string('sku', 30)->unique(); // SKU
             $table->string('name', 80)->notNull(); // Name
-            $table->text('image_url')->notNull(); // Name
+            $table->text('image_1_url')->notNull(); // Name
+            $table->text('image_2_url')->nullable(); // Name
+            $table->text('image_3_url')->nullable(); // Name
             $table->text('description')->nullable(); // Description
             $table->decimal('price', 10, 2)->notNull(); // Price
             $table->decimal('discount_price', 10, 2)->default(0); // Discount Price

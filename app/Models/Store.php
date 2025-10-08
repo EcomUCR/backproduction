@@ -27,6 +27,7 @@ class Store extends Model
         'verification_date',
         'status'
     ];
+    protected $with = ['user', 'storeSocials', 'banners', 'products', 'reviews'];
 
     public function user()
     {
