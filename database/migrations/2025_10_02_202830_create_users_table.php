@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id(); // Primary Key
             $table->string('username', 100)->unique(); // Email
             $table->string('email', 100)->unique(); // Email
-            $table->string('password', 255); // Password
+            $table->string('password', 300); // Password
             $table->string('first_name', 80)->nullable(); // First Name
             $table->string('last_name', 80)->nullable(); // Last Name
             $table->text('image')->nullable(); // Image
@@ -29,8 +29,10 @@ return new class extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+  public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('remember_token');
+        });
     }
 };
