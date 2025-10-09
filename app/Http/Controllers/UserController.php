@@ -30,10 +30,7 @@ class UserController extends Controller
         'store:id,user_id,name,slug,status', // campos específicos de la tienda
     ]);
 
-    return response()->json([
-        'user' => $user,
-        'store' => $user->store ?? null, // por si no tiene tienda
-    ]);
+    return response()->json($user);
 }
 
     public function show($id)
