@@ -20,31 +20,40 @@ class ProductController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'store_id' => 'required|exists:stores,id',
-            'sku' => 'required|string|unique:products',
-            'name' => 'required|string|max:80',
-            'image_1_url' => 'required|string',
-            'image_2_url' => 'nullable|string',
-            'image_3_url' => 'nullable|string',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric',
-            'discount_price' => 'nullable|numeric',
-            'stock' => 'nullable|integer',
-            'status' => 'nullable|boolean',
-            'is_featured' => 'nullable|boolean',
-        ]);
+{
+    $validatedData = $request->validate([
+        'store_id' => 'required|exists:stores,id',
+        'sku' => 'required|string|unique:products',
+        'name' => 'required|string|max:80',
+        'image_1_url' => 'required|string',
+        'image_2_url' => 'nullable|string',
+        'image_3_url' => 'nullable|string',
+        'description' => 'nullable|string',
+        'price' => 'required|numeric',
+        'discount_price' => 'nullable|numeric',
+        'stock' => 'nullable|integer',
+        'status' => 'nullable|boolean',
+        'is_featured' => 'nullable|boolean',
+        'category_ids' => 'required|array|min:1',
+        'category_ids.*' => 'exists:categories,id',
+    ]);
 
-        if (empty($validatedData['discount_price']) && $validatedData['discount_price'] !== 0 && $validatedData['discount_price'] !== '0') {
-            unset($validatedData['discount_price']);
-        }
-
-        $product = Product::create($validatedData);
-        $product->load('store', 'categories');
-
-        return response()->json($product, 201);
+    if (empty($validatedData['discount_price']) && $validatedData['discount_price'] !== 0 && $validatedData['discount_price'] !== '0') {
+        unset($validatedData['discount_price']);
     }
+
+    $product = Product::create($validatedData);
+
+    // ✅ Asociar categorías si vienen en el request
+    if (!empty($validatedData['category_ids'])) {
+        $product->categories()->attach($validatedData['category_ids']);
+    }
+
+    $product->load('store', 'categories');
+
+    return response()->json($product, 201);
+}
+
     public function featured()
     {
         $featured = Product::with('store', 'categories')->where('is_featured', true)->limit(10)->get();
@@ -84,6 +93,10 @@ class ProductController extends Controller
             'status' => 'sometimes|boolean',
             'is_featured' => 'sometimes|boolean',
         ]);
+
+        if ($request->has('category_ids')) {
+    $product->categories()->sync($validatedData['category_ids']);
+}
 
         $product->update($validatedData);
 
