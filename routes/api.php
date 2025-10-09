@@ -100,10 +100,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}/store', [UserController::class, 'getStore']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
-    //Tiendas
+    // Tiendas
     Route::get('/stores', [StoreController::class, 'index']);
-    Route::get('/stores/{user_id}', [StoreController::class, 'show']);
-
+    Route::get('/stores/{user_id}', [StoreController::class, 'show']); 
+    Route::put('/stores/{id}', [StoreController::class, 'update']);
 
     // Perfiles
     Route::get('/profiles/{id}', [ProfileController::class, 'show']);
@@ -114,7 +114,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
 
-    
+
     // Ordenes (CRUD)
     Route::apiResource('orders', OrderController::class);
 

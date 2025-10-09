@@ -58,7 +58,7 @@ class StoreController extends Controller
         $validatedData = $request->validate([
             'user_id' => 'sometimes|exists:users,id',
             'name' => 'sometimes|string|max:80',
-            'slug' => 'sometimes|string|max:100|unique:stores,slug,'.$store->id,
+            'slug' => 'sometimes|string|max:100|unique:stores,slug,' . $store->id,
             'description' => 'nullable|string',
             'category_id' => 'nullable|exists:store_categories,id',
             'business_name' => 'nullable|string|max:150',
@@ -68,6 +68,8 @@ class StoreController extends Controller
             'address' => 'nullable|string',
             'support_email' => 'nullable|string|email|max:120',
             'support_phone' => 'nullable|string|max:30',
+            'image' => 'nullable|string|max:1024',
+            'banner' => 'nullable|string|max:1024',
             'status' => 'nullable|string|in:ACTIVE,SUSPENDED,CLOSED',
         ]);
 
