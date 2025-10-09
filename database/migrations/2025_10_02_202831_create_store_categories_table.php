@@ -5,20 +5,16 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('store_categories', function (Blueprint $table) {
-            $table->id(); // Primary Key
-            $table->string('name', 50)->unique()->notNull(); // Name
+            $table->id();
+            $table->string('name', 50)->unique();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('store_categories');

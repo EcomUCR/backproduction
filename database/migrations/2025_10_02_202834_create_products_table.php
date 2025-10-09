@@ -8,18 +8,20 @@ return new class extends Migration {
     /**
      * Run the migrations.
      */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id(); // Primary Key
             $table->foreignId('store_id')->constrained('stores')->onDelete('cascade'); // Foreign Key to Stores
             $table->string('sku', 30)->unique(); // SKU
-            $table->string('name', 80)->notNull(); // Name
-            $table->text('image_1_url')->notNull(); // Name
+            $table->string('name', 80); // Name
+            $table->text('image_1_url'); // Name
             $table->text('image_2_url')->nullable(); // Name
             $table->text('image_3_url')->nullable(); // Name
             $table->text('description')->nullable(); // Description
-            $table->decimal('price', 10, 2)->notNull(); // Price
+            $table->decimal('price', 10, 2); // Price
             $table->decimal('discount_price', 10, 2)->default(0); // Discount Price
             $table->integer('stock')->default(0); // Stock
             $table->boolean('status')->default(true); // Status

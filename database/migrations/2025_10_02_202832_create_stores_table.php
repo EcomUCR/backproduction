@@ -7,13 +7,15 @@ return new class extends Migration {
     /**
      * Run the migrations.
      */
+        public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('stores', function (Blueprint $table) {
             $table->id(); // Primary Key
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Foreign Key to Users
-            $table->string('name', 80)->notNull(); // Name
-            $table->string('slug', 100)->unique()->notNull(); // Slug
+            $table->string('name', 80); // Name
+            $table->string('slug', 100)->unique(); // Slug
             $table->text('description')->nullable(); // Description
             $table->text('image')->nullable(); // Image
             $table->text('banner')->nullable(); // Banner

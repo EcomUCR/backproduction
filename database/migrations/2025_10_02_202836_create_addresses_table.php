@@ -7,12 +7,14 @@ return new class extends Migration {
     /**
      * Run the migrations.
      */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id(); // Primary Key
             $table->foreignId('customer_id')->constrained('users')->onDelete('cascade'); // Foreign Key to Users
-            $table->string('phone_number', 20)->notNull(); // Phone Number
+            $table->string('phone_number', 20); // Phone Number
             $table->string('street', 150)->nullable(); // Street
             $table->string('city', 100)->nullable(); // City
             $table->string('state', 100)->nullable(); // State
