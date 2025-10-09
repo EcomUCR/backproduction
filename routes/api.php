@@ -62,8 +62,8 @@ Route::get('/categories/{id}', [CategoryController::class, 'show']);
 // Password reset
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('guest');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])
-    ->middleware('guest')
-    ->name('password.update');
+->middleware('guest')
+->name('password.update');
 
 //FOrmulario de contacto
 Route::post('/contact-messages', [ContactMessageController::class, 'store']);
@@ -74,6 +74,8 @@ Route::get('/products/search', [ProductController::class, 'search']);      // bu
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/{id}', [ProductController::class, 'show']);          // detalle
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
+Route::get('/categories/{id}/products', [ProductController::class, 'byCategory']);
+
 // DB Test
 Route::get('/db-test', function () {
     try {
@@ -116,7 +118,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
-    Route::get('/categories/{id}/products', [ProductController::class, 'byCategory']);
 
 
     // Ordenes (CRUD)
