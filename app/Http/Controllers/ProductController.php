@@ -9,7 +9,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::get();
+        $products = Product::with(['store:id,name', 'categories'])->get();
         return response()->json($products);
     }
 
