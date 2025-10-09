@@ -162,7 +162,7 @@ class UserController extends Controller
     $user = User::with([
         'store' => function ($query) {
             $query->select('id', 'user_id', 'name', 'slug', 'description', 'category_id', 'status')
-                  ->with(['products:id,store_id,name,price,image_url', 'storeSocials', 'banners']);
+                  ->with(['products:id,store_id,name,price,image_1_url', /*'storeSocials', 'banners'*/]);
         }
     ])->findOrFail($id);
 
