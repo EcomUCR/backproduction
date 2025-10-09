@@ -62,8 +62,8 @@ Route::get('/categories/{id}', [CategoryController::class, 'show']);
 // Password reset
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('guest');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])
-    ->middleware('guest')
-    ->name('password.update');
+->middleware('guest')
+->name('password.update');
 
 //FOrmulario de contacto
 Route::post('/contact-messages', [ContactMessageController::class, 'store']);
@@ -74,6 +74,8 @@ Route::get('/products/search', [ProductController::class, 'search']);      // bu
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/{id}', [ProductController::class, 'show']);          // detalle
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
+Route::get('/categories/{id}/products', [ProductController::class, 'byCategory']);
+
 // DB Test
 Route::get('/db-test', function () {
     try {
@@ -83,7 +85,10 @@ Route::get('/db-test', function () {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
-
+Route::get('/my-ip', function () {
+    $ip = Http::get('https://ifconfig.me')->body();
+    return response()->json(['ip' => $ip]);
+});
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
@@ -102,7 +107,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Tiendas
     Route::get('/stores', [StoreController::class, 'index']);
-    Route::get('/stores/{user_id}', [StoreController::class, 'show']); 
+    Route::get('/stores/{user_id}', [StoreController::class, 'show']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);
 
     // Perfiles

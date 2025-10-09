@@ -110,4 +110,20 @@ class ProductController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function byCategory($category_id)
+{
+    $products = Product::with('store', 'categories')
+        ->whereHas('categories', function ($query) use ($category_id) {
+            $query->where('categories.id', $category_id);
+        })
+        ->get();
+
+    if ($products->isEmpty()) {
+        return response()->json(['message' => 'No hay productos en esta categoría'], 404);
+    }
+
+    return response()->json($products);
+}
+
 }

@@ -6,33 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
-     * Run the migrations.
+     * ⚡️ Desactivar transacciones automáticas para PostgreSQL (Neon)
      */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id(); // Primary Key
-            $table->string('username', 100)->unique(); // Email
-            $table->string('email', 100)->unique(); // Email
-            $table->string('password', 300); // Password
-            $table->string('first_name', 80)->nullable(); // First Name
-            $table->string('last_name', 80)->nullable(); // Last Name
-            $table->text('image')->nullable(); // Image
-            $table->boolean('status')->default(true); // Status
-            $table->string('phone_number', 20)->nullable(); // Phone Number
-            $table->string('role', 10); // Role
-            $table->timestamps(); // Created At & Updated At
+            $table->id();
+            $table->string('username', 100)->unique();
+            $table->string('email', 100)->unique();
+            $table->string('password', 255);
+            $table->string('first_name', 80)->nullable();
+            $table->string('last_name', 80)->nullable();
+            $table->text('image')->nullable();
+            $table->boolean('status')->default(true);
+            $table->string('phone_number', 20)->nullable();
+            $table->string('role', 10);
             $table->rememberToken();
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-  public function down(): void
+    public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('remember_token');
-        });
+        Schema::dropIfExists('users');
     }
 };
