@@ -76,6 +76,9 @@ Route::get('/products/{id}', [ProductController::class, 'show']);          // de
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
 Route::get('/categories/{id}/products', [ProductController::class, 'byCategory']);
 
+//Tienda
+Route::get('/stores/{user_id}', [StoreController::class, 'show']);
+
 // DB Test
 Route::get('/db-test', function () {
     try {
@@ -107,7 +110,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Tiendas
     Route::get('/stores', [StoreController::class, 'index']);
-    Route::get('/stores/{user_id}', [StoreController::class, 'show']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);
 
     // Perfiles
