@@ -11,15 +11,15 @@ WORKDIR /var/www
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
+
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Render necesita un puerto fijo declarado, no una variable
-EXPOSE 8000
+EXPOSE $PORT
 
-CMD php artisan config:clear || true \
-    && php artisan cache:clear || true \
-    && php artisan route:clear || true \
-    && php artisan view:clear || true \
-    && php artisan optimize:clear || true \
-    && php artisan storage:link || true \
-    && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+CMD php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan route:clear && \
+    php artisan view:clear && \
+    php artisan optimize:clear && \
+    php artisan storage:link && \
+    php artisan serve --host=0.0.0.0 --port=${PORT}
