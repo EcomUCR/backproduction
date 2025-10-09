@@ -75,6 +75,7 @@ Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/{id}', [ProductController::class, 'show']);          // detalle
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
 Route::get('/categories/{id}/products', [ProductController::class, 'byCategory']);
+Route::get('/stores/{store_id}/featured', [ProductController::class, 'featuredByStore']);
 
 //Tienda
 Route::get('/stores/{user_id}', [StoreController::class, 'show']);

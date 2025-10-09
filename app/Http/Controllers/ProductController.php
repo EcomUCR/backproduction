@@ -20,39 +20,39 @@ class ProductController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'store_id' => 'required|exists:stores,id',
-        'sku' => 'required|string|unique:products',
-        'name' => 'required|string|max:80',
-        'image_1_url' => 'required|string',
-        'image_2_url' => 'nullable|string',
-        'image_3_url' => 'nullable|string',
-        'description' => 'nullable|string',
-        'price' => 'required|numeric',
-        'discount_price' => 'nullable|numeric',
-        'stock' => 'nullable|integer',
-        'status' => 'nullable|boolean',
-        'is_featured' => 'nullable|boolean',
-        'category_ids' => 'required|array|min:1',
-        'category_ids.*' => 'exists:categories,id',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'store_id' => 'required|exists:stores,id',
+            'sku' => 'required|string|unique:products',
+            'name' => 'required|string|max:80',
+            'image_1_url' => 'required|string',
+            'image_2_url' => 'nullable|string',
+            'image_3_url' => 'nullable|string',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'discount_price' => 'nullable|numeric',
+            'stock' => 'nullable|integer',
+            'status' => 'nullable|boolean',
+            'is_featured' => 'nullable|boolean',
+            'category_ids' => 'required|array|min:1',
+            'category_ids.*' => 'exists:categories,id',
+        ]);
 
-    if (empty($validatedData['discount_price']) && $validatedData['discount_price'] !== 0 && $validatedData['discount_price'] !== '0') {
-        unset($validatedData['discount_price']);
+        if (empty($validatedData['discount_price']) && $validatedData['discount_price'] !== 0 && $validatedData['discount_price'] !== '0') {
+            unset($validatedData['discount_price']);
+        }
+
+        $product = Product::create($validatedData);
+
+        // ✅ Asociar categorías si vienen en el request
+        if (!empty($validatedData['category_ids'])) {
+            $product->categories()->attach($validatedData['category_ids']);
+        }
+
+        $product->load('store', 'categories');
+
+        return response()->json($product, 201);
     }
-
-    $product = Product::create($validatedData);
-
-    // ✅ Asociar categorías si vienen en el request
-    if (!empty($validatedData['category_ids'])) {
-        $product->categories()->attach($validatedData['category_ids']);
-    }
-
-    $product->load('store', 'categories');
-
-    return response()->json($product, 201);
-}
 
     public function featured()
     {
@@ -95,8 +95,8 @@ class ProductController extends Controller
         ]);
 
         if ($request->has('category_ids')) {
-    $product->categories()->sync($validatedData['category_ids']);
-}
+            $product->categories()->sync($validatedData['category_ids']);
+        }
 
         $product->update($validatedData);
 
@@ -112,18 +112,31 @@ class ProductController extends Controller
     }
 
     public function byCategory($category_id)
-{
-    $products = Product::with('store', 'categories')
-        ->whereHas('categories', function ($query) use ($category_id) {
-            $query->where('categories.id', $category_id);
-        })
-        ->get();
+    {
+        $products = Product::with('store', 'categories')
+            ->whereHas('categories', function ($query) use ($category_id) {
+                $query->where('categories.id', $category_id);
+            })
+            ->get();
 
-    if ($products->isEmpty()) {
-        return response()->json(['message' => 'No hay productos en esta categoría'], 404);
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'No hay productos en esta categoría'], 404);
+        }
+
+        return response()->json($products);
     }
+    public function featuredByStore($store_id)
+    {
+        $featured = Product::with('store', 'categories')
+            ->where('store_id', $store_id)
+            ->where('is_featured', true)
+            ->get();
 
-    return response()->json($products);
-}
+        if ($featured->isEmpty()) {
+            return response()->json(['message' => 'No hay productos destacados en esta tienda'], 404);
+        }
+
+        return response()->json($featured);
+    }
 
 }
