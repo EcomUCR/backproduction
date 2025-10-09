@@ -7,12 +7,14 @@ return new class extends Migration {
     /**
      * Run the migrations.
      */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('banners', function (Blueprint $table) {
             $table->id(); // Primary Key
             $table->string('title', 100)->nullable(); // Title
-            $table->text('image')->notNull(); // Image
+            $table->text('image'); // Image
             $table->text('link')->nullable(); // Link
             $table->string('type', 20)->default('MAIN'); // Type
             $table->integer('position')->nullable(); // Position

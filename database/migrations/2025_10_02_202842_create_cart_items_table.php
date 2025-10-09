@@ -7,6 +7,8 @@ return new class extends Migration {
     /**
      * Run the migrations.
      */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('cart_items', function (Blueprint $table) {
@@ -14,7 +16,7 @@ return new class extends Migration {
             $table->foreignId('cart_id')->constrained('carts')->onDelete('cascade'); // Foreign Key to Carts
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade'); // Foreign Key to Products
             $table->integer('quantity')->default(1); // Quantity
-            $table->decimal('unit_price', 10, 2)->notNull(); // Unit Price
+            $table->decimal('unit_price', 10, 2); // Unit Price
             $table->timestamps(); // Created At & Updated At
         });
     }
