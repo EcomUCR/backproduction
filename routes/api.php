@@ -105,7 +105,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Tiendas
     Route::get('/stores', [StoreController::class, 'index']);
-    Route::get('/stores/{user_id}', [StoreController::class, 'show']); 
+    Route::get('/stores/{user_id}', [StoreController::class, 'show']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);
 
     // Perfiles
@@ -116,6 +116,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
+    Route::get('/categories/{id}/products', [ProductController::class, 'byCategory']);
 
 
     // Ordenes (CRUD)
