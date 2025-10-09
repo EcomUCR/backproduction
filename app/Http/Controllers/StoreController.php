@@ -9,31 +9,24 @@ class StoreController extends Controller
 {
     public function index()
     {
-        $stores = Store::all();
-        return response()->json($stores);
+        return response()->json(Store::all());
     }
 
     public function showByUser($user_id)
-{
-    $store = Store::where('user_id', $user_id)->first();
+    {
+        $store = Store::where('user_id', $user_id)->first();
 
-    if (!$store) {
-        return response()->json(['message' => 'Tienda no encontrada para este usuario'], 404);
+        if (!$store) {
+            return response()->json(['message' => 'Tienda no encontrada para este usuario'], 404);
+        }
+
+        return response()->json($store);
     }
-
-    return response()->json($store);
-}
-
 
     public function show($id)
     {
-        $store = Store::FindOrFail($id);
-
-        if (!$store) {
-            return response()->json(['message' => 'Tienda no encontrada'], 404);
-        }
-
-    return response()->json($store);
+        $store = Store::findOrFail($id);
+        return response()->json($store);
     }
 
     public function store(Request $request)
@@ -47,13 +40,14 @@ class StoreController extends Controller
             'business_name' => 'nullable|string|max:150',
             'tax_id' => 'nullable|string|max:50',
             'legal_type' => 'nullable|string|max:30',
+            'registered_address' => 'nullable|string',
+            'address' => 'nullable|string',
             'support_email' => 'nullable|string|email|max:120',
             'support_phone' => 'nullable|string|max:30',
             'status' => 'nullable|string|in:ACTIVE,SUSPENDED,CLOSED',
         ]);
 
         $store = Store::create($validatedData);
-
         return response()->json($store, 201);
     }
 
@@ -70,13 +64,14 @@ class StoreController extends Controller
             'business_name' => 'nullable|string|max:150',
             'tax_id' => 'nullable|string|max:50',
             'legal_type' => 'nullable|string|max:30',
+            'registered_address' => 'nullable|string',
+            'address' => 'nullable|string',
             'support_email' => 'nullable|string|email|max:120',
             'support_phone' => 'nullable|string|max:30',
             'status' => 'nullable|string|in:ACTIVE,SUSPENDED,CLOSED',
         ]);
 
         $store->update($validatedData);
-
         return response()->json($store);
     }
 

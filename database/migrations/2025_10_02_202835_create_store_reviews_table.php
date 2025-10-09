@@ -9,12 +9,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('store_reviews', function (Blueprint $table) {
+        Schema::create('store_reviews', callback: function (Blueprint $table) {
             $table->id(); // Primary Key
             $table->foreignId('store_id')->constrained('stores')->onDelete('cascade'); // Foreign Key to Stores
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Foreign Key to Users
             $table->integer('rating')->notNull(); // Rating
             $table->text('comment')->nullable(); // Comment
+            $table->boolean('like')->nullable(); // Comment
+            $table->boolean('dislike')->nullable(); // Comment
             $table->timestamps(); // Created At
         });
     }

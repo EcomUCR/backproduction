@@ -26,6 +26,8 @@ class StoreReviewController extends Controller
             'user_id' => 'required|exists:users,id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string',
+            'like' => 'nullable|boolean',
+            'dislike' => 'nullable|boolean',
         ]);
 
         $storeReview = StoreReview::create($validatedData);

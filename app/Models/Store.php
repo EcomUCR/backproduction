@@ -21,6 +21,7 @@ class Store extends Model
         'tax_id',
         'legal_type',
         'registered_address',
+        'address',
         'support_email',
         'support_phone',
         'is_verified',

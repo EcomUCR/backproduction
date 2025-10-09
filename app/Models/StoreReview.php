@@ -13,7 +13,9 @@ class StoreReview extends Model
         'store_id',
         'user_id',
         'rating',
-        'comment'
+        'comment',
+        'like',
+        'dislike',
     ];
 
     public function store()

@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->string('tax_id', 50)->nullable(); // Tax ID
             $table->string('legal_type', 30)->nullable(); // Legal Type
             $table->text('registered_address')->nullable(); // Registered Address
+            $table->text('address')->nullable(); // Registered Address
             $table->string('support_email', 120)->nullable(); // Support Email
             $table->string('support_phone', 30)->nullable(); // Support Phone
             $table->boolean('is_verified')->default(false); // Is Verified
