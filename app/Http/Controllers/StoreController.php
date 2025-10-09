@@ -12,22 +12,22 @@ class StoreController extends Controller
         return response()->json(Store::all());
     }
 
-    public function showByUser($id)
+    public function showByUser($user_id)
     {
-        $store = Store::where('id', $id)->first();
+        $store = Store::where('user_id', $user_id)->first();
 
         if (!$store) {
-            return response()->json(['message' => 'Tienda no encontrada'], 404);
+            return response()->json(['message' => 'Tienda no encontrada para este usuario'], 404);
         }
 
         return response()->json($store);
     }
 
     public function show($id)
-    {
-        $store = Store::findOrFail($id);
-        return response()->json($store);
-    }
+{
+    $store = Store::with(['user', 'storeSocials', 'banners', 'products', 'reviews'])->findOrFail($id);
+    return response()->json($store);
+}
 
     public function store(Request $request)
     {
