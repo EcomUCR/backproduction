@@ -27,8 +27,8 @@ class UserController extends Controller
 
     // Cargar la tienda y opcionalmente productos o relaciones adicionales
     $user->load([
-        'store:id,user_id,name,slug,status', // campos específicos de la tienda
-    ]);
+    'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,status',
+]);
 
     return response()->json($user);
 }
