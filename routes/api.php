@@ -83,7 +83,10 @@ Route::get('/db-test', function () {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
-
+Route::get('/my-ip', function () {
+    $ip = Http::get('https://ifconfig.me')->body();
+    return response()->json(['ip' => $ip]);
+});
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
