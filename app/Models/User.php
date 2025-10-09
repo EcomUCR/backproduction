@@ -13,6 +13,9 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
 
+    /**
+     * Campos que se pueden asignar masivamente.
+     */
     protected $fillable = [
         'username',
         'email',
@@ -22,21 +25,35 @@ class User extends Authenticatable
         'profile_image_url',
         'status',
         'phone_number',
-        'role'
+        'role',
     ];
 
+    /**
+     * Campos ocultos al serializar el modelo.
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    // Si quieres seguir usando tu notificación personalizada:
+    /**
+     * Casts automáticos de atributos.
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    /**
+     * Notificación personalizada de restablecimiento de contraseña.
+     */
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token, $this->email));
     }
 
-    // Relaciones de tu modelo nuevo
+    /**
+     * Relaciones del usuario con otras entidades.
+     */
     public function store()
     {
         return $this->hasOne(Store::class, 'user_id');
