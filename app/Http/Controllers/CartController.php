@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use Illuminate\Http\Request;
+use App\Models\Product;
 
 class CartController extends Controller
 {
@@ -21,10 +22,11 @@ class CartController extends Controller
 
         $user = $request->user();
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-
         $quantity = $request->quantity ?? 1;
 
-        // Verificar si el producto ya existe en el carrito
+        $product = \App\Models\Product::findOrFail($request->product_id);
+        $unitPrice = $product->discount_price ?? $product->price;
+
         $item = $cart->items()->where('product_id', $request->product_id)->first();
 
         if ($item) {
@@ -32,7 +34,8 @@ class CartController extends Controller
         } else {
             $item = $cart->items()->create([
                 'product_id' => $request->product_id,
-                'quantity' => $quantity
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice
             ]);
         }
 
