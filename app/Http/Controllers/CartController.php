@@ -12,6 +12,37 @@ class CartController extends Controller
         $carts = Cart::all();
         return response()->json($carts);
     }
+    public function addItem(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'nullable|integer|min:1'
+        ]);
+
+        $user = $request->user();
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+
+        $quantity = $request->quantity ?? 1;
+
+        // Verificar si el producto ya existe en el carrito
+        $item = $cart->items()->where('product_id', $request->product_id)->first();
+
+        if ($item) {
+            $item->update(['quantity' => $item->quantity + $quantity]);
+        } else {
+            $item = $cart->items()->create([
+                'product_id' => $request->product_id,
+                'quantity' => $quantity
+            ]);
+        }
+
+        $cart->load('items.product');
+
+        return response()->json([
+            'message' => 'Producto añadido al carrito correctamente',
+            'cart' => $cart
+        ]);
+    }
 
     public function show($id)
     {
