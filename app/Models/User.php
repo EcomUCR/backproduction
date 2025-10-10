@@ -76,7 +76,7 @@ class User extends Authenticatable
 
     public function storeReviews()
     {
-        return $this->hasMany(StoreReview::class);
+        return $this->hasMany(related: StoreReview::class);
     }
 
     public function transactions()

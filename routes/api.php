@@ -79,6 +79,7 @@ Route::get('/stores/{store_id}/featured', [ProductController::class, 'featuredBy
 
 //Tienda
 Route::get('/stores/{user_id}', [StoreController::class, 'show']);
+Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
 
 // DB Test
 Route::get('/db-test', function () {
@@ -120,7 +121,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-    Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
 
 
     // Ordenes (CRUD)
