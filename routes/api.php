@@ -113,14 +113,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
     //Cart
-    Route::get('/cart', [CartController::class, 'me']);
+    Route::get('/cart/me', [CartController::class, 'me']);
     Route::delete('/cart/clear', [CartController::class, 'clear']);
     Route::post('/cart/add', [CartController::class, 'addItem']);
 
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
-
+    
     // Tiendas
     Route::get('/stores', [StoreController::class, 'index']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);
