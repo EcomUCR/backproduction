@@ -116,11 +116,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cart/me', [CartController::class, 'me']);
     Route::delete('/cart/clear', [CartController::class, 'clear']);
     Route::post('/cart/add', [CartController::class, 'addItem']);
+    Route::patch('/cart/item/{id}', [CartController::class, 'updateItem']);
+    Route::delete('/cart/item/{id}', [CartController::class, 'removeItem']);
 
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
-    
+
     // Tiendas
     Route::get('/stores', [StoreController::class, 'index']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);

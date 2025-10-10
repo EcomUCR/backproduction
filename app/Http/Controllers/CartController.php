@@ -99,5 +99,29 @@ class CartController extends Controller
         $cart->items()->delete();
         return response()->json(['ok' => true]);
     }
+    public function updateItem(Request $request, $id)
+    {
+        $request->validate(['quantity' => 'required|integer|min:1']);
+        $user = $request->user();
 
+        $cart = Cart::where('user_id', $user->id)->firstOrFail();
+        $item = $cart->items()->where('id', $id)->firstOrFail();
+
+        $item->update(['quantity' => $request->quantity]);
+
+        $cart->load('items.product');
+        return response()->json(['message' => 'Cantidad actualizada', 'cart' => $cart]);
+    }
+
+    // DELETE /cart/item/{id}
+    public function removeItem($id)
+    {
+        $user = request()->user();
+        $cart = Cart::where('user_id', $user->id)->firstOrFail();
+        $item = $cart->items()->where('id', $id)->firstOrFail();
+        $item->delete();
+
+        $cart->load('items.product');
+        return response()->json(['message' => 'Producto eliminado', 'cart' => $cart]);
+    }
 }
