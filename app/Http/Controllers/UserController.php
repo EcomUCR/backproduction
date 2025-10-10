@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-
+use App\Models\Cart;
 class UserController extends Controller
 {
     /**
@@ -81,7 +81,8 @@ class UserController extends Controller
                 ]);
                 $user->setRelation('store', $store);
             }
-
+            $cart = Cart::create(['user_id' => $user->id]);
+            $user->setRelation('cart', $cart);
             return response()->json([
                 'message' => 'Usuario creado correctamente',
                 'user' => $user

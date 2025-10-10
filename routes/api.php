@@ -19,6 +19,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\OpenAIController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CartItemController;
 
 // use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
@@ -62,8 +64,8 @@ Route::get('/categories/{id}', [CategoryController::class, 'show']);
 // Password reset
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('guest');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])
-->middleware('guest')
-->name('password.update');
+    ->middleware('guest')
+    ->name('password.update');
 
 //FOrmulario de contacto
 Route::post('/contact-messages', [ContactMessageController::class, 'store']);
@@ -109,6 +111,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/change-password', [UserController::class, 'changePassword']);
     Route::get('/users/{id}/store', [UserController::class, 'getStore']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    //Cart
+    Route::get('/cart', [CartController::class, 'me']);
+    Route::delete('/cart/clear', [CartController::class, 'clear']);
+
+    Route::post('/cart/items', [CartItemController::class, 'add']);
+    Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
+    Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
 
     // Tiendas
     Route::get('/stores', [StoreController::class, 'index']);

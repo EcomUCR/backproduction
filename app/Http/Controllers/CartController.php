@@ -50,4 +50,20 @@ class CartController extends Controller
 
         return response()->json(null, 204);
     }
+    public function me(Request $request)
+    {
+        $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
+        $cart->load(['items.product:id,name,image_1_url,price,discount_price,stock']);
+        return response()->json($cart);
+    }
+
+    public function clear(Request $request)
+    {
+        $cart = Cart::where('user_id', $request->user()->id)->first();
+        if (!$cart)
+            return response()->json(null, 204);
+        $cart->items()->delete();
+        return response()->json(['ok' => true]);
+    }
+
 }
