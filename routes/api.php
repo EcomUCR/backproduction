@@ -100,6 +100,15 @@ Route::get('/my-ip', function () {
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
 Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 'summary']);
 
+//API VISA
+Route::get('/visa/test', function () {
+    $response = VisaClient::makeRequest('/forexrates/v1/foreignexchangerates', [
+        'destinationCurrencyCode' => 'USD',
+        'sourceCurrencyCode' => 'CRC',
+    ]);
+
+    return response()->json($response->json());
+});
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
