@@ -13,6 +13,7 @@ class CartController extends Controller
         $carts = Cart::all();
         return response()->json($carts);
     }
+
     public function addItem(Request $request)
     {
         $request->validate([
@@ -24,7 +25,7 @@ class CartController extends Controller
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
         $quantity = $request->quantity ?? 1;
 
-        $product = \App\Models\Product::findOrFail($request->product_id);
+        $product = Product::findOrFail($request->product_id);
         $unitPrice = $product->discount_price ?? $product->price;
 
         $item = $cart->items()->where('product_id', $request->product_id)->first();
@@ -39,7 +40,8 @@ class CartController extends Controller
             ]);
         }
 
-        $cart->load('items.product');
+        // ✅ Cargar productos y sus tiendas
+        $cart->load('items.product.store');
 
         return response()->json([
             'message' => 'Producto añadido al carrito correctamente',
@@ -84,10 +86,14 @@ class CartController extends Controller
 
         return response()->json(null, 204);
     }
+
     public function me(Request $request)
     {
         $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
-        $cart->load(['items.product:id,name,image_1_url,price,discount_price,stock']);
+        // ✅ incluir tienda en cada producto
+        $cart->load(['items.product.store' => function ($query) {
+            $query->select('id', 'name', 'image_1_url', 'price', 'discount_price', 'stock', 'store_id');
+        }]);
         return response()->json($cart);
     }
 
@@ -96,9 +102,11 @@ class CartController extends Controller
         $cart = Cart::where('user_id', $request->user()->id)->first();
         if (!$cart)
             return response()->json(null, 204);
+
         $cart->items()->delete();
         return response()->json(['ok' => true]);
     }
+
     public function updateItem(Request $request, $id)
     {
         $request->validate(['quantity' => 'required|integer|min:1']);
@@ -109,11 +117,11 @@ class CartController extends Controller
 
         $item->update(['quantity' => $request->quantity]);
 
-        $cart->load('items.product');
+        // ✅ incluir tienda
+        $cart->load('items.product.store');
         return response()->json(['message' => 'Cantidad actualizada', 'cart' => $cart]);
     }
 
-    // DELETE /cart/item/{id}
     public function removeItem($id)
     {
         $user = request()->user();
@@ -121,7 +129,8 @@ class CartController extends Controller
         $item = $cart->items()->where('id', $id)->firstOrFail();
         $item->delete();
 
-        $cart->load('items.product');
+        // ✅ incluir tienda
+        $cart->load('items.product.store');
         return response()->json(['message' => 'Producto eliminado', 'cart' => $cart]);
     }
 }
