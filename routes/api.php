@@ -98,6 +98,7 @@ Route::get('/my-ip', function () {
 });
 //Rese;as de tiendas
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
+Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 'summary']);
 
 /*
 |--------------------------------------------------------------------------
