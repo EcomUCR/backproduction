@@ -23,7 +23,7 @@ class ResetPasswordNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $url = url("https://ecomproduccion.vercel.app/resetPassword?token={$this->token}&email={$this->email}");
+        $url = url("https://frontproduction.vercel.app/resetPassword?token={$this->token}&email={$this->email}");
 
         return (new MailMessage)
                     ->subject('Restablecer contraseña')
