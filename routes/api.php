@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 // Controllers
 use App\Http\Controllers\UserController;
@@ -104,12 +105,21 @@ Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 
 
 //API VISA
 Route::get('/visa/test', function () {
-    $response = VisaClient::makeRequest('/forexrates/v1/foreignexchangerates', [
-        'destinationCurrencyCode' => 'USD',
-        'sourceCurrencyCode' => 'CRC',
-    ]);
+    try {
+        $response = VisaClient::makeRequest('/forexrates/v1/foreignexchangerates', [
+            'destinationCurrencyCode' => 'USD',
+            'sourceCurrencyCode' => 'CRC',
+        ]);
 
-    return response()->json($response->json());
+        return response()->json($response->json());
+    } catch (\Throwable $e) {
+        Log::error('❌ VISA ERROR: ' . $e->getMessage());
+        return response()->json([
+            'error' => true,
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
 });
 /*
 |--------------------------------------------------------------------------
