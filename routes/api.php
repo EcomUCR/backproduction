@@ -96,6 +96,9 @@ Route::get('/my-ip', function () {
     $ip = Http::get('https://ifconfig.me')->body();
     return response()->json(['ip' => $ip]);
 });
+//Rese;as de tiendas
+Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
@@ -129,7 +132,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña
-    Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
 
     // Perfiles
     Route::get('/profiles/{id}', [ProfileController::class, 'show']);
