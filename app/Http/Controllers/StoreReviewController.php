@@ -56,4 +56,14 @@ class StoreReviewController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function reviewsByStore($store_id)
+    {
+        $reviews = StoreReview::where('store_id', $store_id)
+        ->with(['user:id,first_name,last_name,username,image'])
+        ->latest()
+        ->get();
+
+        return response()->json($reviews);
+    }
 }

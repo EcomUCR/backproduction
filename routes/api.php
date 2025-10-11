@@ -24,7 +24,7 @@ use App\Http\Controllers\CartItemController;
 
 // use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
-// use App\Http\Controllers\StoreReviewController;
+use App\Http\Controllers\StoreReviewController;
 // use App\Http\Controllers\StoreSocialController;
 
 /*
@@ -126,6 +126,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Tiendas
     Route::get('/stores', [StoreController::class, 'index']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);
+
+    // Reseñas de tiendas
+    Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña
+    Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
 
     // Perfiles
     Route::get('/profiles/{id}', [ProfileController::class, 'show']);
