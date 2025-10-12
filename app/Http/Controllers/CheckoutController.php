@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\Payments\PaymentService;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -20,22 +21,22 @@ class CheckoutController extends Controller
         // 🧾 VALIDACIÓN COMPLETA
         $validated = $request->validate([
             // Dirección
-            'street'         => 'nullable|string|max:150',
-            'city'           => 'nullable|string|max:100',
-            'state'          => 'nullable|string|max:100',
-            'zip_code'       => 'nullable|string|max:20',
-            'country'        => 'nullable|string|max:100',
+            'street' => 'nullable|string|max:150',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
 
             // Método de pago
             'payment_method' => 'required|string|in:VISA,MASTERCARD,AMEX,PAYPAL',
-            'currency'       => 'nullable|string|in:CRC,USD',
+            'currency' => 'nullable|string|in:CRC,USD',
 
             // Datos de tarjeta (mock o real)
-            'card.name'      => 'required|string|max:100',
-            'card.number'    => 'required|string|size:16',
+            'card.name' => 'required|string|max:100',
+            'card.number' => 'required|string|size:16',
             'card.exp_month' => 'required|string|size:2',
-            'card.exp_year'  => 'required|string|size:4',
-            'card.cvv'       => 'required|string|size:3',
+            'card.exp_year' => 'required|string|size:4',
+            'card.cvv' => 'required|string|size:3',
         ]);
 
         $currency = $validated['currency'] ?? 'CRC';
@@ -50,13 +51,13 @@ class CheckoutController extends Controller
         }
 
         // 🧮 2) CALCULAR TOTALES
-        $taxRate   = (float) (config('app.tax_rate', env('APP_TAX_RATE', 0.13)));
-        $shipping  = (int) (config('app.shipping_flat', env('APP_SHIPPING_FLAT', 0)));
-        $subtotal  = 0;
+        $taxRate = (float) (config('app.tax_rate', env('APP_TAX_RATE', 0.13)));
+        $shipping = (int) (config('app.shipping_flat', env('APP_SHIPPING_FLAT', 0)));
+        $subtotal = 0;
 
         foreach ($cart->items as $item) {
             /** @var Product $product */
-            $product   = $item->product;
+            $product = $item->product;
 
             if (!$product) {
                 return response()->json(['error' => "Producto con ID {$item->product_id} no existe"], 400);
@@ -76,36 +77,46 @@ class CheckoutController extends Controller
 
         // 💳 3) INTENTAR PAGO (mock)
         $cardData = $request->input('card', []);
-        $charge   = $payments->charge($total, $currency, $cardData);
+        $charge = $payments->charge($total, $currency, $cardData);
 
         if (!$charge['approved']) {
             return response()->json([
-                'error'   => 'Pago rechazado',
+                'error' => 'Pago rechazado',
                 'details' => $charge,
             ], 402);
         }
 
         // 🧱 4) TRANSACCIÓN PRINCIPAL
         try {
+            Log::info('🧩 CHECKOUT INIT', [
+                'user_id' => $user->id,
+                'email' => $user->email ?? 'N/A',
+                'subtotal' => $subtotal,
+                'shipping' => $shipping,
+                'taxes' => $taxes,
+                'total' => $total,
+                'payment_method' => $validated['payment_method'] ?? null,
+            ]);
+
             $order = DB::transaction(function () use ($user, $validated, $subtotal, $shipping, $taxes, $total, $cart, $charge, $currency) {
                 $order = Order::create([
-                    'user_id'        => $user->id,
-                    'status'         => 'PAID',
-                    'subtotal'       => $subtotal,
-                    'shipping'       => $shipping,
-                    'taxes'          => $taxes,
-                    'total'          => $total,
+                    'user_id' => $user->id,
+                    'status' => 'PAID', // o 'PENDING' si prefieres el flujo normal
+                    'subtotal' => $subtotal ?? 0,
+                    'shipping' => $shipping ?? 0,
+                    'taxes' => $taxes ?? 0,
+                    'total' => $total ?? 0,
                     'payment_method' => $validated['payment_method'] ?? 'VISA',
-                    'street'         => $validated['street'] ?? null,
-                    'city'           => $validated['city'] ?? null,
-                    'state'          => $validated['state'] ?? null,
-                    'zip_code'       => $validated['zip_code'] ?? null,
-                    'country'        => $validated['country'] ?? null,
+                    'street' => $validated['street'] ?? null,
+                    'city' => $validated['city'] ?? null,
+                    'state' => $validated['state'] ?? null,
+                    'zip_code' => $validated['zip_code'] ?? null,
+                    'country' => $validated['country'] ?? null,
                 ]);
 
                 // Crear los ítems
                 foreach ($cart->items as $item) {
-                    $product   = $item->product;
+                    $product = $item->product;
                     $unitPrice = $product->discount_price ?? $product->price;
 
                     if ($product->stock !== null && $product->stock < $item->quantity) {
@@ -113,11 +124,11 @@ class CheckoutController extends Controller
                     }
 
                     OrderItem::create([
-                        'order_id'     => $order->id,
-                        'product_id'   => $product->id,
-                        'store_id'     => $product->store_id,
-                        'quantity'     => $item->quantity,
-                        'unit_price'   => $unitPrice,
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'store_id' => $product->store_id,
+                        'quantity' => $item->quantity,
+                        'unit_price' => $unitPrice,
                         'discount_pct' => 0,
                     ]);
 
@@ -128,11 +139,11 @@ class CheckoutController extends Controller
 
                 // Crear transacción
                 Transaction::create([
-                    'user_id'     => $user->id,
-                    'order_id'    => $order->id,
-                    'type'        => 'PAYMENT',
-                    'amount'      => $total,
-                    'currency'    => $currency,
+                    'user_id' => $user->id,
+                    'order_id' => $order->id,
+                    'type' => 'PAYMENT',
+                    'amount' => $total,
+                    'currency' => $currency,
                     'description' => 'Pago aprobado vía ' . ($validated['payment_method'] ?? 'VISA'),
                 ]);
 
@@ -154,8 +165,8 @@ class CheckoutController extends Controller
 
         // ✅ RESPUESTA FINAL
         return response()->json([
-            'message'        => 'Orden creada y pago aprobado',
-            'order'          => $order,
+            'message' => 'Orden creada y pago aprobado',
+            'order' => $order,
             'payment_result' => $charge,
         ], 201);
     }
