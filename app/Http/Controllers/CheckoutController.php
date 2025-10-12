@@ -9,7 +9,6 @@ use App\Models\Product;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Services\Payments\PaymentService;
 
 class CheckoutController extends Controller
@@ -33,7 +32,7 @@ class CheckoutController extends Controller
 
             // Datos de tarjeta (mock o real)
             'card.name'      => 'required|string|max:100',
-            'card.number'    => 'required|string|size:16', // 16 dígitos
+            'card.number'    => 'required|string|size:16',
             'card.exp_month' => 'required|string|size:2',
             'card.exp_year'  => 'required|string|size:4',
             'card.cvv'       => 'required|string|size:3',
@@ -65,7 +64,6 @@ class CheckoutController extends Controller
 
             $unitPrice = $product->discount_price ?? $product->price;
 
-            // Validar precio válido
             if ($unitPrice <= 0) {
                 return response()->json(['error' => "El producto {$product->name} tiene un precio inválido"], 400);
             }
@@ -90,7 +88,6 @@ class CheckoutController extends Controller
         // 🧱 4) TRANSACCIÓN PRINCIPAL
         try {
             $order = DB::transaction(function () use ($user, $validated, $subtotal, $shipping, $taxes, $total, $cart, $charge, $currency) {
-                // Crear la orden principal
                 $order = Order::create([
                     'user_id'        => $user->id,
                     'status'         => 'PAID',
@@ -106,12 +103,11 @@ class CheckoutController extends Controller
                     'country'        => $validated['country'] ?? null,
                 ]);
 
-                // Crear los ítems de la orden
+                // Crear los ítems
                 foreach ($cart->items as $item) {
                     $product   = $item->product;
                     $unitPrice = $product->discount_price ?? $product->price;
 
-                    // Validar stock
                     if ($product->stock !== null && $product->stock < $item->quantity) {
                         throw new \RuntimeException("Stock insuficiente para {$product->name}");
                     }
@@ -125,13 +121,12 @@ class CheckoutController extends Controller
                         'discount_pct' => 0,
                     ]);
 
-                    // Descontar stock
                     if ($product->stock !== null) {
                         $product->decrement('stock', $item->quantity);
                     }
                 }
 
-                // Crear registro de transacción
+                // Crear transacción
                 Transaction::create([
                     'user_id'     => $user->id,
                     'order_id'    => $order->id,
@@ -141,25 +136,23 @@ class CheckoutController extends Controller
                     'description' => 'Pago aprobado vía ' . ($validated['payment_method'] ?? 'VISA'),
                 ]);
 
-                // Limpiar carrito
                 $cart->items()->delete();
 
                 return $order->load(['items.product:id,name,image_1_url,price,discount_price']);
             });
         } catch (\Throwable $e) {
-            Log::error('❌ CHECKOUT ERROR: ' . $e->getMessage(), [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
             return response()->json([
                 'error' => true,
-                'message' => 'Error al procesar la compra: ' . $e->getMessage(),
+                'message' => 'Error al procesar la compra',
+                'exception' => get_class($e),
+                'exception_message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => collect(explode("\n", $e->getTraceAsString()))->take(10)->toArray(), // primeros 10 niveles
             ], 500);
         }
 
-        // ✅ 5) RESPUESTA FINAL
+        // ✅ RESPUESTA FINAL
         return response()->json([
             'message'        => 'Orden creada y pago aprobado',
             'order'          => $order,
