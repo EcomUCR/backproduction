@@ -9,8 +9,8 @@ use App\Models\Product;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\Payments\PaymentService;
 use Illuminate\Support\Facades\Log;
+use App\Services\Payments\PaymentService;
 
 class CheckoutController extends Controller
 {
@@ -31,7 +31,7 @@ class CheckoutController extends Controller
             'payment_method' => 'required|string|in:VISA,MASTERCARD,AMEX,PAYPAL',
             'currency' => 'nullable|string|in:CRC,USD',
 
-            // Datos de tarjeta (mock o real)
+            // Datos de tarjeta (mock)
             'card.name' => 'required|string|max:100',
             'card.number' => 'required|string|size:16',
             'card.exp_month' => 'required|string|size:2',
@@ -41,7 +41,7 @@ class CheckoutController extends Controller
 
         $currency = $validated['currency'] ?? 'CRC';
 
-        // 🛒 1) CARGAR CARRITO
+        // 🛒 1️⃣ CARGAR CARRITO
         $cart = Cart::where('user_id', $user->id)
             ->with(['items.product:id,store_id,name,price,discount_price,stock'])
             ->first();
@@ -50,13 +50,12 @@ class CheckoutController extends Controller
             return response()->json(['error' => 'El carrito está vacío'], 400);
         }
 
-        // 🧮 2) CALCULAR TOTALES
+        // 🧮 2️⃣ CALCULAR TOTALES
         $taxRate = (float) (config('app.tax_rate', env('APP_TAX_RATE', 0.13)));
         $shipping = (int) (config('app.shipping_flat', env('APP_SHIPPING_FLAT', 0)));
         $subtotal = 0;
 
         foreach ($cart->items as $item) {
-            /** @var Product $product */
             $product = $item->product;
 
             if (!$product) {
@@ -75,7 +74,7 @@ class CheckoutController extends Controller
         $taxes = (int) round($subtotal * $taxRate);
         $total = (int) ($subtotal + $taxes + $shipping);
 
-        // 💳 3) INTENTAR PAGO (mock)
+        // 💳 3️⃣ SIMULAR PAGO
         $cardData = $request->input('card', []);
         $charge = $payments->charge($total, $currency, $cardData);
 
@@ -86,22 +85,23 @@ class CheckoutController extends Controller
             ], 402);
         }
 
-        // 🧱 4) TRANSACCIÓN PRINCIPAL
+        // 🧱 4️⃣ TRANSACCIÓN PRINCIPAL
         try {
-            Log::info('🧩 CHECKOUT INIT', [
+            Log::info('🧩 CHECKOUT INICIADO', [
                 'user_id' => $user->id,
-                'email' => $user->email ?? 'N/A',
                 'subtotal' => $subtotal,
                 'shipping' => $shipping,
                 'taxes' => $taxes,
                 'total' => $total,
-                'payment_method' => $validated['payment_method'] ?? null,
+                'currency' => $currency,
+                'payment_method' => $validated['payment_method'],
             ]);
 
             $order = DB::transaction(function () use ($user, $validated, $subtotal, $shipping, $taxes, $total, $cart, $charge, $currency) {
+                Log::info('➡ Creando orden...');
                 $order = Order::create([
                     'user_id' => $user->id,
-                    'status' => 'PAID', // o 'PENDING' si prefieres el flujo normal
+                    'status' => 'PAID',
                     'subtotal' => $subtotal ?? 0,
                     'shipping' => $shipping ?? 0,
                     'taxes' => $taxes ?? 0,
@@ -114,10 +114,20 @@ class CheckoutController extends Controller
                     'country' => $validated['country'] ?? null,
                 ]);
 
+                Log::info('✅ Orden creada', ['order_id' => $order->id]);
+
                 // Crear los ítems
                 foreach ($cart->items as $item) {
                     $product = $item->product;
                     $unitPrice = $product->discount_price ?? $product->price;
+
+                    Log::info('🧱 Insertando item', [
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'store_id' => $product->store_id,
+                        'unit_price' => $unitPrice,
+                        'quantity' => $item->quantity,
+                    ]);
 
                     if ($product->stock !== null && $product->stock < $item->quantity) {
                         throw new \RuntimeException("Stock insuficiente para {$product->name}");
@@ -137,7 +147,7 @@ class CheckoutController extends Controller
                     }
                 }
 
-                // Crear transacción
+                Log::info('💰 Creando transacción de pago...');
                 Transaction::create([
                     'user_id' => $user->id,
                     'order_id' => $order->id,
@@ -148,18 +158,24 @@ class CheckoutController extends Controller
                 ]);
 
                 $cart->items()->delete();
+                Log::info('🧹 Carrito limpiado correctamente.');
 
                 return $order->load(['items.product:id,name,image_1_url,price,discount_price']);
             });
         } catch (\Throwable $e) {
+            DB::rollBack(); // asegura rollback limpio
+
             return response()->json([
                 'error' => true,
-                'message' => 'Error al procesar la compra',
+                'message' => 'Error al procesar la compra (modo debug)',
                 'exception' => get_class($e),
                 'exception_message' => $e->getMessage(),
+                'sql_state' => $e instanceof \Illuminate\Database\QueryException ? ($e->errorInfo[0] ?? null) : null,
+                'sql_code' => $e instanceof \Illuminate\Database\QueryException ? ($e->errorInfo[1] ?? null) : null,
+                'sql_detail' => $e instanceof \Illuminate\Database\QueryException ? ($e->errorInfo[2] ?? null) : null,
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => collect(explode("\n", $e->getTraceAsString()))->take(10)->toArray(), // primeros 10 niveles
+                'trace' => collect(explode("\n", $e->getTraceAsString()))->take(8)->toArray(),
             ], 500);
         }
 
