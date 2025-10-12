@@ -88,6 +88,8 @@ Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStor
 Route::get('/stores', [StoreController::class, 'index']);
 Route::put('/stores/{id}', [StoreController::class, 'update']);
 
+// Mensajes de contacto
+Route::apiResource('contact-messages', ContactMessageController::class);
 
 // DB Test
 Route::get('/db-test', function () {
@@ -167,8 +169,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Ordenes (CRUD)
     Route::apiResource('orders', OrderController::class);
 
-    // Mensajes de contacto (CRUD)
-    Route::apiResource('contact-messages', ContactMessageController::class);
 
     // Sesiones autenticadas
     Route::post('/session', [AuthenticatedSessionController::class, 'store']);
