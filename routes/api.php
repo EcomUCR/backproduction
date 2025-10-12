@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -153,6 +154,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
 
+    //Pago Visa
+    Route::post('/checkout', [CheckoutController::class, 'checkout']);
 
     // Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña
