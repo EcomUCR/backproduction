@@ -141,6 +141,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/change-password', [UserController::class, 'changePassword']);
     Route::get('/users/{id}/store', [UserController::class, 'getStore']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::patch('/users/{id}', [UserController::class, 'update']);
 
     //Cart
     Route::get('/cart/me', [CartController::class, 'me']);
@@ -153,7 +154,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
 
- 
+
     // Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña
 
