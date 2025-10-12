@@ -141,7 +141,7 @@ class CheckoutController extends Controller
                 Transaction::create([
                     'user_id' => $user->id,
                     'order_id' => $order->id,
-                    'type' => 'PAYMENT',
+                    'type' => 'INCOME',
                     'amount' => $total,
                     'currency' => $currency,
                     'description' => 'Pago aprobado vía ' . ($validated['payment_method'] ?? 'VISA'),

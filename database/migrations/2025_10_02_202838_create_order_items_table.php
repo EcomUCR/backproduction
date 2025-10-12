@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->integer('quantity'); // Quantity
             $table->decimal('unit_price', 10, 2); // Unit Price
             $table->integer('discount_pct')->default(0); // Discount Percentage
+            $table->timestamps();
         });
     }
 
@@ -27,6 +28,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_items');
+        Schema::table('order_items', function (Blueprint $table) {
+            $table->dropTimestamps();
+        });
     }
 };
