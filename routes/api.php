@@ -23,7 +23,7 @@ use App\Http\Controllers\StoreController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CartItemController;
 use App\Services\VisaClient;
-
+use App\Services\Contracts\VisaClientContract;
 
 // use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
@@ -109,20 +109,19 @@ Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviews
 Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 'summary']);
 
 //API VISA
-Route::get('/visa/test', function () {
+Route::get('/visa/test', function (VisaClientContract $visa) {
     try {
-        $response = VisaClient::makeRequest('/forexrates/v1/foreignexchangerates', [
+        $response = $visa->makeRequest('/forexrates/v1/foreignexchangerates', [
             'destinationCurrencyCode' => 'USD',
-            'sourceCurrencyCode' => 'CRC',
+            'sourceCurrencyCode'      => 'CRC',
         ]);
 
-        return response()->json($response->json());
+        return response()->json($response->json(), $response->status());
     } catch (\Throwable $e) {
         Log::error('❌ VISA ERROR: ' . $e->getMessage());
         return response()->json([
-            'error' => true,
+            'error'   => true,
             'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
         ], 500);
     }
 });

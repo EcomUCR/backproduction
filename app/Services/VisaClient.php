@@ -2,25 +2,23 @@
 
 namespace App\Services;
 
+use App\Services\Contracts\VisaClientContract;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Response;
 
-class VisaClient
+class VisaClient implements VisaClientContract
 {
-    public static function makeRequest(string $endpoint, array $body = [])
+    public function makeRequest(string $endpoint, array $body = []): Response
     {
-        $baseUrl = env('VISA_BASE_URL');
-        $certPath = base_path(env('VISA_CERT_PATH'));
-        $keyPath = base_path(env('VISA_KEY_PATH'));
-        $caPath = base_path(env('VISA_CA_PATH'));
-        $apiKey = env('VISA_API_KEY');
+        $cfg = config('services.visa');
 
         return Http::withOptions([
-            'cert' => $certPath,
-            'ssl_key' => $keyPath,
-            'verify' => $caPath,
+            'cert'    => $cfg['cert_path'],
+            'ssl_key' => $cfg['key_path'],
+            'verify'  => $cfg['ca_path'],
         ])->withHeaders([
-            'Accept' => 'application/json',
-            'Authorization' => 'Basic ' . base64_encode($apiKey . ':'),
-        ])->post("{$baseUrl}{$endpoint}", $body);
+            'Accept'        => 'application/json',
+            'Authorization' => 'Basic ' . base64_encode($cfg['api_key'] . ':'),
+        ])->post(rtrim($cfg['base_url'], '/') . $endpoint, $body);
     }
 }
