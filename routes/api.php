@@ -85,6 +85,9 @@ Route::get('/stores/{store_id}/featured', [ProductController::class, 'featuredBy
 //Tienda
 Route::get('/stores/{user_id}', [StoreController::class, 'show']);
 Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
+Route::get('/stores', [StoreController::class, 'index']);
+Route::put('/stores/{id}', [StoreController::class, 'update']);
+
 
 // DB Test
 Route::get('/db-test', function () {
@@ -148,10 +151,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
 
-    // Tiendas
-    Route::get('/stores', [StoreController::class, 'index']);
-    Route::put('/stores/{id}', [StoreController::class, 'update']);
-
+ 
     // Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña
 
