@@ -20,20 +20,20 @@ class CheckoutController extends Controller
 
         // 1) Validación
         $validated = $request->validate([
-            'street'         => 'nullable|string|max:150',
-            'city'           => 'nullable|string|max:100',
-            'state'          => 'nullable|string|max:100',
-            'zip_code'       => 'nullable|string|max:20',
-            'country'        => 'nullable|string|max:100',
+            'street' => 'nullable|string|max:150',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
             'payment_method' => 'required|string|in:VISA,MASTERCARD,AMEX,PAYPAL',
-            'currency'       => 'nullable|string|in:CRC,USD',
+            'currency' => 'nullable|string|in:CRC,USD',
 
             // Datos de tarjeta (mock)
-            'card.name'      => 'required|string|max:100',
-            'card.number'    => 'required|string|size:16',
+            'card.name' => 'required|string|max:100',
+            'card.number' => 'required|string|size:16',
             'card.exp_month' => 'required|string|size:2',
-            'card.exp_year'  => 'required|string|size:4',
-            'card.cvv'       => 'required|string|size:3',
+            'card.exp_year' => 'required|string|size:4',
+            'card.cvv' => 'required|string|size:3',
         ]);
 
         $currency = $validated['currency'] ?? 'CRC';
@@ -48,7 +48,7 @@ class CheckoutController extends Controller
         }
 
         // 3) Calcular totales
-        $taxRate  = (float) (config('app.tax_rate', env('APP_TAX_RATE', 0.13)));
+        $taxRate = (float) (config('app.tax_rate', env('APP_TAX_RATE', 0.13)));
         $shipping = (int) (config('app.shipping_flat', env('APP_SHIPPING_FLAT', 0)));
         $subtotal = 0;
 
@@ -58,7 +58,9 @@ class CheckoutController extends Controller
             if (!$product) {
                 return response()->json(['error' => true, 'step' => 'TOTALS', 'message' => "Producto con ID {$item->product_id} no existe"], 400);
             }
-            $unitPrice = $product->discount_price ?? $product->price;
+            $unitPrice = ($product->discount_price !== null && $product->discount_price > 0)
+                ? $product->discount_price
+                : $product->price;
             if ($unitPrice <= 0) {
                 return response()->json(['error' => true, 'step' => 'TOTALS', 'message' => "El producto {$product->name} tiene un precio inválido"], 400);
             }
@@ -82,23 +84,23 @@ class CheckoutController extends Controller
             // E1: Crear la orden (fuera de transacción para poder reportar bien si falla)
             try {
                 $order = Order::create([
-                    'user_id'        => $user->id,
-                    'status'         => 'PAID',
-                    'subtotal'       => $subtotal,
-                    'shipping'       => $shipping,
-                    'taxes'          => $taxes,
-                    'total'          => $total,
+                    'user_id' => $user->id,
+                    'status' => 'PAID',
+                    'subtotal' => $subtotal,
+                    'shipping' => $shipping,
+                    'taxes' => $taxes,
+                    'total' => $total,
                     'payment_method' => $validated['payment_method'],
-                    'street'         => $validated['street']  ?? null,
-                    'city'           => $validated['city']    ?? null,
-                    'state'          => $validated['state']   ?? null,
-                    'zip_code'       => $validated['zip_code']?? null,
-                    'country'        => $validated['country'] ?? null,
+                    'street' => $validated['street'] ?? null,
+                    'city' => $validated['city'] ?? null,
+                    'state' => $validated['state'] ?? null,
+                    'zip_code' => $validated['zip_code'] ?? null,
+                    'country' => $validated['country'] ?? null,
                 ]);
             } catch (QueryException $qe) {
                 return response()->json([
                     'error' => true,
-                    'step'  => 'E1_ORDER_CREATE',
+                    'step' => 'E1_ORDER_CREATE',
                     'message' => 'Falló la creación de la orden',
                     'payload' => [
                         'user_id' => $user->id,
@@ -109,8 +111,8 @@ class CheckoutController extends Controller
                         'payment_method' => $validated['payment_method'],
                     ],
                     'sql_state' => $qe->errorInfo[0] ?? null,
-                    'sql_code'  => $qe->errorInfo[1] ?? null,
-                    'sql_detail'=> $qe->errorInfo[2] ?? null,
+                    'sql_code' => $qe->errorInfo[1] ?? null,
+                    'sql_detail' => $qe->errorInfo[2] ?? null,
                 ], 500);
             }
 
@@ -119,7 +121,7 @@ class CheckoutController extends Controller
 
             // E2: Crear items (si falla uno, devolvemos detalle del que falló)
             foreach ($cart->items as $idx => $item) {
-                $product   = $item->product;
+                $product = $item->product;
                 $unitPrice = $product->discount_price ?? $product->price;
 
                 if ($product->stock !== null && $product->stock < $item->quantity) {
@@ -128,7 +130,7 @@ class CheckoutController extends Controller
                     $order->delete();
                     return response()->json([
                         'error' => true,
-                        'step'  => 'E2_STOCK',
+                        'step' => 'E2_STOCK',
                         'message' => "Stock insuficiente para {$product->name}",
                         'order_id' => $order->id,
                         'product_id' => $product->id,
@@ -139,11 +141,11 @@ class CheckoutController extends Controller
 
                 try {
                     OrderItem::create([
-                        'order_id'     => $order->id,
-                        'product_id'   => $product->id,
-                        'store_id'     => $product->store_id,
-                        'quantity'     => $item->quantity,
-                        'unit_price'   => $unitPrice,
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'store_id' => $product->store_id,
+                        'quantity' => $item->quantity,
+                        'unit_price' => $unitPrice,
                         'discount_pct' => 0,
                     ]);
                 } catch (QueryException $qe) {
@@ -151,16 +153,16 @@ class CheckoutController extends Controller
                     $order->delete();
                     return response()->json([
                         'error' => true,
-                        'step'  => 'E2_ITEM_CREATE',
+                        'step' => 'E2_ITEM_CREATE',
                         'message' => 'Falló la creación de un ítem',
                         'which_item_index' => $idx,
-                        'order_id'   => $order->id,
+                        'order_id' => $order->id,
                         'product_id' => $product->id,
-                        'store_id'   => $product->store_id,
+                        'store_id' => $product->store_id,
                         'unit_price' => $unitPrice,
-                        'quantity'   => $item->quantity,
-                        'sql_state'  => $qe->errorInfo[0] ?? null,
-                        'sql_code'   => $qe->errorInfo[1] ?? null,
+                        'quantity' => $item->quantity,
+                        'sql_state' => $qe->errorInfo[0] ?? null,
+                        'sql_code' => $qe->errorInfo[1] ?? null,
                         'sql_detail' => $qe->errorInfo[2] ?? null,
                     ], 500);
                 }
@@ -174,11 +176,11 @@ class CheckoutController extends Controller
             // E3: Crear transacción contable
             try {
                 Transaction::create([
-                    'user_id'     => $user->id,
-                    'order_id'    => $order->id,
-                    'type'        => 'INCOME',   // caben en 10 chars
-                    'amount'      => $total,
-                    'currency'    => $currency,
+                    'user_id' => $user->id,
+                    'order_id' => $order->id,
+                    'type' => 'INCOME',   // caben en 10 chars
+                    'amount' => $total,
+                    'currency' => $currency,
                     'description' => 'Pago aprobado vía ' . $validated['payment_method'],
                 ]);
             } catch (QueryException $qe) {
@@ -186,13 +188,13 @@ class CheckoutController extends Controller
                 $order->delete();
                 return response()->json([
                     'error' => true,
-                    'step'  => 'E3_TX_CREATE',
+                    'step' => 'E3_TX_CREATE',
                     'message' => 'Falló la creación de la transacción',
-                    'order_id'   => $order->id,
-                    'amount'     => $total,
-                    'currency'   => $currency,
-                    'sql_state'  => $qe->errorInfo[0] ?? null,
-                    'sql_code'   => $qe->errorInfo[1] ?? null,
+                    'order_id' => $order->id,
+                    'amount' => $total,
+                    'currency' => $currency,
+                    'sql_state' => $qe->errorInfo[0] ?? null,
+                    'sql_code' => $qe->errorInfo[1] ?? null,
                     'sql_detail' => $qe->errorInfo[2] ?? null,
                 ], 500);
             }
@@ -205,7 +207,7 @@ class CheckoutController extends Controller
                 $order->delete();
                 return response()->json([
                     'error' => true,
-                    'step'  => 'E4_CART_CLEAR',
+                    'step' => 'E4_CART_CLEAR',
                     'message' => 'Falló al limpiar el carrito',
                     'order_id' => $order->id,
                     'exception' => get_class($t),
@@ -218,7 +220,7 @@ class CheckoutController extends Controller
             // Respuesta OK
             return response()->json([
                 'message' => 'Orden creada y pago aprobado',
-                'order'   => $order->load(['items.product:id,name,image_1_url,price,discount_price']),
+                'order' => $order->load(['items.product:id,name,image_1_url,price,discount_price']),
                 'payment_result' => $charge,
             ], 201);
 
@@ -233,15 +235,15 @@ class CheckoutController extends Controller
 
             $payload = [
                 'error' => true,
-                'step'  => 'E_UNCAUGHT',
+                'step' => 'E_UNCAUGHT',
                 'message' => 'Error no controlado en checkout',
                 'exception' => get_class($e),
-                'detail'    => $e->getMessage(),
+                'detail' => $e->getMessage(),
             ];
 
             if ($e instanceof QueryException) {
-                $payload['sql_state']  = $e->errorInfo[0] ?? null;
-                $payload['sql_code']   = $e->errorInfo[1] ?? null;
+                $payload['sql_state'] = $e->errorInfo[0] ?? null;
+                $payload['sql_code'] = $e->errorInfo[1] ?? null;
                 $payload['sql_detail'] = $e->errorInfo[2] ?? null;
             }
 
