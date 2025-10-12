@@ -110,7 +110,7 @@ class UserController extends Controller
             'last_name' => 'nullable|string|max:80',
             'phone_number' => 'nullable|string|max:20',
             'role' => 'sometimes|string|in:ADMIN,SELLER,CUSTOMER',
-            'image' => 'nullable|string|max:512', // 👈 ahora sí validamos la URL de Cloudinary
+            'image' => 'nullable|string|max:512', 
         ]);
 
         if (isset($validatedData['password'])) {
