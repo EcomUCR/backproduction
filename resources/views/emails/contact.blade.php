@@ -22,7 +22,7 @@
             border: 1px solid #eee;
         }
         .header {
-            background: linear-gradient(135deg, #0165B0, #00AEEF);
+            background:linear-gradient(135deg,#FFD027,#FF6F3B,#5B2A86)
             color: #fff;
             padding: 24px;
             text-align: center;
@@ -39,11 +39,11 @@
             margin-bottom: 12px;
         }
         .content strong {
-            color: #0165B0;
+            color: #ff6f3b;
         }
         .message-box {
             background-color: #f2f7fb;
-            border-left: 4px solid #00AEEF;
+            border-left: 4px solid #5B2A86;
             padding: 16px;
             border-radius: 8px;
             white-space: pre-line;
@@ -59,8 +59,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Nuevo mensaje de contacto 📩</h1>
+        <div class="header ">
+            <h1>Nuevo mensaje de contacto</h1>
         </div>
 
         <div class="content">
