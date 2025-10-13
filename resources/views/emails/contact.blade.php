@@ -22,7 +22,7 @@
             border: 1px solid #eee;
         }
         .header {
-            background:linear-gradient(135deg,#FFD027,#FF6F3B)
+            background: linear-gradient(135deg, #ffd027, #ff9640);
             color: #fff;
             padding: 24px;
             text-align: center;
@@ -39,11 +39,11 @@
             margin-bottom: 12px;
         }
         .content strong {
-            color: #ff6f3b;
+            color: #ff9640;
         }
         .message-box {
             background-color: #f2f7fb;
-            border-left: 4px solid #5B2A86;
+            border-left: 4px solid #ff9640;
             padding: 16px;
             border-radius: 8px;
             white-space: pre-line;
@@ -59,7 +59,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header ">
+        <div class="header">
             <h1>Nuevo mensaje de contacto</h1>
         </div>
 
