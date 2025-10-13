@@ -13,7 +13,14 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
-
+    'visa' => [
+        'mock' => env('VISA_MOCK', false),
+        'base_url' => env('VISA_BASE_URL', 'https://sandbox.api.visa.com/'),
+        'cert_path' => base_path(env('VISA_CERT_PATH', '')),
+        'key_path' => base_path(env('VISA_KEY_PATH', '')),
+        'ca_path' => base_path(env('VISA_CA_PATH', '')),
+        'api_key' => env('VISA_API_KEY', ''),
+    ],
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
