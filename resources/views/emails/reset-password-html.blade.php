@@ -17,7 +17,7 @@
           </tr>
           <tr>
             <td style="padding:32px 28px;color:#111827;">
-              <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;">Hello!</h1>
+              <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;">¡Hola!</h1>
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">
                 Recibiste este correo porque solicitaste restablecer tu contraseña.
               </p>
