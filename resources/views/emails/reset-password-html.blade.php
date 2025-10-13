@@ -9,10 +9,10 @@
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f7fb;padding:24px 0;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#FFD027,#FF6F3B,#5B2A86);border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
           <tr>
             <td align="center" style="padding:24px;background:#111827;">
-              <img src="https://tu-cdn-o-dominio/logo-tukishop-blanco.png" alt="TukiShop" width="120" style="display:block;">
+              <img src="https://res.cloudinary.com/dpbghs8ep/image/upload/v1760314036/Tuki_vitzem.png" alt="TukiShop" width="120" style="display:block;">
             </td>
           </tr>
           <tr>
