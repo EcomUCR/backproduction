@@ -22,7 +22,7 @@
                 Recibiste este correo porque solicitaste restablecer tu contraseña.
               </p>
               <p style="margin:0 0 24px;text-align:center;">
-                <a href="{{ $url }}" style="background:#0ea5e9;color:#000000;text-decoration:none;padding:12px 20px;border-radius:8px;display:inline-block;font-weight:bold;">
+                <a href="{{ $url }}" style="background:linear-gradient(135deg,#FFD027,#FF6F3B);color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;display:inline-block;font-weight:bold;">
                   Restablecer contraseña
                 </a>
               </p>
