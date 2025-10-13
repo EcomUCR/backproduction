@@ -12,25 +12,25 @@
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
           <tr>
             <td align="center" style="padding:24px;background:linear-gradient(135deg,#FFD027,#FF6F3B,#5B2A86);">
-              <img src="https://res.cloudinary.com/dpbghs8ep/image/upload/v1760314036/Tuki_vitzem.png" alt="TukiShop" width="80" style="display:block;">
+              <img src="https://res.cloudinary.com/dpbghs8ep/image/upload/v1760314036/Tuki_vitzem.png" alt="TukiShop" width="50" style="display:block;">
             </td>
           </tr>
           <tr>
-            <td style="padding:32px 28px;color:#ffffff;">
-              <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;">¡Hola!</h1>
-              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">
+            <td style="padding:32px 28px;">
+              <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#111827;">¡Hola!</h1>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#111827;">
                 Recibiste este correo porque solicitaste restablecer tu contraseña.
               </p>
               <p style="margin:0 0 24px;text-align:center;">
-                <a href="{{ $url }}" style="background:#0ea5e9;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;display:inline-block;font-weight:bold;">
+                <a href="{{ $url }}" style="background:#0ea5e9;color:#000000;text-decoration:none;padding:12px 20px;border-radius:8px;display:inline-block;font-weight:bold;">
                   Restablecer contraseña
                 </a>
               </p>
-              <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#374151;">
+              <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#000000;">
                 Si no solicitaste esto, ignora el correo.
               </p>
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
-              <p style="margin:0;font-size:12px;line-height:1.6;color:#ffffff;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#000000;">
                 Si tienes problemas con el botón, copia y pega esta URL en tu navegador:<br>
                 <a href="{{ $url }}" style="color:#0ea5e9;word-break:break-all;">{{ $url }}</a>
               </p>
