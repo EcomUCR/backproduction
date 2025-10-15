@@ -21,10 +21,11 @@ return new class extends Migration {
             $table->text('image_2_url')->nullable(); // Name
             $table->text('image_3_url')->nullable(); // Name
             $table->text('description')->nullable(); // Description
+            $table->text('details')->nullable(); // Description
             $table->decimal('price', 10, 2); // Price
             $table->decimal('discount_price', 10, 2)->default(0); // Discount Price
             $table->integer('stock')->default(0); // Stock
-            $table->boolean('status')->default(true); // Status
+            $table->string('status')->default("DRAFT"); // Status
             $table->boolean('is_featured')->default(false); // Is Featured
             $table->timestamps(); // Created At & Updated At
         });
