@@ -33,7 +33,7 @@ class UserController extends Controller
 
         // Cargar la tienda del usuario
         $user->load([
-            'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,support_email,status'
+            'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,support_email,status,is_verified',
         ]);
 
         return response()->json($user);
