@@ -30,6 +30,10 @@ class Store extends Model
     ];
     protected $with = ['user', 'storeSocials', 'banners', 'products', 'reviews'];
 
+    protected $casts = [
+        'is_verified' => 'boolean',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
