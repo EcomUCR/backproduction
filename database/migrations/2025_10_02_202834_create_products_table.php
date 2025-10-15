@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->decimal('price', 10, 2); // Price
             $table->decimal('discount_price', 10, 2)->default(0); // Discount Price
             $table->integer('stock')->default(0); // Stock
-            $table->boolean('status')->default(true); // Status
+            $table->string('status')->default("DRAFT"); // Status
             $table->boolean('is_featured')->default(false); // Is Featured
             $table->timestamps(); // Created At & Updated At
         });

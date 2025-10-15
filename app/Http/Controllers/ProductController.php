@@ -32,7 +32,7 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'discount_price' => 'nullable|numeric',
             'stock' => 'nullable|integer',
-            'status' => 'nullable|boolean',
+            'status' => 'nullable|string',
             'is_featured' => 'nullable|boolean',
             'category_ids' => 'required|array|min:1',
             'category_ids.*' => 'exists:categories,id',
