@@ -4,22 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    // 📦 Muestra todos (incluye archivados)
+    // 📦 Muestra todos (solo para admin, incluye archivados)
     public function index()
     {
-        $products = Product::with(['store:id,name', 'categories'])->get();
+        $products = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->get();
+
         return response()->json($products);
     }
 
-    // 🔍 Mostrar producto (oculta archivados)
+    // 🔍 Mostrar un producto (excluye archivados)
     public function show($id)
     {
-        $product = Product::with(['store:id,name', 'categories'])
-            ->where('id', $id)
-            ->where('status', '!=', 'ARCHIVED')
+        $product = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.id', '=', $id)
+            ->where('products.status', '<>', 'ARCHIVED')
             ->first();
 
         if (!$product) {
@@ -29,10 +36,80 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
+    // 🏪 Productos destacados (solo activos)
+    public function featured()
+    {
+        $featured = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.is_featured', '=', true)
+            ->where('products.status', '=', 'ACTIVE')
+            ->limit(10)
+            ->get();
+
+        return response()->json($featured);
+    }
+
+    // 🧩 No destacados (solo activos)
+    public function notFeatured()
+    {
+        $notFeatured = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.is_featured', '=', false)
+            ->where('products.status', '=', 'ACTIVE')
+            ->limit(10)
+            ->get();
+
+        return response()->json($notFeatured);
+    }
+
+    // 🏬 Por tienda (sin archivados)
+    public function showByStore($store_id)
+    {
+        $products = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->where('products.status', '<>', 'ARCHIVED')
+            ->get();
+
+        return response()->json($products);
+    }
+
+    // 🏷️ Por categoría (solo activos)
+    public function byCategory($category_id)
+    {
+        $products = DB::table('products')
+            ->join('product_category', 'products.id', '=', 'product_category.product_id')
+            ->join('categories', 'categories.id', '=', 'product_category.category_id')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name', 'categories.name as category_name')
+            ->where('product_category.category_id', '=', $category_id)
+            ->where('products.status', '=', 'ACTIVE')
+            ->get();
+
+        return response()->json($products);
+    }
+
+    // ⭐ Destacados por tienda (solo activos)
+    public function featuredByStore($store_id)
+    {
+        $featured = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->where('products.is_featured', '=', true)
+            ->where('products.status', '=', 'ACTIVE')
+            ->get();
+
+        return response()->json($featured);
+    }
+
     // 🛠️ Crear producto
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             'store_id' => 'required|exists:stores,id',
             'sku' => 'required|string|unique:products',
             'name' => 'required|string|max:80',
@@ -46,68 +123,19 @@ class ProductController extends Controller
             'stock' => 'nullable|integer',
             'status' => 'nullable|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
             'is_featured' => 'nullable|boolean',
-            'category_ids' => 'required|array|min:1',
-            'category_ids.*' => 'exists:categories,id',
         ]);
 
-        $product = Product::create($validatedData);
+        $id = DB::table('products')->insertGetId($validated);
 
-        if (!empty($validatedData['category_ids'])) {
-            $product->categories()->attach($validatedData['category_ids']);
-        }
-
-        $product->load('store', 'categories');
-
-        return response()->json($product, 201);
+        return response()->json(DB::table('products')->find($id), 201);
     }
 
-    // ⭐ Destacados (solo activos)
-    public function featured()
-    {
-        $featured = Product::with('store', 'categories')
-            ->where('is_featured', true)
-            ->where('status', 'ACTIVE')
-            ->limit(10)
-            ->get();
-
-        return response()->json($featured);
-    }
-
-    // 🧩 No destacados (solo activos)
-    public function notFeatured()
-    {
-        $notFeatured = Product::with('store', 'categories')
-            ->where('is_featured', false)
-            ->where('status', 'ACTIVE')
-            ->limit(10)
-            ->get();
-
-        return response()->json($notFeatured);
-    }
-
-    // 🏬 Por tienda (excluye archivados)
-    public function showByStore($store_id)
-    {
-        $products = Product::with('store', 'categories')
-            ->where('store_id', $store_id)
-            ->where('status', '!=', 'ARCHIVED')
-            ->get();
-
-        return response()->json($products);
-    }
-
-    // ✏️ Actualizar
+    // ✏️ Actualizar producto
     public function update(Request $request, $id)
     {
-        $product = Product::with('store', 'categories')->findOrFail($id);
-
-        $validatedData = $request->validate([
-            'store_id' => 'sometimes|exists:stores,id',
-            'sku' => 'sometimes|string|unique:products,sku,' . $product->id,
+        $validated = $request->validate([
+            'sku' => 'sometimes|string|unique:products,sku,' . $id,
             'name' => 'sometimes|string|max:80',
-            'image_1_url' => 'sometimes|string',
-            'image_2_url' => 'nullable|string',
-            'image_3_url' => 'nullable|string',
             'description' => 'nullable|string',
             'details' => 'nullable|string',
             'price' => 'sometimes|numeric',
@@ -115,47 +143,18 @@ class ProductController extends Controller
             'stock' => 'nullable|integer',
             'status' => 'sometimes|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
             'is_featured' => 'sometimes|boolean',
-            'category_ids' => 'nullable|array',
-            'category_ids.*' => 'exists:categories,id',
+            'image_1_url' => 'sometimes|string',
         ]);
 
-        if ($request->has('category_ids')) {
-            $product->categories()->sync($validatedData['category_ids']);
-        }
+        DB::table('products')->where('id', '=', $id)->update($validated);
 
-        $product->update($validatedData);
-
-        return response()->json($product);
+        return response()->json(DB::table('products')->find($id));
     }
 
     // ❌ Eliminar
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
+        DB::table('products')->where('id', '=', $id)->delete();
         return response()->json(null, 204);
-    }
-
-    // 🏷️ Por categoría (solo activos)
-    public function byCategory($category_id)
-    {
-        $products = Product::with('store', 'categories')
-            ->whereHas('categories', fn($q) => $q->where('categories.id', $category_id))
-            ->where('status', 'ACTIVE')
-            ->get();
-
-        return response()->json($products);
-    }
-
-    // ⭐ Destacados por tienda (solo activos)
-    public function featuredByStore($store_id)
-    {
-        $featured = Product::with('store', 'categories')
-            ->where('store_id', $store_id)
-            ->where('is_featured', true)
-            ->where('status', 'ACTIVE')
-            ->get();
-
-        return response()->json($featured);
     }
 }
