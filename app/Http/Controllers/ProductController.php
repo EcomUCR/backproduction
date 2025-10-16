@@ -7,18 +7,63 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    // 📦 Muestra todos los productos (incluye archivados)
     public function index()
     {
         $products = Product::with(['store:id,name', 'categories'])->get();
         return response()->json($products);
     }
 
+    // 🔍 Mostrar un producto específico (solo si no está archivado)
     public function show($id)
     {
-        $product = Product::with(['store:id,name', 'categories'])->findOrFail($id);
+        $product = Product::with(['store:id,name', 'categories'])
+            ->where('status', '!=', 'ARCHIVED')
+            ->findOrFail($id);
+
         return response()->json($product);
     }
 
+    // 🏪 Productos destacados (sin archivados)
+    public function featured()
+    {
+        $featured = Product::with('store', 'categories')
+            ->where('is_featured', true)
+            ->where('status', '!=', 'ARCHIVED')
+            ->limit(10)
+            ->get();
+
+        return response()->json($featured);
+    }
+
+    // 🧩 Productos no destacados (sin archivados)
+    public function notFeatured()
+    {
+        $notFeatured = Product::with('store', 'categories')
+            ->where('is_featured', false)
+            ->where('status', '!=', 'ARCHIVED')
+            ->limit(10)
+            ->get();
+
+        return response()->json($notFeatured);
+    }
+
+    // 🏬 Productos por tienda (sin archivados)
+    public function showByStore($store_id)
+    {
+        $products = Product::with('store', 'categories')
+            ->where('store_id', $store_id)
+            ->where('status', '!=', 'ARCHIVED')
+            ->get();
+
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'No hay productos activos para esta tienda'], 404);
+        }
+
+        return response()->json($products);
+    }
+
+    // 🛠️ Crear producto
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -45,7 +90,6 @@ class ProductController extends Controller
 
         $product = Product::create($validatedData);
 
-        // ✅ Asociar categorías si vienen en el request
         if (!empty($validatedData['category_ids'])) {
             $product->categories()->attach($validatedData['category_ids']);
         }
@@ -55,27 +99,7 @@ class ProductController extends Controller
         return response()->json($product, 201);
     }
 
-    public function featured()
-    {
-        $featured = Product::with('store', 'categories')->where('is_featured', true)->limit(10)->get();
-        return response()->json($featured);
-    }
-
-    public function notFeatured()
-    {
-        $notFeatured = Product::with('store', 'categories')->where('is_featured', false)->limit(10)->get();
-        return response()->json($notFeatured);
-    }
-
-    public function showByStore($store_id)
-    {
-        $products = Product::with('store', 'categories')->where('store_id', $store_id)->get();
-        if ($products->isEmpty()) {
-            return response()->json(['message' => 'No hay productos para esta tienda'], 404);
-        }
-        return response()->json($products);
-    }
-
+    // ✏️ Actualizar producto
     public function update(Request $request, $id)
     {
         $product = Product::with('store', 'categories')->findOrFail($id);
@@ -98,7 +122,6 @@ class ProductController extends Controller
             'category_ids.*' => 'exists:categories,id',
         ]);
 
-        // ✅ Solo sincroniza si viene category_ids en el request
         if ($request->has('category_ids') && is_array($request->category_ids)) {
             $product->categories()->sync($request->category_ids);
         }
@@ -108,7 +131,7 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-
+    // ❌ Eliminar producto
     public function destroy($id)
     {
         $product = Product::with('store', 'categories')->findOrFail($id);
@@ -117,32 +140,36 @@ class ProductController extends Controller
         return response()->json(null, 204);
     }
 
+    // 🏷️ Productos por categoría (sin archivados)
     public function byCategory($category_id)
     {
         $products = Product::with('store', 'categories')
             ->whereHas('categories', function ($query) use ($category_id) {
                 $query->where('categories.id', $category_id);
             })
+            ->where('status', '!=', 'ARCHIVED')
             ->get();
 
         if ($products->isEmpty()) {
-            return response()->json(['message' => 'No hay productos en esta categoría'], 404);
+            return response()->json(['message' => 'No hay productos activos en esta categoría'], 404);
         }
 
         return response()->json($products);
     }
+
+    // ⭐ Productos destacados por tienda (sin archivados)
     public function featuredByStore($store_id)
     {
         $featured = Product::with('store', 'categories')
             ->where('store_id', $store_id)
             ->where('is_featured', true)
+            ->where('status', '!=', 'ARCHIVED')
             ->get();
 
         if ($featured->isEmpty()) {
-            return response()->json(['message' => 'No hay productos destacados en esta tienda'], 404);
+            return response()->json(['message' => 'No hay productos destacados activos en esta tienda'], 404);
         }
 
         return response()->json($featured);
     }
-
 }
