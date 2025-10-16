@@ -160,25 +160,39 @@ class UserController extends Controller
      * Obtener la tienda asociada a un usuario
      */
     public function getStore($id)
-    {
-        $user = User::with([
-            'store' => function ($query) {
-                $query->select('id', 'user_id', 'name', 'slug', 'description', 'category_id', 'status')
-                    ->with(['products:id,store_id,name,price,image_1_url']);
-            }
-        ])->findOrFail($id);
-
-        if (!$user->store) {
-            return response()->json([
-                'message' => 'El usuario no tiene una tienda asociada'
-            ], 404);
+{
+    $user = User::with([
+        'store' => function ($query) {
+            $query->select(
+                'id',
+                'user_id',
+                'name',
+                'slug',
+                'description',
+                'category_id',
+                'status',
+                'is_verified',
+                'banner',
+                'image',
+                'support_email',
+                'support_phone',
+                'registered_address'
+            )->with(['products:id,store_id,name,price,image_1_url']);
         }
+    ])->findOrFail($id);
 
+    if (!$user->store) {
         return response()->json([
-            'message' => 'Tienda encontrada correctamente',
-            'store' => $user->store
-        ]);
+            'message' => 'El usuario no tiene una tienda asociada'
+        ], 404);
     }
+
+    return response()->json([
+        'message' => 'Tienda encontrada correctamente',
+        'store' => $user->store
+    ]);
+}
+
 
     /**
      * Eliminar usuario y todas sus relaciones
