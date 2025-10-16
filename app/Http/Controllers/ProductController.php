@@ -18,11 +18,13 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with(['store:id,name', 'categories'])
+            ->where('id', $id)
             ->where('status', '!=', 'ARCHIVED')
-            ->findOrFail($id);
+            ->firstOrFail();
 
         return response()->json($product);
     }
+
 
     // 🏪 Productos destacados (sin archivados)
     public function featured()
