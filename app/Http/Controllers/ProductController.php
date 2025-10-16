@@ -94,16 +94,20 @@ class ProductController extends Controller
             'stock' => 'nullable|integer',
             'status' => 'sometimes|string|in:ACTIVE,INACTIVE,ARCHIVED',
             'is_featured' => 'sometimes|boolean',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'exists:categories,id',
         ]);
 
-        if ($request->has('category_ids')) {
-            $product->categories()->sync($validatedData['category_ids']);
+        // ✅ Solo sincroniza si viene category_ids en el request
+        if ($request->has('category_ids') && is_array($request->category_ids)) {
+            $product->categories()->sync($request->category_ids);
         }
 
         $product->update($validatedData);
 
         return response()->json($product);
     }
+
 
     public function destroy($id)
     {
