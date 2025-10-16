@@ -91,7 +91,7 @@ class ProductController extends Controller
             'details' => 'nullable|string',
             'price' => 'sometimes|numeric',
             'discount_price' => 'nullable|numeric',
-            'stock' => 'nullable|string',
+            'stock' => 'nullable|integer',
             'status' => 'sometimes|boolean',
             'is_featured' => 'sometimes|boolean',
         ]);
