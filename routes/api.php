@@ -142,6 +142,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}/store', [UserController::class, 'getStore']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     Route::patch('/users/{id}', [UserController::class, 'update']);
+    Route::put('/users/{id}/status', [UserController::class, 'updateStatus']);
+
 
     //Cart
     Route::get('/cart/me', [CartController::class, 'me']);
