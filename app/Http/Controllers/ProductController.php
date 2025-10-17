@@ -30,7 +30,7 @@ class ProductController extends Controller
             ->select('products.*', 'stores.name as store_name')
             ->where('products.id', '=', $id)
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'") // ✅ tienda activa
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->first();
 
         if (!$product) {
@@ -48,7 +48,7 @@ class ProductController extends Controller
             ->select('products.*', 'stores.name as store_name')
             ->where('products.is_featured', '=', true)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
-            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'") // ✅ filtro de tienda activa
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->limit(10)
             ->get();
 
@@ -78,7 +78,7 @@ class ProductController extends Controller
             ->select('products.*', 'stores.name as store_name')
             ->where('products.store_id', '=', $store_id)
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'") // ✅ la tienda debe estar activa
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->where('stores.is_verified', true)
             ->get();
 
@@ -172,4 +172,93 @@ class ProductController extends Controller
         DB::table('products')->where('id', '=', $id)->delete();
         return response()->json(null, 204);
     }
+
+    // ================================================================
+    // 🆕 NUEVOS MÉTODOS tipo StoreProductController (por tienda)
+    // ================================================================
+
+    // 📦 Todos los productos de una tienda (solo activos, tienda activa y verificada)
+    public function indexByStore($store_id)
+    {
+        $products = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->orderByDesc('products.created_at')
+            ->get();
+
+        return response()->json($products);
+    }
+
+    // 🔍 Producto específico de una tienda (con validaciones)
+    public function showByStoreProduct($store_id, $product_id)
+    {
+        $product = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->where('products.id', '=', $product_id)
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->first();
+
+        if (!$product) {
+            return response()->json(['message' => 'Producto no encontrado o no disponible'], 404);
+        }
+
+        return response()->json($product);
+    }
+
+    // ⭐ Productos destacados por tienda (solo activos/verificados)
+    public function featuredByStoreFull($store_id)
+    {
+        $featured = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->where('products.is_featured', '=', true)
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->orderByDesc('products.created_at')
+            ->get();
+
+        return response()->json($featured);
+    }
+
+    // 🧩 Productos no destacados por tienda (solo activos/verificados)
+    public function notFeaturedByStoreFull($store_id)
+    {
+        $notFeatured = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->where('products.is_featured', '=', false)
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->orderByDesc('products.created_at')
+            ->get();
+
+        return response()->json($notFeatured);
+    }
+    // 👤 Productos completos de la tienda (solo excluye ARCHIVED)
+    public function allByStore($store_id)
+    {
+        $products = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
+            ->orderByDesc('products.created_at')
+            ->get();
+
+        return response()->json($products);
+    }
+
 }

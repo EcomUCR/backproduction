@@ -88,6 +88,8 @@ Route::get('/stores/{user_id}', [StoreController::class, 'show']);
 Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
 Route::get('/stores', [StoreController::class, 'index']);
 Route::put('/stores/{id}', [StoreController::class, 'update']);
+// 👤 Todos los productos (excepto ARCHIVED) visibles para el dueño
+Route::get('/store/{store_id}/all', [ProductController::class, 'allByStore']);
 
 // Mensajes de contacto
 Route::apiResource('contact-messages', ContactMessageController::class);
@@ -105,6 +107,11 @@ Route::get('/my-ip', function () {
     $ip = Http::get('https://ifconfig.me')->body();
     return response()->json(['ip' => $ip]);
 });
+// ✅ Nuevas rutas específicas por tienda (solo lectura pública)
+Route::get('/store/{store_id}/products', [ProductController::class, 'indexByStore']);
+Route::get('/store/{store_id}/products/{product_id}', [ProductController::class, 'showByStoreProduct']);
+Route::get('/store/{store_id}/featured', [ProductController::class, 'featuredByStoreFull']);
+Route::get('/store/{store_id}/not-featured', [ProductController::class, 'notFeaturedByStoreFull']);
 
 //Reseñas de tiendas
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
@@ -115,14 +122,14 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
     try {
         $response = $visa->makeRequest('/forexrates/v1/foreignexchangerates', [
             'destinationCurrencyCode' => 'USD',
-            'sourceCurrencyCode'      => 'CRC',
+            'sourceCurrencyCode' => 'CRC',
         ]);
 
         return response()->json($response->json(), $response->status());
     } catch (\Throwable $e) {
         Log::error('❌ VISA ERROR: ' . $e->getMessage());
         return response()->json([
-            'error'   => true,
+            'error' => true,
             'message' => $e->getMessage(),
         ], 500);
     }
