@@ -149,10 +149,16 @@ class CartController extends Controller
         $subtotal = 0;
 
         foreach ($cart->items as $item) {
-            $price = $item->product->discount_price ?? $item->product->price;
-            $subtotal += $price * $item->quantity;
-        }
+    $product = $item->product;
 
+    $price = ($product->discount_price !== null && $product->discount_price > 0)
+        ? $product->discount_price
+        : $product->price;
+
+    $subtotal += $price * $item->quantity;
+
+    $item->update(['unit_price' => $price]);
+    }
         $taxes = round($subtotal * 0.13, 2);
         $shipping = 3000;
         $total = $subtotal + $taxes + $shipping;
