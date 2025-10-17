@@ -15,8 +15,11 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with([
-            'store:id,user_id'
-        ])->get();
+            'store' => function ($query) {
+                $query->select('id', 'user_id', 'name', 'category_id', 'image', 'banner', 'slug')
+                    ->with(['storeSocials', 'banners']);
+            },
+        ])->get(['id', 'username', 'email', 'first_name', 'last_name', 'image', 'status', 'phone_number', 'role', 'created_at', 'updated_at']); // columnas del usuario
 
         return response()->json($users);
     }
