@@ -12,15 +12,17 @@ class StoreController extends Controller
         return response()->json(Store::all());
     }
 
-    public function showByUser($user_id)
+      public function showByUser($user_id)
     {
-        $store = Store::where('user_id', $user_id)->first();
+        $store = Store::with(['user', 'storeSocials', 'banners', 'products', 'reviews'])
+            ->where('user_id', $user_id)
+            ->first();
 
         if (!$store) {
             return response()->json(['message' => 'Tienda no encontrada para este usuario'], 404);
         }
 
-        return response()->json($store);
+        return response()->json(['store' => $store]);
     }
 
     public function show($id)
@@ -70,11 +72,19 @@ class StoreController extends Controller
             'support_phone' => 'nullable|string|max:30',
             'image' => 'nullable|string|max:1024',
             'banner' => 'nullable|string|max:1024',
+            'is_verified' => 'nullable|boolean',
             'status' => 'nullable|string|in:ACTIVE,SUSPENDED,CLOSED',
         ]);
 
         $store->update($validatedData);
-        return response()->json($store);
+
+        // Recargar con relaciones
+        $store->load(['user', 'storeSocials', 'banners', 'products', 'reviews']);
+
+        return response()->json([
+            'store' => $store,
+            'message' => 'Tienda actualizada correctamente'
+        ]);
     }
 
     public function destroy($id)
