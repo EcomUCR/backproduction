@@ -105,7 +105,8 @@ Route::get('/my-ip', function () {
     $ip = Http::get('https://ifconfig.me')->body();
     return response()->json(['ip' => $ip]);
 });
-//Rese;as de tiendas
+
+//Reseñas de tiendas
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
 Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 'summary']);
 
@@ -155,6 +156,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
+    Route::middleware('auth:sanctum')->get('/cart/totals', [CartController::class, 'totals']);
 
     //Pago Visa
     Route::post('/checkout', [CheckoutController::class, 'checkout']);

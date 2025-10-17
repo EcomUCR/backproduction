@@ -124,4 +124,46 @@ class CartController extends Controller
         $cart->load('items.product');
         return response()->json(['message' => 'Producto eliminado', 'cart' => $cart]);
     }
+
+    public function totals(Request $request)
+    {
+        $user = $request->user();
+
+        $cart = \App\Models\Cart::where('user_id', $user->id)
+            ->with('items.product')
+            ->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return response()->json([
+                'message' => 'El carrito está vacío',
+                'totals' => [
+                    'subtotal' => 0,
+                    'taxes' => 0,
+                    'shipping' => 0,
+                    'total' => 0,
+                    'currency' => 'CRC',
+                ],
+            ]);
+        }
+
+        $subtotal = 0;
+
+        foreach ($cart->items as $item) {
+            $price = $item->product->discount_price ?? $item->product->price;
+            $subtotal += $price * $item->quantity;
+        }
+
+        $taxes = round($subtotal * 0.13, 2);
+        $shipping = 3000;
+        $total = $subtotal + $taxes + $shipping;
+
+        return response()->json([
+            'subtotal' => round($subtotal, 2),
+            'taxes' => $taxes,
+            'shipping' => $shipping,
+            'total' => round($total, 2),
+            'currency' => 'CRC',
+            'items_count' => $cart->items->count(),
+        ]);
+    }
 }
