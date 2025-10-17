@@ -17,7 +17,7 @@ class UserController extends Controller
         $users = User::with([
             'store' => function ($query) {
                 $query->select('id', 'user_id', 'name', 'category_id', 'image', 'banner', 'slug')
-                    ->with(['store_socials', 'banners']);
+                    ->with(['storeSocials', 'banners']);
             },
         ])->get(['id', 'username', 'email', 'first_name', 'last_name', 'image', 'status', 'phone_number', 'role', 'created_at', 'updated_at']); // columnas del usuario
 
