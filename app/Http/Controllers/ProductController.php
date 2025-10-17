@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    // 📦 Muestra todos (solo para admin, incluye archivados)
+    // 📦 Muestra todos los productos (solo admin, incluye archivados)
     public function index()
     {
         $products = DB::table('products')
@@ -19,14 +19,14 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    // 🔍 Mostrar un producto (excluye archivados)
+    // 🔍 Mostrar un producto específico (excluye archivados)
     public function show($id)
     {
         $product = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->where('products.id', '=', $id)
-            ->where('products.status', '<>', 'ARCHIVED')
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->first();
 
         if (!$product) {
@@ -43,7 +43,7 @@ class ProductController extends Controller
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->where('products.is_featured', '=', true)
-            ->where('products.status', '=', 'ACTIVE')
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->limit(10)
             ->get();
 
@@ -57,27 +57,27 @@ class ProductController extends Controller
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->where('products.is_featured', '=', false)
-            ->where('products.status', '=', 'ACTIVE')
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->limit(10)
             ->get();
 
         return response()->json($notFeatured);
     }
 
-    // 🏬 Por tienda (sin archivados)
+    // 🏬 Productos por tienda (sin archivados)
     public function showByStore($store_id)
     {
         $products = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->where('products.store_id', '=', $store_id)
-            ->where('products.status', '<>', 'ARCHIVED')
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->get();
 
         return response()->json($products);
     }
 
-    // 🏷️ Por categoría (solo activos)
+    // 🏷️ Productos por categoría (solo activos)
     public function byCategory($category_id)
     {
         $products = DB::table('products')
@@ -86,7 +86,7 @@ class ProductController extends Controller
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name', 'categories.name as category_name')
             ->where('product_category.category_id', '=', $category_id)
-            ->where('products.status', '=', 'ACTIVE')
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->get();
 
         return response()->json($products);
@@ -100,7 +100,7 @@ class ProductController extends Controller
             ->select('products.*', 'stores.name as store_name')
             ->where('products.store_id', '=', $store_id)
             ->where('products.is_featured', '=', true)
-            ->where('products.status', '=', 'ACTIVE')
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->get();
 
         return response()->json($featured);
@@ -151,7 +151,7 @@ class ProductController extends Controller
         return response()->json(DB::table('products')->find($id));
     }
 
-    // ❌ Eliminar
+    // ❌ Eliminar producto
     public function destroy($id)
     {
         DB::table('products')->where('id', '=', $id)->delete();
