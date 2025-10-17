@@ -14,9 +14,13 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('store:id,user_id,name,slug,status')->get();
+        $users = User::with([
+            'store:id,user_id'
+        ])->get();
+
         return response()->json($users);
     }
+
 
     /**
      * Obtener el usuario autenticado con sus datos relacionados
@@ -110,7 +114,7 @@ class UserController extends Controller
             'last_name' => 'nullable|string|max:80',
             'phone_number' => 'nullable|string|max:20',
             'role' => 'sometimes|string|in:ADMIN,SELLER,CUSTOMER',
-            'image' => 'nullable|string|max:512', 
+            'image' => 'nullable|string|max:512',
         ]);
 
         if (isset($validatedData['password'])) {
@@ -160,38 +164,38 @@ class UserController extends Controller
      * Obtener la tienda asociada a un usuario
      */
     public function getStore($id)
-{
-    $user = User::with([
-        'store' => function ($query) {
-            $query->select(
-                'id',
-                'user_id',
-                'name',
-                'slug',
-                'description',
-                'category_id',
-                'status',
-                'is_verified',
-                'banner',
-                'image',
-                'support_email',
-                'support_phone',
-                'registered_address'
-            )->with(['products:id,store_id,name,price,image_1_url']);
+    {
+        $user = User::with([
+            'store' => function ($query) {
+                $query->select(
+                    'id',
+                    'user_id',
+                    'name',
+                    'slug',
+                    'description',
+                    'category_id',
+                    'status',
+                    'is_verified',
+                    'banner',
+                    'image',
+                    'support_email',
+                    'support_phone',
+                    'registered_address'
+                )->with(['products:id,store_id,name,price,image_1_url']);
+            }
+        ])->findOrFail($id);
+
+        if (!$user->store) {
+            return response()->json([
+                'message' => 'El usuario no tiene una tienda asociada'
+            ], 404);
         }
-    ])->findOrFail($id);
 
-    if (!$user->store) {
         return response()->json([
-            'message' => 'El usuario no tiene una tienda asociada'
-        ], 404);
+            'message' => 'Tienda encontrada correctamente',
+            'store' => $user->store
+        ]);
     }
-
-    return response()->json([
-        'message' => 'Tienda encontrada correctamente',
-        'store' => $user->store
-    ]);
-}
 
 
     /**

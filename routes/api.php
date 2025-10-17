@@ -134,7 +134,7 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
 */
 Route::middleware('auth:sanctum')->group(function () {
     // Usuario
-    Route::get('/users', [UserController::class, 'listUsers']);
+    Route::get('/users', [UserController::class, 'index']);
     Route::get('/me', [UserController::class, 'me']);
     Route::post('/logout', [UserController::class, 'logout']);
     Route::get('/users/{id}', [UserController::class, 'show']);
