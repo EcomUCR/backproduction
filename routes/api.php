@@ -110,8 +110,7 @@ Route::get('/my-ip', function () {
 // ✅ Nuevas rutas específicas por tienda (solo lectura pública)
 Route::get('/store/{store_id}/products', [ProductController::class, 'indexByStore']);
 Route::get('/store/{store_id}/products/{product_id}', [ProductController::class, 'showByStoreProduct']);
-Route::get('/store/{store_id}/featured', [ProductController::class, 'featuredByStoreFull']);
-Route::get('/store/{store_id}/not-featured', [ProductController::class, 'notFeaturedByStoreFull']);
+Route::get('/store/{store_id}/featured', [ProductController::class, 'featuredByStore']);
 
 //Reseñas de tiendas
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
