@@ -14,7 +14,8 @@ class ProductController extends Controller
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
-            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'") // ✅ solo tiendas activas
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
             ->orderByDesc('products.created_at')
             ->get();
 
