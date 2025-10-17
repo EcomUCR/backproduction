@@ -260,5 +260,23 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+    // 💸 Productos en oferta por tienda (público)
+    public function offersByStore($store_id)
+    {
+        $offers = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->whereNotNull('products.discount_price') // debe tener descuento
+            ->where('products.discount_price', '>', 0)
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->orderByDesc('products.created_at')
+            ->get();
+
+        return response()->json($offers);
+    }
 
 }

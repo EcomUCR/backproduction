@@ -111,6 +111,8 @@ Route::get('/my-ip', function () {
 Route::get('/store/{store_id}/products', [ProductController::class, 'indexByStore']);
 Route::get('/store/{store_id}/products/{product_id}', [ProductController::class, 'showByStoreProduct']);
 Route::get('/store/{store_id}/featured', [ProductController::class, 'featuredByStore']);
+// 💸 Productos en oferta por tienda (público)
+Route::get('/store/{store_id}/offers', [ProductController::class, 'offersByStore']);
 
 //Reseñas de tiendas
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
