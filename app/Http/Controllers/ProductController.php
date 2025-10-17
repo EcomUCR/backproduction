@@ -14,6 +14,8 @@ class ProductController extends Controller
         $products = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'") // ✅ Solo productos activos
+            ->orderByDesc('products.created_at')
             ->get();
 
         return response()->json($products);
