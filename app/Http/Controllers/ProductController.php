@@ -79,6 +79,7 @@ class ProductController extends Controller
             ->where('products.store_id', '=', $store_id)
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'") // ✅ la tienda debe estar activa
+            ->where('stores.is_verified', true)
             ->get();
 
         return response()->json($products);
@@ -114,6 +115,7 @@ class ProductController extends Controller
             ->where('products.is_featured', '=', true)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
             ->get();
 
         return response()->json($featured);
