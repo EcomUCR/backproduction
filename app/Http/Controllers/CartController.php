@@ -39,7 +39,7 @@ class CartController extends Controller
             ]);
         }
 
-        $cart->load('items.product.store');
+        $cart->load('items.product');
 
         return response()->json([
             'message' => 'Producto añadido al carrito correctamente',
@@ -84,55 +84,55 @@ class CartController extends Controller
 
         return response()->json(null, 204);
     }
-    public function me(Request $request)
-    {
-        $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
-        $cart->load(['items.product.store:id,name']); // 👈 Incluye también la tienda
+   public function me(Request $request)
+{
+    $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
+    $cart->load(['items.product.store:id,items.product:id,name,image_1_url,price,discount_price,stock']); // 👈 Incluye también la tienda
 
-        return response()->json($cart);
-    }
+    return response()->json($cart);
+}
 
 
     public function clear(Request $request)
-    {
-        try {
-            $user = $request->user();
+{
+    try {
+        $user = $request->user();
 
-            // Buscar el carrito del usuario autenticado
-            $cart = Cart::where('user_id', $user->id)->first();
+        // Buscar el carrito del usuario autenticado
+        $cart = Cart::where('user_id', $user->id)->first();
 
-            if (!$cart) {
-                return response()->json([
-                    'ok' => false,
-                    'message' => 'El usuario no tiene un carrito activo',
-                ], 404);
-            }
-
-            // Verificar si hay items
-            if ($cart->items()->count() === 0) {
-                return response()->json([
-                    'ok' => true,
-                    'message' => 'El carrito ya estaba vacío 🧹',
-                ], 200);
-            }
-
-            // Eliminar todos los items
-            $cart->items()->delete();
-
-            return response()->json([
-                'ok' => true,
-                'message' => 'Carrito vaciado correctamente 🧹',
-            ], 200);
-        } catch (\Exception $e) {
-            \Log::error("❌ Error al limpiar el carrito: " . $e->getMessage());
-
+        if (!$cart) {
             return response()->json([
                 'ok' => false,
-                'message' => 'Error interno al limpiar el carrito',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'El usuario no tiene un carrito activo',
+            ], 404);
         }
+
+        // Verificar si hay items
+        if ($cart->items()->count() === 0) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'El carrito ya estaba vacío 🧹',
+            ], 200);
+        }
+
+        // Eliminar todos los items
+        $cart->items()->delete();
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Carrito vaciado correctamente 🧹',
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error("❌ Error al limpiar el carrito: " . $e->getMessage());
+
+        return response()->json([
+            'ok' => false,
+            'message' => 'Error interno al limpiar el carrito',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
     public function updateItem(Request $request, $id)
     {
         $request->validate(['quantity' => 'required|integer|min:1']);
@@ -143,7 +143,7 @@ class CartController extends Controller
 
         $item->update(['quantity' => $request->quantity]);
 
-        $cart->load('items.product.store');
+        $cart->load('items.product');
         return response()->json(['message' => 'Cantidad actualizada', 'cart' => $cart]);
     }
 
@@ -155,7 +155,7 @@ class CartController extends Controller
         $item = $cart->items()->where('id', $id)->firstOrFail();
         $item->delete();
 
-        $cart->load('items.product.store');
+        $cart->load('items.product');
         return response()->json(['message' => 'Producto eliminado', 'cart' => $cart]);
     }
 
@@ -164,7 +164,7 @@ class CartController extends Controller
         $user = $request->user();
 
         $cart = \App\Models\Cart::where('user_id', $user->id)
-            ->with('items.product.store')
+            ->with('items.product')
             ->first();
 
         if (!$cart || $cart->items->isEmpty()) {
@@ -183,16 +183,16 @@ class CartController extends Controller
         $subtotal = 0;
 
         foreach ($cart->items as $item) {
-            $product = $item->product;
+    $product = $item->product;
 
-            $price = ($product->discount_price !== null && $product->discount_price > 0)
-                ? $product->discount_price
-                : $product->price;
+    $price = ($product->discount_price !== null && $product->discount_price > 0)
+        ? $product->discount_price
+        : $product->price;
 
-            $subtotal += $price * $item->quantity;
+    $subtotal += $price * $item->quantity;
 
-            $item->update(['unit_price' => $price]);
-        }
+    $item->update(['unit_price' => $price]);
+    }
         $taxes = round($subtotal * 0.13, 2);
         $shipping = 3000;
         $total = $subtotal + $taxes + $shipping;
