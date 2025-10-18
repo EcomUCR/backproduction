@@ -23,6 +23,7 @@ use App\Http\Controllers\OpenAIController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CartItemController;
+use App\Http\Controllers\BannerController;
 use App\Services\VisaClient;
 use App\Services\Contracts\VisaClientContract;
 
