@@ -15,7 +15,6 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ImageUploadController;
@@ -30,6 +29,10 @@ use App\Services\Contracts\VisaClientContract;
 // use App\Http\Controllers\StoreBannerController;
 use App\Http\Controllers\StoreReviewController;
 // use App\Http\Controllers\StoreSocialController;
+
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\OrderController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -181,6 +184,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Pago Visa
     Route::post('/checkout', [CheckoutController::class, 'checkout']);
+
+    //Pagos Stripe
+    Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
+    Route::post('/checkout', [OrderController::class, 'store']);
+
+    // (Opcionales para administración)
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 
     // Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña
