@@ -71,19 +71,22 @@ class ProductController extends Controller
     }
 
     // 🏬 Productos por tienda (solo si la tienda existe y está activa)
+    // 🏬 Productos por tienda (vista pública - solo productos ACTIVOS y tienda verificada)
     public function showByStore($store_id)
     {
         $products = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->where('products.store_id', '=', $store_id)
-            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
-            ->where('stores.is_verified', true)
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'") // ✅ solo activos
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")  // ✅ tienda activa
+            ->where('stores.is_verified', true)                 // ✅ tienda verificada
+            ->orderByDesc('products.created_at')
             ->get();
 
         return response()->json($products);
     }
+
 
     // 🏷️ Productos por categoría (solo activos y de tiendas activas)
     public function byCategory($category_id)
