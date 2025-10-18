@@ -9,13 +9,13 @@ class CartItemController extends Controller
 {
     public function index()
     {
-        $cartItems = CartItem::all();
+        $cartItems = CartItem::with('product.store')->get();
         return response()->json($cartItems);
     }
 
     public function show($id)
     {
-        $cartItem = CartItem::findOrFail($id);
+        $cartItem = CartItem::with('product.store')->findOrFail($id);
         return response()->json($cartItem);
     }
 
@@ -28,7 +28,7 @@ class CartItemController extends Controller
             'unit_price' => 'required|numeric',
         ]);
 
-        $cartItem = CartItem::create($validatedData);
+        $cartItem = CartItem::create($validatedData)->load('product.store');
 
         return response()->json($cartItem, 201);
     }
@@ -45,6 +45,8 @@ class CartItemController extends Controller
         ]);
 
         $cartItem->update($validatedData);
+
+        $cartItem->load('product.store');
 
         return response()->json($cartItem);
     }
