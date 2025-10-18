@@ -80,7 +80,7 @@ class ProductController extends Controller
             ->where('products.store_id', '=', $store_id)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'") // ✅ solo activos
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")  // ✅ tienda activa
-            ->where('stores.is_verified', true)                 // ✅ tienda verificada
+            ->where('stores.is_verified', true)   // ✅ tienda verificada
             ->orderByDesc('products.created_at')
             ->get();
 
