@@ -41,7 +41,14 @@ class CouponController extends Controller
             'expires_at' => 'nullable|date',
             'active' => 'boolean',
         ]);
-
+        // Verificar si ya existe un código igual
+        $existing = Coupon::where('code', $validated['code'])->first();
+        if ($existing) {
+            return response()->json([
+                'message' => 'El código de cupón ya existe.',
+                'coupon' => $existing,
+            ], 409); // 409 Conflict
+        }
         $coupon = Coupon::create($validated);
         return response()->json($coupon, 201);
     }
