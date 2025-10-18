@@ -10,30 +10,30 @@ use Stripe\PaymentIntent;
 class PaymentController extends Controller
 {
     public function createPaymentIntent(Request $request)
-    {
-        try {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+{
+    \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
 
-            $validated = $request->validate([
-                'amount' => 'required|numeric|min:1',
-                'currency' => 'required|string|in:usd,crc',
-            ]);
+    // ✅ Recalcular el total desde el carrito del usuario autenticado
+    $cart = Cart::where('user_id', auth()->id())->with('items.product')->first();
 
-            $paymentIntent = PaymentIntent::create([
-                'amount' => $validated['amount'], // en centavos
-                'currency' => $validated['currency'],
-                'description' => 'Compra en TukiShop',
-                'automatic_payment_methods' => ['enabled' => true],
-            ]);
+    $subtotal = $cart->items->sum(fn($item) => $item->product->price * $item->quantity);
+    $tax = $subtotal * 0.13;
+    $shipping = 1500;
+    $total = $subtotal + $tax + $shipping;
 
-            return response()->json([
-                'clientSecret' => $paymentIntent->client_secret,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error creando PaymentIntent: ' . $e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
+    $amount = intval(round($total * 100)); // en céntimos
+
+    $paymentIntent = \Stripe\PaymentIntent::create([
+        'amount' => $amount,
+        'currency' => 'crc',
+        'metadata' => [
+            'user_id' => auth()->id(),
+            'cart_id' => $cart->id,
+        ],
+    ]);
+
+    return response()->json(['clientSecret' => $paymentIntent->client_secret]);
+}
 
     public function webhook(Request $request)
     {
