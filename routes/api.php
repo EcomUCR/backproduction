@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 // Controllers
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\ProfileController;
@@ -61,6 +62,14 @@ Route::get('/debug-cloudinary', function () {
         'env' => env('CLOUDINARY_URL')
     ];
 });
+//Cupones
+Route::get('/coupons', [CouponController::class, 'index']);
+Route::post('/coupons', [CouponController::class, 'store']);
+Route::get('/coupons/{id}', [CouponController::class, 'show']);
+Route::put('/coupons/{id}', [CouponController::class, 'update']);
+Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
+Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
+
 // Registro y login
 Route::post('/users', [UserController::class, 'store']);
 Route::post('/login', [UserController::class, 'login']);
