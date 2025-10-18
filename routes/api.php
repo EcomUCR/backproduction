@@ -151,10 +151,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Cart
     Route::get('/cart/me', [CartController::class, 'me']);
-    Route::delete('/cart/clear', [CartController::class, 'clear']);
+    Route::post('/cart/clear', [CartController::class, 'clear']);
     Route::post('/cart/add', [CartController::class, 'addItem']);
     Route::patch('/cart/item/{id}', [CartController::class, 'updateItem']);
     Route::delete('/cart/item/{id}', [CartController::class, 'removeItem']);
+    
 
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
@@ -167,6 +168,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Pagos Stripe
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
     Route::post('/checkout', [OrderController::class, 'store']);
+
 
     // (Opcionales para administración)
     Route::get('/orders', [OrderController::class, 'index']);
