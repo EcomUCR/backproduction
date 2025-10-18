@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->decimal('shipping', 10, 2)->default(0); // Shipping
             $table->decimal('taxes', 10, 2)->default(0); // Taxes
             $table->decimal('total', 10, 2)->default(0); // Total
-            $table->foreignId('address_id')->nullable()->constrained('addresses'); // Address
+            $table->foreignId('address_id')->nullable()->constrained('addresses')->nullOnDelete();
             $table->string('street', 150)->nullable(); // Street
             $table->string('city', 100)->nullable(); // City
             $table->string('state', 100)->nullable(); // State
@@ -27,6 +27,7 @@ return new class extends Migration {
             $table->string('country', 100)->nullable(); // Country
             $table->string('payment_method', 30)->nullable(); // Payment Method
             $table->timestamps(); // Created At & Updated At
+            $table->string('payment_id', 100)->nullable();// Payment ID
         });
     }
 
