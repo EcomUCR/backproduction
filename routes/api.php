@@ -15,7 +15,6 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ImageUploadController;
@@ -23,6 +22,7 @@ use App\Http\Controllers\OpenAIController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CartItemController;
+use App\Http\Controllers\BannerController;
 use App\Services\VisaClient;
 use App\Services\Contracts\VisaClientContract;
 
@@ -30,6 +30,10 @@ use App\Services\Contracts\VisaClientContract;
 // use App\Http\Controllers\StoreBannerController;
 use App\Http\Controllers\StoreReviewController;
 // use App\Http\Controllers\StoreSocialController;
+
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\OrderController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -118,6 +122,10 @@ Route::get('/store/{store_id}/offers', [ProductController::class, 'offersByStore
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
 Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 'summary']);
 
+//Banners
+Route::get('/banners', [BannerController::class, 'index']);
+Route::get('/banners/{id}', [BannerController::class, 'show']);
+
 //API VISA
 Route::get('/visa/test', function (VisaClientContract $visa) {
     try {
@@ -158,14 +166,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/stores/{id}', [StoreController::class, 'update']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);
 
-
-
+    //Banners
+    Route::post('/banners', [BannerController::class, 'store']);
+    Route::put('/banners/{id}', [BannerController::class, 'update']);
+    Route::patch('/banners/{id}', [BannerController::class, 'update']);
+    Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
     //Cart
     Route::get('/cart/me', [CartController::class, 'me']);
-    Route::delete('/cart/clear', [CartController::class, 'clear']);
+    Route::post('/cart/clear', [CartController::class, 'clear']);
     Route::post('/cart/add', [CartController::class, 'addItem']);
     Route::patch('/cart/item/{id}', [CartController::class, 'updateItem']);
     Route::delete('/cart/item/{id}', [CartController::class, 'removeItem']);
+    
 
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
@@ -174,6 +186,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Pago Visa
     Route::post('/checkout', [CheckoutController::class, 'checkout']);
+
+    //Pagos Stripe
+    Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
+    Route::post('/checkout', [OrderController::class, 'store']);
+
+
+    // (Opcionales para administración)
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 
     // Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña

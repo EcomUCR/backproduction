@@ -92,13 +92,45 @@ class CartController extends Controller
     }
 
     public function clear(Request $request)
-    {
-        $cart = Cart::where('user_id', $request->user()->id)->first();
-        if (!$cart)
-            return response()->json(null, 204);
+{
+    try {
+        $user = $request->user();
+
+        // Buscar el carrito del usuario autenticado
+        $cart = Cart::where('user_id', $user->id)->first();
+
+        if (!$cart) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'El usuario no tiene un carrito activo',
+            ], 404);
+        }
+
+        // Verificar si hay items
+        if ($cart->items()->count() === 0) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'El carrito ya estaba vacío 🧹',
+            ], 200);
+        }
+
+        // Eliminar todos los items
         $cart->items()->delete();
-        return response()->json(['ok' => true]);
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Carrito vaciado correctamente 🧹',
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error("❌ Error al limpiar el carrito: " . $e->getMessage());
+
+        return response()->json([
+            'ok' => false,
+            'message' => 'Error interno al limpiar el carrito',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
     public function updateItem(Request $request, $id)
     {
         $request->validate(['quantity' => 'required|integer|min:1']);

@@ -47,19 +47,21 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
 
         $validatedData = $request->validate([
-            'status' => 'sometimes|string|in:PENDING,PAID,CONFIRM,PROCESSING,SHIPPED,DELIVERED,CANCELLED',
-            'subtotal' => 'sometimes|numeric',
-            'shipping' => 'sometimes|numeric',
-            'taxes' => 'sometimes|numeric',
-            'total' => 'sometimes|numeric',
-            'address_id' => 'nullable|exists:addresses,id',
-            'street' => 'nullable|string|max:150',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'zip_code' => 'nullable|string|max:20',
-            'country' => 'nullable|string|max:100',
-            'payment_method' => 'nullable|string|max:30',
-        ]);
+        'user_id' => 'required|exists:users,id',
+        'status' => 'required|string|in:PENDING,PAID,CONFIRM,PROCESSING,SHIPPED,DELIVERED,CANCELLED',
+        'subtotal' => 'required|numeric',
+        'shipping' => 'required|numeric',
+        'taxes' => 'required|numeric',
+        'total' => 'required|numeric',
+        'address_id' => 'nullable|exists:addresses,id',
+        'street' => 'nullable|string|max:150',
+        'city' => 'nullable|string|max:100',
+        'state' => 'nullable|string|max:100',
+        'zip_code' => 'nullable|string|max:20',
+        'country' => 'nullable|string|max:100',
+        'payment_method' => 'nullable|string|max:30',
+        'payment_id' => 'nullable|string|max:100', 
+    ]);
 
         $order->update($validatedData);
 
