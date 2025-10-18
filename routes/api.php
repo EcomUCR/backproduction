@@ -118,6 +118,10 @@ Route::get('/store/{store_id}/offers', [ProductController::class, 'offersByStore
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
 Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 'summary']);
 
+//Banners
+Route::get('/banners', [BannerController::class, 'index']);
+Route::get('/banners/{id}', [BannerController::class, 'show']);
+
 //API VISA
 Route::get('/visa/test', function (VisaClientContract $visa) {
     try {
@@ -158,8 +162,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/stores/{id}', [StoreController::class, 'update']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);
 
-
-
+    //Banners
+    Route::post('/banners', [BannerController::class, 'store']);
+    Route::put('/banners/{id}', [BannerController::class, 'update']);
+    Route::patch('/banners/{id}', [BannerController::class, 'update']);
+    Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
     //Cart
     Route::get('/cart/me', [CartController::class, 'me']);
     Route::delete('/cart/clear', [CartController::class, 'clear']);
