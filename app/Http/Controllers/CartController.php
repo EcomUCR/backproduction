@@ -84,55 +84,63 @@ class CartController extends Controller
 
         return response()->json(null, 204);
     }
-   public function me(Request $request)
-{
-    $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
-    $cart->load(['items.product.store:id,items.product:id,name,image_1_url,price,discount_price,stock']); // 👈 Incluye también la tienda
+    public function me(Request $request)
+    {
+        $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
 
-    return response()->json($cart);
-}
+        // ✅ Carga correctamente la relación del producto y la tienda
+        $cart->load([
+            'items.product' => function ($query) {
+                $query->select('id', 'store_id', 'name', 'image_1_url', 'price', 'discount_price', 'stock');
+            },
+            'items.product.store' => function ($query) {
+                $query->select('id', 'name');
+            },
+        ]);
 
+        return response()->json($cart);
+    }
 
     public function clear(Request $request)
-{
-    try {
-        $user = $request->user();
+    {
+        try {
+            $user = $request->user();
 
-        // Buscar el carrito del usuario autenticado
-        $cart = Cart::where('user_id', $user->id)->first();
+            // Buscar el carrito del usuario autenticado
+            $cart = Cart::where('user_id', $user->id)->first();
 
-        if (!$cart) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'El usuario no tiene un carrito activo',
-            ], 404);
-        }
+            if (!$cart) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'El usuario no tiene un carrito activo',
+                ], 404);
+            }
 
-        // Verificar si hay items
-        if ($cart->items()->count() === 0) {
+            // Verificar si hay items
+            if ($cart->items()->count() === 0) {
+                return response()->json([
+                    'ok' => true,
+                    'message' => 'El carrito ya estaba vacío 🧹',
+                ], 200);
+            }
+
+            // Eliminar todos los items
+            $cart->items()->delete();
+
             return response()->json([
                 'ok' => true,
-                'message' => 'El carrito ya estaba vacío 🧹',
+                'message' => 'Carrito vaciado correctamente 🧹',
             ], 200);
+        } catch (\Exception $e) {
+            \Log::error("❌ Error al limpiar el carrito: " . $e->getMessage());
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Error interno al limpiar el carrito',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Eliminar todos los items
-        $cart->items()->delete();
-
-        return response()->json([
-            'ok' => true,
-            'message' => 'Carrito vaciado correctamente 🧹',
-        ], 200);
-    } catch (\Exception $e) {
-        \Log::error("❌ Error al limpiar el carrito: " . $e->getMessage());
-
-        return response()->json([
-            'ok' => false,
-            'message' => 'Error interno al limpiar el carrito',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
     public function updateItem(Request $request, $id)
     {
         $request->validate(['quantity' => 'required|integer|min:1']);
@@ -183,16 +191,16 @@ class CartController extends Controller
         $subtotal = 0;
 
         foreach ($cart->items as $item) {
-    $product = $item->product;
+            $product = $item->product;
 
-    $price = ($product->discount_price !== null && $product->discount_price > 0)
-        ? $product->discount_price
-        : $product->price;
+            $price = ($product->discount_price !== null && $product->discount_price > 0)
+                ? $product->discount_price
+                : $product->price;
 
-    $subtotal += $price * $item->quantity;
+            $subtotal += $price * $item->quantity;
 
-    $item->update(['unit_price' => $price]);
-    }
+            $item->update(['unit_price' => $price]);
+        }
         $taxes = round($subtotal * 0.13, 2);
         $shipping = 3000;
         $total = $subtotal + $taxes + $shipping;
