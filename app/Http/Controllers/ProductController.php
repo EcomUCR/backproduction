@@ -24,21 +24,31 @@ class ProductController extends Controller
 
     // 🔍 Mostrar un producto específico (solo si la tienda está activa y no está archivado)
     public function show($id)
-    {
-        $product = DB::table('products')
-            ->join('stores', 'stores.id', '=', 'products.store_id')
-            ->select('products.*', 'stores.name as store_name')
-            ->where('products.id', '=', $id)
-            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
-            ->first();
+{
+    $product = DB::table('products')
+        ->join('stores', 'stores.id', '=', 'products.store_id')
+        ->select('products.*', 'stores.name as store_name')
+        ->where('products.id', '=', $id)
+        ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
+        ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+        ->first();
 
-        if (!$product) {
-            return response()->json(['message' => 'Producto no encontrado o la tienda está inactiva'], 404);
-        }
-
-        return response()->json($product);
+    if (!$product) {
+        return response()->json(['message' => 'Producto no encontrado o la tienda está inactiva'], 404);
     }
+
+    // 🔹 Agregar las categorías relacionadas
+    $categories = DB::table('categories')
+        ->join('product_category', 'categories.id', '=', 'product_category.category_id')
+        ->where('product_category.product_id', '=', $id)
+        ->select('categories.id', 'categories.name')
+        ->get();
+
+    $product->categories = $categories;
+
+    return response()->json($product);
+}
+
 
     // 🏪 Productos destacados (solo activos y de tiendas activas)
     public function featured()
