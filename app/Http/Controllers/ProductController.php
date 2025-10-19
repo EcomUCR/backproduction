@@ -16,6 +16,7 @@ class ProductController extends Controller
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->where('stores.is_verified', true)
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->orderByDesc('products.created_at')
             ->get();
 
@@ -49,6 +50,7 @@ class ProductController extends Controller
             ->where('products.is_featured', '=', true)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->limit(10)
             ->get();
 
@@ -64,6 +66,7 @@ class ProductController extends Controller
             ->where('products.is_featured', '=', false)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->limit(10)
             ->get();
 
@@ -81,6 +84,7 @@ class ProductController extends Controller
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'") // ✅ solo activos
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")  // ✅ tienda activa
             ->where('stores.is_verified', true)   // ✅ tienda verificada
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->orderByDesc('products.created_at')
             ->get();
 
@@ -103,6 +107,7 @@ class ProductController extends Controller
             ->where('product_category.category_id', '=', $category_id)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->get();
 
         return response()->json($products);
@@ -118,6 +123,7 @@ class ProductController extends Controller
             ->where('products.is_featured', '=', true)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->where('stores.is_verified', true)
             ->get();
 
@@ -207,6 +213,7 @@ class ProductController extends Controller
             ->where('products.id', '=', $product_id)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->where('stores.is_verified', true)
             ->first();
 
@@ -228,6 +235,7 @@ class ProductController extends Controller
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->where('stores.is_verified', true)
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->orderByDesc('products.created_at')
             ->get();
 
@@ -245,6 +253,7 @@ class ProductController extends Controller
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->where('stores.is_verified', true)
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->orderByDesc('products.created_at')
             ->get();
 
