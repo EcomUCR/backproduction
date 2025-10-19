@@ -25,21 +25,31 @@ class ProductController extends Controller
 
     // 🔍 Mostrar un producto específico (solo si la tienda está activa y no está archivado)
     public function show($id)
-    {
-        $product = DB::table('products')
-            ->join('stores', 'stores.id', '=', 'products.store_id')
-            ->select('products.*', 'stores.name as store_name')
-            ->where('products.id', '=', $id)
-            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
-            ->first();
+{
+    $product = DB::table('products')
+        ->join('stores', 'stores.id', '=', 'products.store_id')
+        ->select('products.*', 'stores.name as store_name')
+        ->where('products.id', '=', $id)
+        ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
+        ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+        ->first();
 
-        if (!$product) {
-            return response()->json(['message' => 'Producto no encontrado o la tienda está inactiva'], 404);
-        }
-
-        return response()->json($product);
+    if (!$product) {
+        return response()->json(['message' => 'Producto no encontrado o la tienda está inactiva'], 404);
     }
+
+    // 🔹 Agregar las categorías relacionadas
+    $categories = DB::table('categories')
+        ->join('product_category', 'categories.id', '=', 'product_category.category_id')
+        ->where('product_category.product_id', '=', $id)
+        ->select('categories.id', 'categories.name')
+        ->get();
+
+    $product->categories = $categories;
+
+    return response()->json($product);
+}
+
 
     // 🏪 Productos destacados (solo activos y de tiendas activas)
     public function featured()
@@ -131,49 +141,130 @@ class ProductController extends Controller
     }
 
     // 🛠️ Crear producto
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'store_id' => 'required|exists:stores,id',
-            'sku' => 'required|string|unique:products',
-            'name' => 'required|string|max:80',
-            'image_1_url' => 'required|string',
-            'image_2_url' => 'nullable|string',
-            'image_3_url' => 'nullable|string',
-            'description' => 'nullable|string',
-            'details' => 'nullable|string',
-            'price' => 'required|numeric',
-            'discount_price' => 'nullable|numeric',
-            'stock' => 'nullable|integer',
-            'status' => 'nullable|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
-            'is_featured' => 'nullable|boolean',
-        ]);
+   public function store(Request $request)
+{
+    $validated = $request->validate([
+        'store_id' => 'required|exists:stores,id',
+        'sku' => 'required|string|unique:products',
+        'name' => 'required|string|max:80',
+        'image_1_url' => 'required|string',
+        'image_2_url' => 'nullable|string',
+        'image_3_url' => 'nullable|string',
+        'description' => 'nullable|string',
+        'details' => 'nullable|string',
+        'price' => 'required|numeric',
+        'discount_price' => 'nullable|numeric',
+        'stock' => 'nullable|integer',
+        'status' => 'nullable|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
+        'is_featured' => 'nullable|boolean',
+        'category_ids' => 'nullable|array',
+        'category_ids.*' => 'exists:categories,id',
+    ]);
 
-        $id = DB::table('products')->insertGetId($validated);
+    // 🔹 Guardar producto
+    $id = DB::table('products')->insertGetId([
+        'store_id' => $validated['store_id'],
+        'sku' => $validated['sku'],
+        'name' => $validated['name'],
+        'description' => $validated['description'] ?? null,
+        'details' => $validated['details'] ?? null,
+        'price' => $validated['price'],
+        'discount_price' => $validated['discount_price'] ?? null,
+        'stock' => $validated['stock'] ?? 0,
+        'status' => $validated['status'] ?? 'ACTIVE',
+        'is_featured' => $validated['is_featured'] ?? false,
+        'image_1_url' => $validated['image_1_url'],
+        'image_2_url' => $validated['image_2_url'] ?? null,
+        'image_3_url' => $validated['image_3_url'] ?? null,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
 
-        return response()->json(DB::table('products')->find($id), 201);
+    // 🔹 Registrar categorías si vienen
+    if (!empty($validated['category_ids'])) {
+        foreach ($validated['category_ids'] as $categoryId) {
+            DB::table('product_category')->insert([
+                'product_id' => $id,
+                'category_id' => $categoryId,
+            ]);
+        }
     }
 
+    return response()->json(DB::table('products')->find($id), 201);
+}
     // ✏️ Actualizar producto
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'sku' => 'sometimes|string|unique:products,sku,' . $id,
-            'name' => 'sometimes|string|max:80',
-            'description' => 'nullable|string',
-            'details' => 'nullable|string',
-            'price' => 'sometimes|numeric',
-            'discount_price' => 'nullable|numeric',
-            'stock' => 'nullable|integer',
-            'status' => 'sometimes|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
-            'is_featured' => 'sometimes|boolean',
-            'image_1_url' => 'sometimes|string',
-        ]);
+  public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'sku' => 'sometimes|string|unique:products,sku,' . $id,
+        'name' => 'sometimes|string|max:80',
+        'description' => 'nullable|string',
+        'details' => 'nullable|string',
+        'price' => 'sometimes|numeric',
+        'discount_price' => 'nullable|numeric',
+        'stock' => 'nullable|integer',
+        'status' => 'sometimes|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
+        'is_featured' => 'sometimes|boolean',
+        'image_1_url' => 'nullable|string',
+        'image_2_url' => 'nullable|string',
+        'image_3_url' => 'nullable|string',
+        'category_ids' => 'nullable|array',
+        'category_ids.*' => 'exists:categories,id',
+    ]);
 
-        DB::table('products')->where('id', '=', $id)->update($validated);
+    // ===============================
+    // 🔹 Construcción dinámica del update
+    // ===============================
+    $fields = [
+        'sku', 'name', 'description', 'details',
+        'price', 'discount_price', 'stock',
+        'status', 'is_featured',
+        'image_1_url', 'image_2_url', 'image_3_url',
+    ];
 
-        return response()->json(DB::table('products')->find($id));
+    $updateData = [];
+
+    foreach ($fields as $field) {
+        // ⚠️ Si el campo viene en el request (aunque sea null), se actualiza
+        if ($request->has($field)) {
+            $updateData[$field] = $request->input($field);
+        }
     }
+
+    $updateData['updated_at'] = now();
+
+    // ===============================
+    // 🔹 Actualización del producto
+    // ===============================
+    DB::table('products')
+        ->where('id', $id)
+        ->update($updateData);
+
+    // ===============================
+    // 🔹 Sincronizar categorías (si vienen en el request)
+    // ===============================
+    if ($request->has('category_ids')) {
+        DB::table('product_category')->where('product_id', $id)->delete();
+
+        if (!empty($validated['category_ids'])) {
+            foreach ($validated['category_ids'] as $categoryId) {
+                DB::table('product_category')->insert([
+                    'product_id' => $id,
+                    'category_id' => $categoryId,
+                ]);
+            }
+        }
+    }
+
+    // ===============================
+    // 🔹 Devolver producto actualizado
+    // ===============================
+    $updatedProduct = DB::table('products')->find($id);
+
+    return response()->json($updatedProduct);
+}
+
+
 
     // ❌ Eliminar producto
     public function destroy($id)
