@@ -125,49 +125,112 @@ class ProductController extends Controller
     }
 
     // 🛠️ Crear producto
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'store_id' => 'required|exists:stores,id',
-            'sku' => 'required|string|unique:products',
-            'name' => 'required|string|max:80',
-            'image_1_url' => 'required|string',
-            'image_2_url' => 'nullable|string',
-            'image_3_url' => 'nullable|string',
-            'description' => 'nullable|string',
-            'details' => 'nullable|string',
-            'price' => 'required|numeric',
-            'discount_price' => 'nullable|numeric',
-            'stock' => 'nullable|integer',
-            'status' => 'nullable|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
-            'is_featured' => 'nullable|boolean',
-        ]);
+   public function store(Request $request)
+{
+    $validated = $request->validate([
+        'store_id' => 'required|exists:stores,id',
+        'sku' => 'required|string|unique:products',
+        'name' => 'required|string|max:80',
+        'image_1_url' => 'required|string',
+        'image_2_url' => 'nullable|string',
+        'image_3_url' => 'nullable|string',
+        'description' => 'nullable|string',
+        'details' => 'nullable|string',
+        'price' => 'required|numeric',
+        'discount_price' => 'nullable|numeric',
+        'stock' => 'nullable|integer',
+        'status' => 'nullable|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
+        'is_featured' => 'nullable|boolean',
+        'category_ids' => 'nullable|array',
+        'category_ids.*' => 'exists:categories,id',
+    ]);
 
-        $id = DB::table('products')->insertGetId($validated);
+    // 🔹 Guardar producto
+    $id = DB::table('products')->insertGetId([
+        'store_id' => $validated['store_id'],
+        'sku' => $validated['sku'],
+        'name' => $validated['name'],
+        'description' => $validated['description'] ?? null,
+        'details' => $validated['details'] ?? null,
+        'price' => $validated['price'],
+        'discount_price' => $validated['discount_price'] ?? null,
+        'stock' => $validated['stock'] ?? 0,
+        'status' => $validated['status'] ?? 'ACTIVE',
+        'is_featured' => $validated['is_featured'] ?? false,
+        'image_1_url' => $validated['image_1_url'],
+        'image_2_url' => $validated['image_2_url'] ?? null,
+        'image_3_url' => $validated['image_3_url'] ?? null,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
 
-        return response()->json(DB::table('products')->find($id), 201);
+    // 🔹 Registrar categorías si vienen
+    if (!empty($validated['category_ids'])) {
+        foreach ($validated['category_ids'] as $categoryId) {
+            DB::table('product_category')->insert([
+                'product_id' => $id,
+                'category_id' => $categoryId,
+            ]);
+        }
     }
 
+    return response()->json(DB::table('products')->find($id), 201);
+}
     // ✏️ Actualizar producto
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'sku' => 'sometimes|string|unique:products,sku,' . $id,
-            'name' => 'sometimes|string|max:80',
-            'description' => 'nullable|string',
-            'details' => 'nullable|string',
-            'price' => 'sometimes|numeric',
-            'discount_price' => 'nullable|numeric',
-            'stock' => 'nullable|integer',
-            'status' => 'sometimes|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
-            'is_featured' => 'sometimes|boolean',
-            'image_1_url' => 'sometimes|string',
-        ]);
+   public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'sku' => 'sometimes|string|unique:products,sku,' . $id,
+        'name' => 'sometimes|string|max:80',
+        'description' => 'nullable|string',
+        'details' => 'nullable|string',
+        'price' => 'sometimes|numeric',
+        'discount_price' => 'nullable|numeric',
+        'stock' => 'nullable|integer',
+        'status' => 'sometimes|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
+        'is_featured' => 'sometimes|boolean',
+        'image_1_url' => 'nullable|string',
+        'image_2_url' => 'nullable|string',
+        'image_3_url' => 'nullable|string',
+        'category_ids' => 'nullable|array',
+        'category_ids.*' => 'exists:categories,id',
+    ]);
 
-        DB::table('products')->where('id', '=', $id)->update($validated);
+    // 🔹 Armar los datos actualizables
+    $updateData = [
+        'sku' => $validated['sku'] ?? DB::raw('sku'),
+        'name' => $validated['name'] ?? DB::raw('name'),
+        'description' => $validated['description'] ?? DB::raw('description'),
+        'details' => $validated['details'] ?? DB::raw('details'),
+        'price' => $validated['price'] ?? DB::raw('price'),
+        'discount_price' => $validated['discount_price'] ?? DB::raw('discount_price'),
+        'stock' => $validated['stock'] ?? DB::raw('stock'),
+        'status' => $validated['status'] ?? DB::raw('status'),
+        'is_featured' => $validated['is_featured'] ?? DB::raw('is_featured'),
+        'image_1_url' => $validated['image_1_url'] ?? DB::raw('image_1_url'),
+        'image_2_url' => $validated['image_2_url'] ?? DB::raw('image_2_url'),
+        'image_3_url' => $validated['image_3_url'] ?? DB::raw('image_3_url'),
+        'updated_at' => now(),
+    ];
 
-        return response()->json(DB::table('products')->find($id));
+    // 🔹 Actualizar producto
+    DB::table('products')->where('id', $id)->update($updateData);
+
+    // 🔹 Sincronizar categorías (si vienen en el request)
+    if (isset($validated['category_ids'])) {
+        DB::table('product_category')->where('product_id', $id)->delete();
+
+        foreach ($validated['category_ids'] as $categoryId) {
+            DB::table('product_category')->insert([
+                'product_id' => $id,
+                'category_id' => $categoryId,
+            ]);
+        }
     }
+
+    return response()->json(DB::table('products')->find($id));
+}
+
 
     // ❌ Eliminar producto
     public function destroy($id)
