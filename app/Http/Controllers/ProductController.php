@@ -177,7 +177,7 @@ class ProductController extends Controller
     return response()->json(DB::table('products')->find($id), 201);
 }
     // ✏️ Actualizar producto
-   public function update(Request $request, $id)
+  public function update(Request $request, $id)
 {
     $validated = $request->validate([
         'sku' => 'sometimes|string|unique:products,sku,' . $id,
@@ -196,40 +196,58 @@ class ProductController extends Controller
         'category_ids.*' => 'exists:categories,id',
     ]);
 
-    // 🔹 Armar los datos actualizables
-    $updateData = [
-        'sku' => $validated['sku'] ?? DB::raw('sku'),
-        'name' => $validated['name'] ?? DB::raw('name'),
-        'description' => $validated['description'] ?? DB::raw('description'),
-        'details' => $validated['details'] ?? DB::raw('details'),
-        'price' => $validated['price'] ?? DB::raw('price'),
-        'discount_price' => $validated['discount_price'] ?? DB::raw('discount_price'),
-        'stock' => $validated['stock'] ?? DB::raw('stock'),
-        'status' => $validated['status'] ?? DB::raw('status'),
-        'is_featured' => $validated['is_featured'] ?? DB::raw('is_featured'),
-        'image_1_url' => $validated['image_1_url'] ?? DB::raw('image_1_url'),
-        'image_2_url' => $validated['image_2_url'] ?? DB::raw('image_2_url'),
-        'image_3_url' => $validated['image_3_url'] ?? DB::raw('image_3_url'),
-        'updated_at' => now(),
+    // ===============================
+    // 🔹 Construcción dinámica del update
+    // ===============================
+    $fields = [
+        'sku', 'name', 'description', 'details',
+        'price', 'discount_price', 'stock',
+        'status', 'is_featured',
+        'image_1_url', 'image_2_url', 'image_3_url',
     ];
 
-    // 🔹 Actualizar producto
-    DB::table('products')->where('id', $id)->update($updateData);
+    $updateData = [];
 
-    // 🔹 Sincronizar categorías (si vienen en el request)
-    if (isset($validated['category_ids'])) {
-        DB::table('product_category')->where('product_id', $id)->delete();
-
-        foreach ($validated['category_ids'] as $categoryId) {
-            DB::table('product_category')->insert([
-                'product_id' => $id,
-                'category_id' => $categoryId,
-            ]);
+    foreach ($fields as $field) {
+        // ⚠️ Si el campo viene en el request (aunque sea null), se actualiza
+        if ($request->has($field)) {
+            $updateData[$field] = $request->input($field);
         }
     }
 
-    return response()->json(DB::table('products')->find($id));
+    $updateData['updated_at'] = now();
+
+    // ===============================
+    // 🔹 Actualización del producto
+    // ===============================
+    DB::table('products')
+        ->where('id', $id)
+        ->update($updateData);
+
+    // ===============================
+    // 🔹 Sincronizar categorías (si vienen en el request)
+    // ===============================
+    if ($request->has('category_ids')) {
+        DB::table('product_category')->where('product_id', $id)->delete();
+
+        if (!empty($validated['category_ids'])) {
+            foreach ($validated['category_ids'] as $categoryId) {
+                DB::table('product_category')->insert([
+                    'product_id' => $id,
+                    'category_id' => $categoryId,
+                ]);
+            }
+        }
+    }
+
+    // ===============================
+    // 🔹 Devolver producto actualizado
+    // ===============================
+    $updatedProduct = DB::table('products')->find($id);
+
+    return response()->json($updatedProduct);
 }
+
 
 
     // ❌ Eliminar producto
