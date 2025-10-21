@@ -200,7 +200,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
 
     // envío de orden desde el checkout
-    Route::post('/checkout', [CheckoutController::class, 'checkoutOrder']);
+    Route::post('/checkout', [CheckoutController::class, 'checkout']);
 
 
 
