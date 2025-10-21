@@ -12,13 +12,17 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $orders = Order::where('user_id', $request->user()->id)
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Usuario no autenticado'], 401);
+        }
+
+        $orders = Order::where('user_id', $user->id)
             ->with([
-                'items.product' => function ($query) {
-                    $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url');
-                },
+                'items.product:id,store_id,name,price,discount_price,image_1_url',
             ])
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->get();
 
         return response()->json($orders);
@@ -30,9 +34,7 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = Order::with([
-            'items.product' => function ($query) {
-                $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url');
-            },
+            'items.product:id,store_id,name,price,discount_price,image_1_url',
         ])->findOrFail($id);
 
         return response()->json($order);
@@ -61,10 +63,10 @@ class OrderController extends Controller
             'items' => 'nullable|array',
         ]);
 
-        // Crear orden principal
+        // Crear la orden
         $order = Order::create($validatedData);
 
-        // Crear los items asociados
+        // Crear items asociados (si existen)
         if (!empty($request->items)) {
             foreach ($request->items as $item) {
                 $order->items()->create([
@@ -115,7 +117,7 @@ class OrderController extends Controller
     }
 
     /**
-     * ❌ Elimina una orden junto con sus productos.
+     * ❌ Elimina una orden y sus productos asociados.
      */
     public function destroy($id)
     {
@@ -127,17 +129,15 @@ class OrderController extends Controller
     }
 
     /**
-     * 👤 Muestra todas las órdenes de un usuario específico.
+     * 👤 Devuelve las órdenes de un usuario específico.
      */
     public function userOrders($userId)
     {
         $orders = Order::where('user_id', $userId)
             ->with([
-                'items.product' => function ($query) {
-                    $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url');
-                },
+                'items.product:id,store_id,name,price,discount_price,image_1_url',
             ])
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->get();
 
         return response()->json($orders);

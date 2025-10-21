@@ -26,6 +26,7 @@ class Order extends Model
         'payment_id',
     ];
 
+    // ✅ Relaciones
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -38,6 +39,7 @@ class Order extends Model
 
     public function items()
     {
-        return $this->hasMany(OrderItem::class);
+        // 🔹 Aseguramos que la llave foránea esté explícita
+        return $this->hasMany(OrderItem::class, 'order_id');
     }
 }
