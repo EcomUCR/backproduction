@@ -8,25 +8,38 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
     /**
-     * 📦 Muestra todas las órdenes (puedes filtrar luego por usuario si lo deseas)
+     * 📦 Devuelve las órdenes del usuario autenticado con sus productos.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['items.product', 'user'])->get();
+        $orders = Order::where('user_id', $request->user()->id)
+            ->with([
+                'items.product' => function ($query) {
+                    $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url');
+                },
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return response()->json($orders);
     }
 
     /**
-     * 🔍 Muestra una orden específica junto con sus productos.
+     * 🔍 Devuelve una orden específica con sus productos asociados.
      */
     public function show($id)
     {
-        $order = Order::with(['items.product', 'user'])->findOrFail($id);
+        $order = Order::with([
+            'items.product' => function ($query) {
+                $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url');
+            },
+        ])->findOrFail($id);
+
         return response()->json($order);
     }
 
     /**
-     * 🧾 Crea una nueva orden y sus items (checkout con Stripe o manual).
+     * 🧾 Crea una nueva orden con sus productos (OrderItems).
      */
     public function store(Request $request)
     {
@@ -45,14 +58,14 @@ class OrderController extends Controller
             'country' => 'nullable|string|max:100',
             'payment_method' => 'nullable|string|max:30',
             'payment_id' => 'nullable|string|max:100',
-            'items' => 'nullable|array', // 👈 para crear los OrderItem
+            'items' => 'nullable|array',
         ]);
 
-        // 🧠 Crear la orden principal
+        // Crear orden principal
         $order = Order::create($validatedData);
 
-        // 🧩 Crear los OrderItem (productos del checkout)
-        if ($request->has('items') && is_array($request->items)) {
+        // Crear los items asociados
+        if (!empty($request->items)) {
             foreach ($request->items as $item) {
                 $order->items()->create([
                     'product_id' => $item['product_id'],
@@ -65,20 +78,19 @@ class OrderController extends Controller
         }
 
         return response()->json([
-            'message' => 'Orden creada exitosamente',
+            'message' => 'Orden creada exitosamente ✅',
             'order' => $order->load('items.product'),
         ], 201);
     }
 
     /**
-     * ✏️ Actualiza los datos de una orden existente.
+     * ✏️ Actualiza una orden existente.
      */
     public function update(Request $request, $id)
     {
         $order = Order::findOrFail($id);
 
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'status' => 'required|string|in:PENDING,PAID,CONFIRM,PROCESSING,SHIPPED,DELIVERED,CANCELLED',
             'subtotal' => 'required|numeric',
             'shipping' => 'required|numeric',
@@ -97,30 +109,34 @@ class OrderController extends Controller
         $order->update($validatedData);
 
         return response()->json([
-            'message' => 'Orden actualizada correctamente',
+            'message' => 'Orden actualizada correctamente ✏️',
             'order' => $order->load('items.product'),
         ]);
     }
 
     /**
-     * ❌ Elimina una orden y sus productos asociados.
+     * ❌ Elimina una orden junto con sus productos.
      */
     public function destroy($id)
     {
         $order = Order::findOrFail($id);
-        $order->items()->delete(); // 🔹 elimina productos asociados
+        $order->items()->delete();
         $order->delete();
 
-        return response()->json(['message' => 'Orden eliminada correctamente'], 204);
+        return response()->json(['message' => 'Orden eliminada correctamente 🗑️'], 204);
     }
 
     /**
-     * ✅ (Opcional) Muestra todas las órdenes de un usuario.
+     * 👤 Muestra todas las órdenes de un usuario específico.
      */
     public function userOrders($userId)
     {
-        $orders = Order::with(['items.product'])
-            ->where('user_id', $userId)
+        $orders = Order::where('user_id', $userId)
+            ->with([
+                'items.product' => function ($query) {
+                    $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url');
+                },
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
 
