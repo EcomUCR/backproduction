@@ -32,7 +32,7 @@ class AdminMailController extends Controller
 
         // Armar el correo igual que el contact controller
         $subject = 'Nueva solicitud de verificación de tienda';
-        $body = view('emails.store_request', [
+        $body = view('emails.verification-request', [
             'store_name'   => $validatedData['store_name'],
             'owner_name'   => $validatedData['owner_name'],
             'owner_email'  => $validatedData['owner_email'],
