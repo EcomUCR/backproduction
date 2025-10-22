@@ -160,13 +160,15 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
 | Rutas que requieren token de autenticación con Sanctum
 */
 Route::middleware('auth:sanctum')->group(function () {
-    //Notificaciones
+
+    // 📩 Notificaciones
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications', [NotificationController::class, 'store']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::patch('/notifications/{id}/archive', [NotificationController::class, 'archive']);
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
-    // Usuario
+
+    // 👤 Usuario
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/me', [UserController::class, 'me']);
     Route::post('/logout', [UserController::class, 'logout']);
@@ -177,59 +179,58 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/users/{id}', [UserController::class, 'update']);
     Route::put('/users/{id}/status', [UserController::class, 'updateStatus']);
 
-    //Store
+    // 🏬 Tiendas
     Route::get('/stores/user/{user_id}', [StoreController::class, 'showByUser']);
     Route::patch('/stores/{id}', [StoreController::class, 'update']);
     Route::put('/stores/{id}', [StoreController::class, 'update']);
 
-    //Banners
+    // 🎨 Banners
     Route::post('/banners', [BannerController::class, 'store']);
     Route::put('/banners/{id}', [BannerController::class, 'update']);
     Route::patch('/banners/{id}', [BannerController::class, 'update']);
     Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
-    //Cart
+
+    // 🛒 Carrito
     Route::get('/cart/me', [CartController::class, 'me']);
     Route::post('/cart/clear', [CartController::class, 'clear']);
     Route::post('/cart/add', [CartController::class, 'addItem']);
     Route::patch('/cart/item/{id}', [CartController::class, 'updateItem']);
     Route::delete('/cart/item/{id}', [CartController::class, 'removeItem']);
-
-
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
-    Route::middleware('auth:sanctum')->get('/cart/totals', [CartController::class, 'totals']);
+    Route::get('/cart/totals', [CartController::class, 'totals']);
 
-    //ordenes desde el checkout
-    Route::post('/checkout', [CheckoutController::class, 'checkout']);
+    // 💳 NUEVO Checkout modular
+    Route::post('/checkout/init', [CheckoutController::class, 'init']); // crea orden vacía
+    Route::post('/checkout/items', [\App\Http\Controllers\CheckoutItemController::class, 'store']); // agrega productos
+    Route::post('/checkout/confirm', [CheckoutController::class, 'confirm']); // confirma el pago
 
-    // 💳 Pagos Stripe (Checkout crea la orden con productos)
+    // 💸 Stripe (crea PaymentIntent)
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
 
-    // (Opcionales para administración)
+    // 📦 Órdenes
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::put('/orders/{id}', [OrderController::class, 'update']);
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
     Route::get('/user/{userId}/orders', [OrderController::class, 'userOrders']);
 
-    // Reseñas de tiendas
-    Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña
+    // 🌟 Reseñas de tiendas
+    Route::post('/store-reviews', [StoreReviewController::class, 'store']);
 
-    // Perfiles
+    // 👤 Perfiles
     Route::get('/profiles/{id}', [ProfileController::class, 'show']);
 
-    // Productos (CRUD completo)
+    // 🧩 Productos
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 
-
-    // Ordenes (CRUD)
+    // 🧾 CRUD de órdenes (admin)
     Route::apiResource('orders', OrderController::class);
 
-
-    // Sesiones autenticadas
+    // 🔐 Sesiones autenticadas
     Route::post('/session', [AuthenticatedSessionController::class, 'store']);
     Route::delete('/session', [AuthenticatedSessionController::class, 'destroy']);
 });

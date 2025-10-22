@@ -3,58 +3,44 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\OrderItem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
     /**
-     * 💳 Procesa el checkout desde el frontend (Stripe, etc.)
-     * Crea la orden + items + descuenta stock.
+     * 🧾 Inicializa una nueva orden antes del pago.
+     * Crea la orden base con estado "PENDING" y datos del cliente.
      */
-    public function checkout(Request $request)
+    public function init(Request $request)
     {
         $user = $request->user();
 
         if (!$user) {
             return response()->json([
                 'error' => true,
-                'message' => 'Usuario no autenticado'
+                'message' => 'Usuario no autenticado',
             ], 401);
         }
 
-        // ✅ Validar datos base de la orden
+        // ✅ Validar datos del pedido base
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'status' => 'required|string|in:PENDING,PAID,FAILED,CONFIRM,PROCESSING,SHIPPED,DELIVERED,CANCELLED',
-            'subtotal' => 'required|numeric',
-            'shipping' => 'nullable|numeric',
-            'taxes' => 'nullable|numeric',
-            'total' => 'required|numeric',
+            'subtotal' => 'required|numeric|min:0',
+            'shipping' => 'nullable|numeric|min:0',
+            'taxes' => 'nullable|numeric|min:0',
+            'total' => 'required|numeric|min:0',
             'street' => 'nullable|string|max:150',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:100',
-            'payment_method' => 'required|string|max:30',
-            'payment_id' => 'nullable|string|max:100',
-            'currency' => 'nullable|string|max:10',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
-            'items.*.store_id' => 'nullable|integer|exists:stores,id',
-            'items.*.discount_pct' => 'nullable|numeric|min:0',
         ]);
 
         try {
-            DB::beginTransaction();
-
-            // 🧾 Crear la orden principal
+            // 🧾 Crear la orden inicial (sin items todavía)
             $order = Order::create([
-                'user_id' => $validated['user_id'],
-                'status' => $validated['status'],
+                'user_id' => $user->id,
+                'status' => 'PENDING',
                 'subtotal' => $validated['subtotal'],
                 'shipping' => $validated['shipping'] ?? 0,
                 'taxes' => $validated['taxes'] ?? 0,
@@ -64,35 +50,75 @@ class CheckoutController extends Controller
                 'state' => $validated['state'] ?? null,
                 'zip_code' => $validated['zip_code'] ?? null,
                 'country' => $validated['country'] ?? null,
-                'payment_method' => strtoupper($validated['payment_method']),
-                'payment_id' => $validated['payment_id'] ?? 'N/A',
             ]);
-
-            // 🧩 Crear los OrderItems asociados
-            foreach ($validated['items'] as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
-                    'store_id' => $item['store_id'] ?? null,
-                    'quantity' => (int) $item['quantity'],
-                    'unit_price' => (float) $item['unit_price'],
-                    'discount_pct' => (float) ($item['discount_pct'] ?? 0),
-                ]);
-            }
-
-            DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Orden creada exitosamente 🧾',
-                'order' => $order->load(['items.product:id,name,image_1_url,price,discount_price']),
+                'message' => 'Orden inicial creada correctamente ✅',
+                'order' => $order,
             ], 201);
         } catch (\Throwable $e) {
-            DB::rollBack();
+            Log::error('❌ Error al crear orden inicial', [
+                'user_id' => $user->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
 
             return response()->json([
                 'error' => true,
-                'message' => 'Error en el proceso de checkout',
+                'message' => 'Error al crear la orden inicial',
+                'detail' => config('app.debug') ? $e->getMessage() : 'Error interno del servidor',
+            ], 500);
+        }
+    }
+
+    /**
+     * 💳 Confirma el pago y actualiza la orden.
+     * Cambia el estado, guarda el ID del pago y el método de pago.
+     */
+    public function confirm(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Usuario no autenticado',
+            ], 401);
+        }
+
+        // ✅ Validar los datos de confirmación del pago
+        $validated = $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'status' => 'required|string|in:PAID,FAILED,CANCELLED',
+            'payment_id' => 'nullable|string|max:100',
+            'payment_method' => 'nullable|string|max:30',
+            'currency' => 'nullable|string|max:10',
+        ]);
+
+        try {
+            $order = Order::findOrFail($validated['order_id']);
+
+            $order->update([
+                'status' => strtoupper($validated['status']),
+                'payment_id' => $validated['payment_id'] ?? 'N/A',
+                'payment_method' => strtoupper($validated['payment_method'] ?? 'CARD'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Orden confirmada correctamente 💳',
+                'order' => $order->load('items.product'),
+            ], 200);
+        } catch (\Throwable $e) {
+            Log::error('❌ Error al confirmar orden', [
+                'user_id' => $user->id ?? null,
+                'error' => $e->getMessage(),
+                'request' => $request->all(),
+            ]);
+
+            return response()->json([
+                'error' => true,
+                'message' => 'Error al confirmar la orden',
                 'detail' => config('app.debug') ? $e->getMessage() : 'Error interno del servidor',
             ], 500);
         }
