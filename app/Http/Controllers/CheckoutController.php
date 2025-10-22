@@ -9,14 +9,22 @@ use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
+    /**
+     * 💳 Procesa el checkout desde el frontend (Stripe, etc.)
+     * Crea la orden + items + descuenta stock.
+     */
     public function checkout(Request $request)
     {
         $user = $request->user();
 
         if (!$user) {
-            return response()->json(['error' => true, 'message' => 'Usuario no autenticado'], 401);
+            return response()->json([
+                'error' => true,
+                'message' => 'Usuario no autenticado'
+            ], 401);
         }
 
+        // ✅ Validar datos base de la orden
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'status' => 'required|string|in:PENDING,PAID,FAILED,CONFIRM,PROCESSING,SHIPPED,DELIVERED,CANCELLED',
@@ -43,7 +51,7 @@ class CheckoutController extends Controller
         try {
             DB::beginTransaction();
 
-            // 🧾 1️⃣ Intentar crear orden
+            // 🧾 1️⃣ Intentar crear orden principal
             try {
                 $order = Order::create([
                     'user_id' => $validated['user_id'],
@@ -66,6 +74,7 @@ class CheckoutController extends Controller
                     'error' => true,
                     'message' => 'Error creando orden principal',
                     'detail' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(), // 👈 muestra el error exacto
                 ], 500);
             }
 
@@ -87,6 +96,7 @@ class CheckoutController extends Controller
                         'message' => 'Error creando item',
                         'item' => $item,
                         'detail' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
                     ], 500);
                 }
             }
@@ -105,6 +115,7 @@ class CheckoutController extends Controller
                 'error' => true,
                 'message' => 'Error en el proceso de checkout',
                 'detail' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ], 500);
         }
     }
