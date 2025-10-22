@@ -70,7 +70,6 @@ class UserController extends Controller
             'role' => 'required|string|in:ADMIN,SELLER,CUSTOMER',
         ]);
 
-
         // 🔐 Encriptar contraseña
         $validatedData['password'] = Hash::make($validatedData['password']);
 
@@ -94,7 +93,7 @@ class UserController extends Controller
 
                 $user->setRelation('store', $store);
 
-                // 🔔 Notificar a todos los administradores
+                // 🔔 Crear notificación interna para los administradores
                 $admins = \App\Models\User::where('role', 'ADMIN')->get();
 
                 foreach ($admins as $admin) {
@@ -115,21 +114,22 @@ class UserController extends Controller
                         ],
                     ]);
                 }
-                // 🚀 Enviar correo a los admins
-                app(\App\Http\Controllers\AdminMailController::class)
+
+                // 📧 Enviar correo HTML a todos los administradores
+                (new \App\Http\Controllers\AdminMailController)
                     ->sendStoreVerificationEmail(new \Illuminate\Http\Request([
                         'store_name' => $store->name,
-                        'owner_name' => $user->first_name . ' ' . $user->last_name,
+                        'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
                         'owner_email' => $user->email,
-                        'owner_phone' => $user->phone_number,
+                        'owner_phone' => $user->phone_number ?? 'No especificado',
                     ]));
             }
-
 
             return response()->json([
                 'message' => 'Usuario creado correctamente',
                 'user' => $user
             ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error al crear el usuario o la tienda',
@@ -137,8 +137,6 @@ class UserController extends Controller
             ], 500);
         }
     }
-
-
 
     /**
      * Iniciar sesión
