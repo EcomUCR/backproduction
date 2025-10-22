@@ -119,7 +119,7 @@ class UserController extends Controller
 
                 if ($admins->isNotEmpty()) {
                     $subject = 'Nueva solicitud de verificación de tienda';
-                    $body = view('emails.store_request', [
+                    $body = view('emails.verification_request', [
                         'store_name' => $store->name,
                         'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
                         'owner_email' => $user->email,
