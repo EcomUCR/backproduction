@@ -61,8 +61,11 @@ class NotificationController extends Controller
             'related_id' => 'nullable|integer',
             'related_type' => 'nullable|string|max:80',
             'priority' => 'nullable|in:LOW,NORMAL,HIGH',
-            'data' => 'nullable|array',
+            'data' => 'nullable',
         ]);
+        if (is_string($validated['data'])) {
+            $validated['data'] = json_decode($validated['data'], true);
+        }
 
         $notification = Notification::create($validated);
 

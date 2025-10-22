@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Notification;
 
 use App\Models\Store;
 use Illuminate\Http\Request;
@@ -53,7 +54,7 @@ class StoreController extends Controller
         $admins = \App\Models\User::where('role', 'ADMIN')->get();
 
         foreach ($admins as $admin) {
-            \App\Models\Notification::create([
+            Notification::create([
                 'user_id' => $admin->id,
                 'role' => 'ADMIN',
                 'type' => 'STORE_VERIFICATION',
@@ -62,6 +63,7 @@ class StoreController extends Controller
                 'related_id' => $store->id,
                 'related_type' => 'store',
                 'priority' => 'HIGH',
+                'is_read' => false,
                 'data' => [
                     'store_id' => $store->id,
                     'store_name' => $store->name,
@@ -69,6 +71,7 @@ class StoreController extends Controller
                 ],
             ]);
         }
+
         return response()->json($store, 201);
     }
 
