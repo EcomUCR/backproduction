@@ -13,6 +13,8 @@ class AddressController extends Controller
         return response()->json($addresses);
     }
 
+    //hola juju
+
     public function show($id)
     {
         $address = Address::findOrFail($id);

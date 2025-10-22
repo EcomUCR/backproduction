@@ -10,9 +10,10 @@ class CartController extends Controller
 {
     public function index()
     {
-        $carts = Cart::all();
-        return response()->json($carts);
+        return response()->json(Cart::all());
     }
+
+    // 🛒 Agregar producto al carrito
     public function addItem(Request $request)
     {
         $request->validate([
@@ -24,7 +25,7 @@ class CartController extends Controller
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
         $quantity = $request->quantity ?? 1;
 
-        $product = \App\Models\Product::findOrFail($request->product_id);
+        $product = Product::findOrFail($request->product_id);
         $unitPrice = $product->discount_price ?? $product->price;
 
         $item = $cart->items()->where('product_id', $request->product_id)->first();
@@ -32,14 +33,14 @@ class CartController extends Controller
         if ($item) {
             $item->update(['quantity' => $item->quantity + $quantity]);
         } else {
-            $item = $cart->items()->create([
+            $cart->items()->create([
                 'product_id' => $request->product_id,
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice
             ]);
         }
 
-        $cart->load('items.product');
+        $cart->load(['items.product.store:id,name']);
 
         return response()->json([
             'message' => 'Producto añadido al carrito correctamente',
@@ -49,8 +50,7 @@ class CartController extends Controller
 
     public function show($id)
     {
-        $cart = Cart::findOrFail($id);
-        return response()->json($cart);
+        return response()->json(Cart::findOrFail($id));
     }
 
     public function store(Request $request)
@@ -84,29 +84,29 @@ class CartController extends Controller
 
         return response()->json(null, 204);
     }
+
+    // 👤 Obtener carrito del usuario autenticado
     public function me(Request $request)
     {
         $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
 
-        // ✅ Carga correctamente la relación del producto y la tienda
         $cart->load([
-            'items.product' => function ($query) {
-                $query->select('id', 'store_id', 'name', 'image_1_url', 'price', 'discount_price', 'stock');
+            'items.product' => function ($q) {
+                $q->select('id', 'store_id', 'name', 'image_1_url', 'price', 'discount_price', 'stock');
             },
-            'items.product.store' => function ($query) {
-                $query->select('id', 'name');
+            'items.product.store' => function ($q) {
+                $q->select('id', 'name');
             },
         ]);
 
         return response()->json($cart);
     }
 
+    // 🧹 Vaciar carrito
     public function clear(Request $request)
     {
         try {
             $user = $request->user();
-
-            // Buscar el carrito del usuario autenticado
             $cart = Cart::where('user_id', $user->id)->first();
 
             if (!$cart) {
@@ -116,24 +116,17 @@ class CartController extends Controller
                 ], 404);
             }
 
-            // Verificar si hay items
-            if ($cart->items()->count() === 0) {
-                return response()->json([
-                    'ok' => true,
-                    'message' => 'El carrito ya estaba vacío 🧹',
-                ], 200);
-            }
-
-            // Eliminar todos los items
             $cart->items()->delete();
+
+            $cart->load(['items.product.store:id,name']);
 
             return response()->json([
                 'ok' => true,
                 'message' => 'Carrito vaciado correctamente 🧹',
+                'cart' => $cart,
             ], 200);
         } catch (\Exception $e) {
             \Log::error("❌ Error al limpiar el carrito: " . $e->getMessage());
-
             return response()->json([
                 'ok' => false,
                 'message' => 'Error interno al limpiar el carrito',
@@ -141,6 +134,8 @@ class CartController extends Controller
             ], 500);
         }
     }
+
+    // ✏️ Actualizar cantidad
     public function updateItem(Request $request, $id)
     {
         $request->validate(['quantity' => 'required|integer|min:1']);
@@ -151,11 +146,11 @@ class CartController extends Controller
 
         $item->update(['quantity' => $request->quantity]);
 
-        $cart->load('items.product');
+        $cart->load(['items.product.store:id,name']);
         return response()->json(['message' => 'Cantidad actualizada', 'cart' => $cart]);
     }
 
-    // DELETE /cart/item/{id}
+    // ❌ Eliminar producto
     public function removeItem($id)
     {
         $user = request()->user();
@@ -163,15 +158,15 @@ class CartController extends Controller
         $item = $cart->items()->where('id', $id)->firstOrFail();
         $item->delete();
 
-        $cart->load('items.product');
+        $cart->load(['items.product.store:id,name']);
         return response()->json(['message' => 'Producto eliminado', 'cart' => $cart]);
     }
 
+    // 💰 Totales del carrito
     public function totals(Request $request)
     {
         $user = $request->user();
-
-        $cart = \App\Models\Cart::where('user_id', $user->id)
+        $cart = Cart::where('user_id', $user->id)
             ->with('items.product')
             ->first();
 
@@ -192,15 +187,13 @@ class CartController extends Controller
 
         foreach ($cart->items as $item) {
             $product = $item->product;
-
-            $price = ($product->discount_price !== null && $product->discount_price > 0)
+            $price = ($product->discount_price && $product->discount_price > 0)
                 ? $product->discount_price
                 : $product->price;
-
             $subtotal += $price * $item->quantity;
-
             $item->update(['unit_price' => $price]);
         }
+
         $taxes = round($subtotal * 0.13, 2);
         $shipping = 3000;
         $total = $subtotal + $taxes + $shipping;

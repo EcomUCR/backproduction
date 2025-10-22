@@ -193,19 +193,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
     Route::middleware('auth:sanctum')->get('/cart/totals', [CartController::class, 'totals']);
 
-    //Pago Visa
+    //ordenes desde el checkout
     Route::post('/checkout', [CheckoutController::class, 'checkout']);
 
-    //Pagos Stripe
+    // 💳 Pagos Stripe (Checkout crea la orden con productos)
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
-    Route::post('/checkout', [OrderController::class, 'store']);
-
 
     // (Opcionales para administración)
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::put('/orders/{id}', [OrderController::class, 'update']);
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
+    Route::get('/user/{userId}/orders', [OrderController::class, 'userOrders']);
 
     // Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']); // crear reseña
