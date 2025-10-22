@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -68,7 +67,6 @@ class CheckoutController extends Controller
 
             // 🧩 Crear los OrderItems asociados
             foreach ($validated['items'] as $item) {
-            try {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
@@ -76,24 +74,24 @@ class CheckoutController extends Controller
                     'quantity' => (int) $item['quantity'],
                     'unit_price' => (float) $item['unit_price'],
                     'discount_pct' => (float) ($item['discount_pct'] ?? 0),
-              ]);
-            } catch (\Throwable $e) {
-               dd('Error creando item:', $item, $e->getMessage());
+                ]);
             }
-          }
 
             DB::commit();
 
             return response()->json([
+                'success' => true,
                 'message' => 'Orden creada exitosamente 🧾',
                 'order' => $order->load(['items.product:id,name,image_1_url,price,discount_price']),
             ], 201);
         } catch (\Throwable $e) {
             DB::rollBack();
+
             return response()->json([
                 'error' => true,
                 'message' => 'Error en el proceso de checkout',
                 'detail' => $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null,
             ], 500);
         }
     }
