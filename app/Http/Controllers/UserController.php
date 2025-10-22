@@ -70,6 +70,7 @@ class UserController extends Controller
             'role' => 'required|string|in:ADMIN,SELLER,CUSTOMER',
         ]);
 
+
         // 🔐 Encriptar contraseña
         $validatedData['password'] = Hash::make($validatedData['password']);
 
@@ -114,7 +115,16 @@ class UserController extends Controller
                         ],
                     ]);
                 }
+                // 🚀 Enviar correo a los admins
+                app(\App\Http\Controllers\AdminMailController::class)
+                    ->sendStoreVerificationEmail(new \Illuminate\Http\Request([
+                        'store_name' => $store->name,
+                        'owner_name' => $user->first_name . ' ' . $user->last_name,
+                        'owner_email' => $user->email,
+                        'owner_phone' => $user->phone_number,
+                    ]));
             }
+
 
             return response()->json([
                 'message' => 'Usuario creado correctamente',
