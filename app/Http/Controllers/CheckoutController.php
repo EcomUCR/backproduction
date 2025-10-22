@@ -51,54 +51,33 @@ class CheckoutController extends Controller
         try {
             DB::beginTransaction();
 
-            // 🧾 1️⃣ Intentar crear orden principal
-            try {
-                $order = Order::create([
-                    'user_id' => $validated['user_id'],
-                    'status' => $validated['status'],
-                    'subtotal' => $validated['subtotal'],
-                    'shipping' => $validated['shipping'] ?? 0,
-                    'taxes' => $validated['taxes'] ?? 0,
-                    'total' => $validated['total'],
-                    'street' => $validated['street'] ?? null,
-                    'city' => $validated['city'] ?? null,
-                    'state' => $validated['state'] ?? null,
-                    'zip_code' => $validated['zip_code'] ?? null,
-                    'country' => $validated['country'] ?? null,
-                    'payment_method' => strtoupper($validated['payment_method']),
-                    'payment_id' => $validated['payment_id'] ?? 'N/A',
-                ]);
-            } catch (\Throwable $e) {
-                DB::rollBack();
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Error creando orden principal',
-                    'detail' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(), // 👈 muestra el error exacto
-                ], 500);
-            }
+            // 🧾 Crear la orden principal
+            $order = Order::create([
+                'user_id' => $validated['user_id'],
+                'status' => $validated['status'],
+                'subtotal' => $validated['subtotal'],
+                'shipping' => $validated['shipping'] ?? 0,
+                'taxes' => $validated['taxes'] ?? 0,
+                'total' => $validated['total'],
+                'street' => $validated['street'] ?? null,
+                'city' => $validated['city'] ?? null,
+                'state' => $validated['state'] ?? null,
+                'zip_code' => $validated['zip_code'] ?? null,
+                'country' => $validated['country'] ?? null,
+                'payment_method' => strtoupper($validated['payment_method']),
+                'payment_id' => $validated['payment_id'] ?? 'N/A',
+            ]);
 
-            // 🧩 2️⃣ Intentar crear los items
+            // 🧩 Crear los OrderItems asociados
             foreach ($validated['items'] as $item) {
-                try {
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $item['product_id'],
-                        'store_id' => $item['store_id'] ?? null,
-                        'quantity' => (int) $item['quantity'],
-                        'unit_price' => (float) $item['unit_price'],
-                        'discount_pct' => (float) ($item['discount_pct'] ?? 0),
-                    ]);
-                } catch (\Throwable $e) {
-                    DB::rollBack();
-                    return response()->json([
-                        'error' => true,
-                        'message' => 'Error creando item',
-                        'item' => $item,
-                        'detail' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ], 500);
-                }
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'store_id' => $item['store_id'] ?? null,
+                    'quantity' => (int) $item['quantity'],
+                    'unit_price' => (float) $item['unit_price'],
+                    'discount_pct' => (float) ($item['discount_pct'] ?? 0),
+                ]);
             }
 
             DB::commit();
@@ -114,8 +93,7 @@ class CheckoutController extends Controller
             return response()->json([
                 'error' => true,
                 'message' => 'Error en el proceso de checkout',
-                'detail' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'detail' => config('app.debug') ? $e->getMessage() : 'Error interno del servidor',
             ], 500);
         }
     }
