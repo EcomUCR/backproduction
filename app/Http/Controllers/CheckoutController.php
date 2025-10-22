@@ -68,18 +68,19 @@ class CheckoutController extends Controller
 
             // 🧩 Crear los OrderItems asociados
             foreach ($validated['items'] as $item) {
+            try {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
                     'store_id' => $item['store_id'] ?? null,
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'discount_pct' => $item['discount_pct'] ?? 0,
-                ]);
-
-                // 🏷️ Descontar stock
-                Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
+                    'quantity' => (int) $item['quantity'],
+                    'unit_price' => (float) $item['unit_price'],
+                    'discount_pct' => (float) ($item['discount_pct'] ?? 0),
+              ]);
+            } catch (\Throwable $e) {
+               dd('Error creando item:', $item, $e->getMessage());
             }
+          }
 
             DB::commit();
 
