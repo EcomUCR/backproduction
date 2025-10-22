@@ -117,25 +117,16 @@ class UserController extends Controller
 
                 // 📧 Enviar correo HTML a todos los administradores
                 // 📧 Enviar correo HTML a todos los administradores
-                $admins = \App\Models\User::where('role', 'ADMIN')->get(['email']);
-                if ($admins->count() > 0) {
-                    $subject = 'Nueva solicitud de verificación de tienda';
-                    $data = [
+                // 📧 Enviar correo HTML a todos los administradores
+                app(\App\Http\Controllers\AdminMailController::class)
+                    ->sendStoreVerificationEmail(new \Illuminate\Http\Request([
                         'store_name' => $store->name,
                         'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
                         'owner_email' => $user->email,
                         'owner_phone' => $user->phone_number ?? 'No especificado',
                         'request_date' => now()->format('d/m/Y H:i'),
                         'admin_url' => env('ADMIN_PANEL_URL', 'https://tukishopcr.com/admin/stores'),
-                    ];
-
-                    $html = view('emails.store_request', $data)->render();
-
-                    foreach ($admins as $admin) {
-                        \App\Services\BrevoMailer::send($admin->email, $subject, $html);
-                    }
-                }
-
+                    ]));
             }
 
             return response()->json([
