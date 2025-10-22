@@ -9,10 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
-    /**
-     * 💳 Procesa el checkout desde el frontend (Stripe, etc.)
-     * Crea la orden + items + descuenta stock.
-     */
     public function checkout(Request $request)
     {
         $user = $request->user();
@@ -21,7 +17,6 @@ class CheckoutController extends Controller
             return response()->json(['error' => true, 'message' => 'Usuario no autenticado'], 401);
         }
 
-        // ✅ Validar datos base de la orden
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'status' => 'required|string|in:PENDING,PAID,FAILED,CONFIRM,PROCESSING,SHIPPED,DELIVERED,CANCELLED',
@@ -48,30 +43,33 @@ class CheckoutController extends Controller
         try {
             DB::beginTransaction();
 
-            // 🧾 Crear la orden principal
-            $order = Order::create([
-                'user_id' => $validated['user_id'],
-                'status' => $validated['status'],
-                'subtotal' => $validated['subtotal'],
-                'shipping' => $validated['shipping'] ?? 0,
-                'taxes' => $validated['taxes'] ?? 0,
-                'total' => $validated['total'],
-                'street' => $validated['street'] ?? null,
-                'city' => $validated['city'] ?? null,
-                'state' => $validated['state'] ?? null,
-                'zip_code' => $validated['zip_code'] ?? null,
-                'country' => $validated['country'] ?? null,
-                'payment_method' => strtoupper($validated['payment_method']),
-                'payment_id' => $validated['payment_id'] ?? 'N/A',
-            ]);
-
-            // 🔍 LOG TEMPORAL para probar si se crea bien
-            if (!$order) {
+            // 🧾 1️⃣ Intentar crear orden
+            try {
+                $order = Order::create([
+                    'user_id' => $validated['user_id'],
+                    'status' => $validated['status'],
+                    'subtotal' => $validated['subtotal'],
+                    'shipping' => $validated['shipping'] ?? 0,
+                    'taxes' => $validated['taxes'] ?? 0,
+                    'total' => $validated['total'],
+                    'street' => $validated['street'] ?? null,
+                    'city' => $validated['city'] ?? null,
+                    'state' => $validated['state'] ?? null,
+                    'zip_code' => $validated['zip_code'] ?? null,
+                    'country' => $validated['country'] ?? null,
+                    'payment_method' => strtoupper($validated['payment_method']),
+                    'payment_id' => $validated['payment_id'] ?? 'N/A',
+                ]);
+            } catch (\Throwable $e) {
                 DB::rollBack();
-                return response()->json(['error' => true, 'message' => 'No se pudo crear la orden principal'], 500);
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Error creando orden principal',
+                    'detail' => $e->getMessage(),
+                ], 500);
             }
 
-            // 🧩 Crear los OrderItems asociados
+            // 🧩 2️⃣ Intentar crear los items
             foreach ($validated['items'] as $item) {
                 try {
                     OrderItem::create([
@@ -83,7 +81,6 @@ class CheckoutController extends Controller
                         'discount_pct' => (float) ($item['discount_pct'] ?? 0),
                     ]);
                 } catch (\Throwable $e) {
-                    // 💥 Error específico en creación del item
                     DB::rollBack();
                     return response()->json([
                         'error' => true,
@@ -108,7 +105,6 @@ class CheckoutController extends Controller
                 'error' => true,
                 'message' => 'Error en el proceso de checkout',
                 'detail' => $e->getMessage(),
-                'trace' => config('app.debug') ? $e->getTraceAsString() : null,
             ], 500);
         }
     }
