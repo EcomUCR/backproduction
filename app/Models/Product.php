@@ -18,13 +18,13 @@ class Product extends Model
         'price',
         'discount_price',
         'stock',
+        'sold_count',
         'status',
         'is_featured',
         'image_1_url',
         'image_2_url',
         'image_3_url',
     ];
-
 
     public function store()
     {
@@ -46,5 +46,8 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-
+    public function getTotalSoldAttribute()
+    {
+        return $this->orderItems()->sum('quantity');
+    }
 }
