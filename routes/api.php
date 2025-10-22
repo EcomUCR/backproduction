@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -159,6 +160,12 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
 | Rutas que requieren token de autenticación con Sanctum
 */
 Route::middleware('auth:sanctum')->group(function () {
+    //Notificaciones
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications', [NotificationController::class, 'store']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/{id}/archive', [NotificationController::class, 'archive']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
     // Usuario
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/me', [UserController::class, 'me']);
@@ -186,7 +193,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart/add', [CartController::class, 'addItem']);
     Route::patch('/cart/item/{id}', [CartController::class, 'updateItem']);
     Route::delete('/cart/item/{id}', [CartController::class, 'removeItem']);
-    
+
 
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
