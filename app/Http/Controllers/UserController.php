@@ -70,14 +70,18 @@ class UserController extends Controller
             'role' => 'required|string|in:ADMIN,SELLER,CUSTOMER',
         ]);
 
-        // Encriptar la contraseña
+        // 🔐 Encriptar contraseña
         $validatedData['password'] = Hash::make($validatedData['password']);
 
         try {
-            // Crear usuario
+            // 👤 Crear usuario
             $user = User::create($validatedData);
 
-            // Si es vendedor, crear tienda automáticamente
+            // 🛒 Crear carrito para todos los usuarios
+            $cart = Cart::create(['user_id' => $user->id]);
+            $user->setRelation('cart', $cart);
+
+            // 🏬 Si es vendedor, crear tienda y notificar a los administradores
             if ($user->role === 'SELLER') {
                 $defaultCategoryId = 1;
                 $store = $user->store()->create([
@@ -86,10 +90,32 @@ class UserController extends Controller
                     'category_id' => $defaultCategoryId,
                     'status' => 'ACTIVE',
                 ]);
+
                 $user->setRelation('store', $store);
+
+                // 🔔 Notificar a todos los administradores
+                $admins = \App\Models\User::where('role', 'ADMIN')->get();
+
+                foreach ($admins as $admin) {
+                    \App\Models\Notification::create([
+                        'user_id' => $admin->id,
+                        'role' => 'ADMIN',
+                        'type' => 'STORE_VERIFICATION',
+                        'title' => 'Nueva tienda pendiente de verificación 🏪',
+                        'message' => "La tienda '{$store->name}' requiere revisión y verificación.",
+                        'related_id' => $store->id,
+                        'related_type' => 'store',
+                        'priority' => 'HIGH',
+                        'is_read' => false,
+                        'data' => [
+                            'store_id' => $store->id,
+                            'store_name' => $store->name,
+                            'user_id' => $store->user_id,
+                        ],
+                    ]);
+                }
             }
-            $cart = Cart::create(['user_id' => $user->id]);
-            $user->setRelation('cart', $cart);
+
             return response()->json([
                 'message' => 'Usuario creado correctamente',
                 'user' => $user
@@ -102,38 +128,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Actualizar un usuario existente
-     */
-    public function update(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $validatedData = $request->validate([
-            'username' => 'sometimes|string|max:100|unique:users,username,' . $user->id,
-            'email' => 'sometimes|string|email|max:100|unique:users,email,' . $user->id,
-            'password' => 'sometimes|string|min:6',
-            'first_name' => 'nullable|string|max:80',
-            'last_name' => 'nullable|string|max:80',
-            'phone_number' => 'nullable|string|max:20',
-            'role' => 'sometimes|string|in:ADMIN,SELLER,CUSTOMER',
-            "status" => 'boolean',
-            'image' => 'nullable|string|max:512',
-        ]);
-
-        if (isset($validatedData['password'])) {
-            $validatedData['password'] = Hash::make($validatedData['password']);
-        }
-
-        $user->update($validatedData);
-
-        $user->load('store:id,user_id,name,slug,status');
-
-        return response()->json([
-            'message' => 'Usuario actualizado correctamente',
-            'user' => $user
-        ]);
-    }
 
 
     /**
@@ -252,11 +246,11 @@ class UserController extends Controller
     }
 
     public function updateStatus($id, Request $request)
-{
-    $user = User::findOrFail($id);
-    $user->status = $request->status;
-    $user->save();
+    {
+        $user = User::findOrFail($id);
+        $user->status = $request->status;
+        $user->save();
 
-    return response()->json(['message' => 'Estado actualizado correctamente']);
-}
+        return response()->json(['message' => 'Estado actualizado correctamente']);
+    }
 }

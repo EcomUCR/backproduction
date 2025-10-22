@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Notification;
 
 use App\Models\Store;
 use Illuminate\Http\Request;
@@ -13,7 +12,7 @@ class StoreController extends Controller
         return response()->json(Store::all());
     }
 
-    public function showByUser($user_id)
+      public function showByUser($user_id)
     {
         $store = Store::with(['user', 'storeSocials', 'banners', 'products', 'reviews'])
             ->where('user_id', $user_id)
@@ -27,10 +26,10 @@ class StoreController extends Controller
     }
 
     public function show($id)
-    {
-        $store = Store::with(['user', 'storeSocials', 'banners', 'products', 'reviews'])->findOrFail($id);
-        return response()->json($store);
-    }
+{
+    $store = Store::with(['user', 'storeSocials', 'banners', 'products', 'reviews'])->findOrFail($id);
+    return response()->json($store);
+}
 
     public function store(Request $request)
     {
@@ -51,28 +50,6 @@ class StoreController extends Controller
         ]);
 
         $store = Store::create($validatedData);
-        $users = \App\Models\User::all();
-
-        foreach ($users as $user) {
-            Notification::create([
-                'user_id' => $user->id,
-                'role' => $user->role,
-                'type' => 'STORE_VERIFICATION',
-                'title' => 'Nueva tienda pendiente de verificación 🏪',
-                'message' => "La tienda '{$store->name}' requiere revisión y verificación.",
-                'related_id' => $store->id,
-                'related_type' => 'store',
-                'priority' => 'HIGH',
-                'is_read' => false,
-                'data' => [
-                    'store_id' => $store->id,
-                    'store_name' => $store->name,
-                    'user_id' => $store->user_id,
-                ],
-            ]);
-        }
-
-
         return response()->json($store, 201);
     }
 
