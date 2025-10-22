@@ -65,16 +65,33 @@ class CheckoutController extends Controller
                 'payment_id' => $validated['payment_id'] ?? 'N/A',
             ]);
 
+            // 🔍 LOG TEMPORAL para probar si se crea bien
+            if (!$order) {
+                DB::rollBack();
+                return response()->json(['error' => true, 'message' => 'No se pudo crear la orden principal'], 500);
+            }
+
             // 🧩 Crear los OrderItems asociados
             foreach ($validated['items'] as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
-                    'store_id' => $item['store_id'] ?? null,
-                    'quantity' => (int) $item['quantity'],
-                    'unit_price' => (float) $item['unit_price'],
-                    'discount_pct' => (float) ($item['discount_pct'] ?? 0),
-                ]);
+                try {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $item['product_id'],
+                        'store_id' => $item['store_id'] ?? null,
+                        'quantity' => (int) $item['quantity'],
+                        'unit_price' => (float) $item['unit_price'],
+                        'discount_pct' => (float) ($item['discount_pct'] ?? 0),
+                    ]);
+                } catch (\Throwable $e) {
+                    // 💥 Error específico en creación del item
+                    DB::rollBack();
+                    return response()->json([
+                        'error' => true,
+                        'message' => 'Error creando item',
+                        'item' => $item,
+                        'detail' => $e->getMessage(),
+                    ], 500);
+                }
             }
 
             DB::commit();
