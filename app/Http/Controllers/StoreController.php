@@ -51,12 +51,12 @@ class StoreController extends Controller
         ]);
 
         $store = Store::create($validatedData);
-        $admins = \App\Models\User::where('role', 'ADMIN')->get();
+        $users = \App\Models\User::all();
 
-        foreach ($admins as $admin) {
+        foreach ($users as $user) {
             Notification::create([
-                'user_id' => $admin->id,
-                'role' => 'ADMIN',
+                'user_id' => $user->id,
+                'role' => $user->role,
                 'type' => 'STORE_VERIFICATION',
                 'title' => 'Nueva tienda pendiente de verificación 🏪',
                 'message' => "La tienda '{$store->name}' requiere revisión y verificación.",
@@ -71,6 +71,7 @@ class StoreController extends Controller
                 ],
             ]);
         }
+
 
         return response()->json($store, 201);
     }
