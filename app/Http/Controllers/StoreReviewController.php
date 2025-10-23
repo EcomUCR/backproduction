@@ -64,7 +64,7 @@ class StoreReviewController extends Controller
             Log::error('Error al enviar correo de reseña: ' . $th->getMessage());
         }
 
-        // 🔔 Crear notificación interna
+        // 🔔 Crear notificación interna para el VENDEDOR
         Notification::create([
             'user_id' => $seller->id,
             'role' => 'SELLER',
@@ -81,8 +81,27 @@ class StoreReviewController extends Controller
             ],
         ]);
 
+        // 🏪 Crear notificación interna también para la TIENDA
+        Notification::create([
+            'user_id' => $seller->id, // el dueño de la tienda
+            'role' => 'STORE',
+            'type' => 'STORE_REVIEW',
+            'title' => 'Tu tienda ha recibido una nueva reseña',
+            'message' => "La tienda «{$store->name}» ha recibido una nueva reseña de {$reviewer->first_name}.",
+            'related_id' => $store->id,
+            'related_type' => 'store',
+            'priority' => 'NORMAL',
+            'data' => [
+                'store_name' => $store->name,
+                'reviewer' => $reviewer->first_name . ' ' . $reviewer->last_name,
+                'rating' => $storeReview->rating,
+                'comment' => $storeReview->comment,
+                'review_id' => $storeReview->id,
+            ],
+        ]);
+
         return response()->json([
-            'message' => 'Reseña creada y notificación enviada correctamente.',
+            'message' => 'Reseña creada, correo enviado y notificaciones generadas correctamente.',
             'review' => $storeReview
         ], 201);
     }
