@@ -77,23 +77,22 @@ class UserController extends Controller
             // 👤 Crear usuario
             $user = User::create($validatedData);
 
-            // 🛒 Crear carrito para todos los usuarios
+            // 🛒 Crear carrito
             $cart = Cart::create(['user_id' => $user->id]);
             $user->setRelation('cart', $cart);
 
             // 🏬 Si es vendedor, crear tienda y notificar a los administradores
             if ($user->role === 'SELLER') {
-                $defaultCategoryId = 1;
                 $store = $user->store()->create([
                     'name' => $user->username,
                     'slug' => Str::slug($user->username) . '-' . $user->id,
-                    'category_id' => $defaultCategoryId,
+                    'category_id' => 1,
                     'status' => 'ACTIVE',
                 ]);
 
                 $user->setRelation('store', $store);
 
-                // 🔔 Notificar a todos los administradores
+                // 🔔 Crear notificación interna
                 $admins = \App\Models\User::where('role', 'ADMIN')->get();
 
                 foreach ($admins as $admin) {
@@ -114,20 +113,40 @@ class UserController extends Controller
                         ],
                     ]);
                 }
+
+                // 📧 Enviar correo HTML a todos los administradores
+                $admins = \App\Models\User::where('role', 'ADMIN')->get(['email']);
+
+                if ($admins->isNotEmpty()) {
+                    $subject = 'Nueva solicitud de verificación de tienda';
+                    $body = view('emails.verification-request-html', data: [
+                        'store_name' => $store->name,
+                        'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
+                        'owner_email' => $user->email,
+                        'owner_phone' => $user->phone_number ?? 'No especificado',
+                        'request_date' => now()->format('d/m/Y H:i'),
+                        'admin_url' => env('ADMIN_PANEL_URL', 'https://tukishopcr.com/admin/stores'),
+                    ])->render();
+
+                    foreach ($admins as $admin) {
+                        \App\Services\BrevoMailer::send($admin->email, $subject, $body);
+                    }
+                }
             }
 
             return response()->json([
                 'message' => 'Usuario creado correctamente',
                 'user' => $user
             ], 201);
+
         } catch (\Exception $e) {
+            \Log::error('❌ Error en registro de usuario: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Error al crear el usuario o la tienda',
                 'details' => $e->getMessage()
             ], 500);
         }
     }
-
 
 
     /**

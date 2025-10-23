@@ -103,6 +103,8 @@ Route::get('/stores/{user_id}', [StoreController::class, 'show']);
 Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStore']);
 Route::get('/stores', [StoreController::class, 'index']);
 Route::put('/stores/{id}', [StoreController::class, 'update']);
+Route::get('/store/{store_id}/search', [ProductController::class, 'searchByStore']);
+
 // 👤 Todos los productos (excepto ARCHIVED) visibles para el dueño
 Route::get('/store/{store_id}/all', [ProductController::class, 'allByStore']);
 

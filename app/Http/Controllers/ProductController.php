@@ -427,6 +427,31 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+
+    // 🔍 Buscar productos por nombre dentro de una tienda específica
+    public function searchByStore(Request $request, $store_id)
+    {
+        $query = trim($request->input('q', ''));
+
+        if (empty($query)) {
+            return response()->json([]);
+        }
+
+        $products = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select('products.*', 'stores.name as store_name')
+            ->where('products.store_id', '=', $store_id)
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
+            ->where('products.name', 'ILIKE', "%{$query}%") // búsqueda insensible a mayúsculas
+            ->orderByDesc('products.created_at')
+            ->get();
+
+        return response()->json($products);
+    }
+
     // 🏆 Productos más vendidos por categoría (solo los que tengan al menos 1 venta)
     public function topSellingByCategory($category_id)
     {
