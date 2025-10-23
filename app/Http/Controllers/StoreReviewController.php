@@ -85,7 +85,7 @@ class StoreReviewController extends Controller
 
             Notification::create([
                 'user_id' => $seller->id,
-                'role' => 'STORE',
+                'role' => 'SELLER',
                 'type' => 'STORE_REVIEW',
                 'title' => 'Tu tienda ha recibido una nueva reseña',
                 'message' => "La tienda «{$store->name}» ha recibido una nueva reseña de {$reviewer->first_name}.",
