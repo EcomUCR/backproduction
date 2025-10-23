@@ -35,6 +35,7 @@ use App\Http\Controllers\StoreReviewController;
 
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutItemController;
 
 
 /*
@@ -203,8 +204,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 💳 NUEVO Checkout modular
     Route::post('/checkout/init', [CheckoutController::class, 'init']); // crea orden vacía
-    Route::post('/checkout/items', [\App\Http\Controllers\CheckoutItemController::class, 'store']); // agrega productos
+    Route::post('/checkout/items', [CheckoutItemController::class, 'store']); // agrega productos
     Route::post('/checkout/confirm', [CheckoutController::class, 'confirm']); // confirma el pago
+
+    // ✅ Checkout: productos de la orden
+    Route::post('/checkout/items', [CheckoutItemController::class, 'store']);
+    Route::get('/checkout/{orderId}/items', [CheckoutItemController::class, 'index']);
 
     // 💸 Stripe (crea PaymentIntent)
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);

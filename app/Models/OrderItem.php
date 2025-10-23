@@ -18,19 +18,27 @@ class OrderItem extends Model
         'discount_pct',
     ];
 
-    // ✅ Relaciones
+    // 🔹 Cada item pertenece a una orden
     public function order()
     {
-        return $this->belongsTo(Order::class, 'order_id');
+        return $this->belongsTo(Order::class);
     }
 
+    // 🔹 Cada item pertenece a un producto
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class);
     }
 
+    // 🔹 Cada item pertenece a una tienda (opcional)
     public function store()
     {
-        return $this->belongsTo(Store::class, 'store_id');
+        return $this->belongsTo(Store::class);
+    }
+
+    // 🔹 Precio total del ítem (unitario * cantidad)
+    public function getTotalAttribute()
+    {
+        return ($this->unit_price ?? 0) * ($this->quantity ?? 1);
     }
 }
