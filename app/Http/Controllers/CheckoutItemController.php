@@ -31,32 +31,34 @@ class CheckoutItemController extends Controller
             $order = Order::findOrFail($validated['order_id']);
             $createdItems = [];
 
-            foreach ($validated['items'] as $item) {
+            foreach ($validated['items'] as $index => $item) {
+                // 🔹 Sanitizar tipos
+                $unitPrice = isset($item['unit_price']) ? (float)$item['unit_price'] : 0;
+                $quantity = isset($item['quantity']) ? (int)$item['quantity'] : 1;
+                $discount = isset($item['discount_pct']) ? (float)$item['discount_pct'] : 0;
+
+                // 🧾 Crear el item
                 $orderItem = OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
+                    'product_id' => (int)$item['product_id'],
                     'store_id' => $item['store_id'] ?? null,
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'discount_pct' => $item['discount_pct'] ?? 0,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'discount_pct' => $discount,
                 ]);
 
-                // 🔹 Cargar detalles del producto y la tienda
-                $product = Product::select('id', 'name', 'price', 'discount_price', 'image_1_url')
-                    ->find($item['product_id']);
-                $store = $item['store_id']
-                    ? Store::select('id', 'name', 'image', 'slug')->find($item['store_id'])
-                    : null;
+                // 🔍 Registrar logs si algo sale raro
+                if ($unitPrice === 0) {
+                    \Log::warning("⚠️ Item sin precio unitario", [
+                        'index' => $index,
+                        'product_id' => $item['product_id'],
+                        'data' => $item,
+                    ]);
+                }
 
-                $createdItems[] = [
-                    'id' => $orderItem->id,
-                    'quantity' => $orderItem->quantity,
-                    'unit_price' => $orderItem->unit_price,
-                    'discount_pct' => $orderItem->discount_pct,
-                    'product' => $product,
-                    'store' => $store,
-                ];
+                $createdItems[] = $orderItem;
             }
+
 
             return response()->json([
                 'success' => true,
