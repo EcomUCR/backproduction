@@ -124,11 +124,13 @@ Route::get('/my-ip', function () {
     $ip = Http::get('https://ifconfig.me')->body();
     return response()->json(['ip' => $ip]);
 });
-// ✅ Nuevas rutas específicas por tienda (solo lectura pública)
+
+// Nuevas rutas específicas por tienda (solo lectura pública)
 Route::get('/store/{store_id}/products', [ProductController::class, 'indexByStore']);
 Route::get('/store/{store_id}/products/{product_id}', [ProductController::class, 'showByStoreProduct']);
 Route::get('/store/{store_id}/featured', [ProductController::class, 'featuredByStore']);
-// 💸 Productos en oferta por tienda (público)
+
+// Productos en oferta por tienda (público)
 Route::get('/store/{store_id}/offers', [ProductController::class, 'offersByStore']);
 
 //Reseñas de tiendas
@@ -138,6 +140,9 @@ Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 
 //Banners
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
+
+// Wishlist pública
+Route::get('/wishlist/public/{slug}', [WishlistController::class, 'showPublic']);
 
 //API VISA
 Route::get('/visa/test', function (VisaClientContract $visa) {
@@ -156,6 +161,8 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
         ], 500);
     }
 });
+
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
@@ -215,6 +222,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 💸 Stripe (crea PaymentIntent)
     Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
+
+    //wishlist
+    Route::get('/wishlist/me', [WishlistController::class, 'me']);
+    Route::post('/wishlist/toggle-visibility', [WishlistController::class, 'toggleVisibility']);
+    Route::post('/wishlist/clear', [WishlistController::class, 'clear']);
+    Route::post('/wishlist/add', [WishlistItemController::class, 'addItem']);
+    Route::delete('/wishlist/remove/{id}', [WishlistItemController::class, 'removeItem']);
 
     // 📦 Órdenes
     Route::get('/orders', [OrderController::class, 'index']);

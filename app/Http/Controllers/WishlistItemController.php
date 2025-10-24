@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 
 class WishlistItemController extends Controller
 {
+    public function index()
+    {
+        $items = WishlistItem::with('product')->get();
+        return response()->json($items);
+    }
+
     public function addItem(Request $request)
     {
         $request->validate([
@@ -17,20 +23,18 @@ class WishlistItemController extends Controller
         $user = $request->user();
         $wishlist = Wishlist::firstOrCreate(['user_id' => $user->id]);
 
-        $exists = $wishlist->items()->where('product_id', $request->product_id)->exists();
-        if ($exists) {
+        $item = $wishlist->items()->where('product_id', $request->product_id)->first();
+
+        if ($item) {
             return response()->json(['message' => 'El producto ya está en tu wishlist']);
         }
 
-        $item = $wishlist->items()->create([
-            'product_id' => $request->product_id
-        ]);
-
+        $wishlist->items()->create(['product_id' => $request->product_id]);
         $wishlist->load('items.product');
 
         return response()->json([
             'message' => 'Producto añadido a la wishlist correctamente',
-            'wishlist' => $wishlist
+            'wishlist' => $wishlist,
         ]);
     }
 
@@ -42,13 +46,10 @@ class WishlistItemController extends Controller
         $item->delete();
 
         $wishlist->load('items.product');
-        return response()->json(['message' => 'Producto eliminado de la wishlist', 'wishlist' => $wishlist]);
-    }
-
-    public function index()
-    {
-        $items = WishlistItem::with('product')->get();
-        return response()->json($items);
+        return response()->json([
+            'message' => 'Producto eliminado de la wishlist',
+            'wishlist' => $wishlist,
+        ]);
     }
 
     public function destroy($id)
