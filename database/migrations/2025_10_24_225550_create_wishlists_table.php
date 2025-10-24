@@ -9,16 +9,17 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::create('wishlist_items', function (Blueprint $table) {
+        Schema::create('wishlists', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('wishlist_id')->constrained('wishlists')->onDelete('cascade');
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('slug')->unique(); // para el link público
+            $table->boolean('is_public')->default(true); // visibilidad
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('wishlist_items');
+        Schema::dropIfExists('wishlists');
     }
 };
