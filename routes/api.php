@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
@@ -67,6 +68,11 @@ Route::get('/debug-cloudinary', function () {
         'env' => env('CLOUDINARY_URL')
     ];
 });
+//Adresses
+Route::get('/addresses', [AddressController::class, 'index']);
+Route::post('/addresses', [AddressController::class, 'store']);
+Route::patch('/addresses/{id}', [AddressController::class, 'update']);
+Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
 //Cupones
 Route::get('/coupons', [CouponController::class, 'index']);
 Route::post('/coupons', [CouponController::class, 'store']);
