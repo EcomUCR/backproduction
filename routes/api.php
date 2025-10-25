@@ -68,11 +68,7 @@ Route::get('/debug-cloudinary', function () {
         'env' => env('CLOUDINARY_URL')
     ];
 });
-//Adresses
-Route::get('/addresses', [AddressController::class, 'index']);
-Route::post('/addresses', [AddressController::class, 'store']);
-Route::patch('/addresses/{id}', [AddressController::class, 'update']);
-Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
+
 //Cupones
 Route::get('/coupons', [CouponController::class, 'index']);
 Route::post('/coupons', [CouponController::class, 'store']);
@@ -179,7 +175,11 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
 | Rutas que requieren token de autenticación con Sanctum
 */
 Route::middleware('auth:sanctum')->group(function () {
-
+    //Adresses
+    Route::get('/addresses', [AddressController::class, 'index']);
+    Route::post('/addresses', [AddressController::class, 'store']);
+    Route::patch('/addresses/{id}', [AddressController::class, 'update']);
+    Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
     // 📩 Notificaciones
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications', [NotificationController::class, 'store']);
