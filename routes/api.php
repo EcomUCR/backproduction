@@ -145,7 +145,7 @@ Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
 
 // Wishlist pública
-Route::get('/wishlist/{slug}', [WishlistController::class, 'showPublic']);
+Route::get('/wishlist/public/{slug}', [WishlistController::class, 'showPublic']);
 
 //API VISA
 Route::get('/visa/test', function (VisaClientContract $visa) {
