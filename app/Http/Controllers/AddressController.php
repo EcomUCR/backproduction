@@ -113,15 +113,24 @@ class AddressController extends Controller
 
     public function userAddresses(Request $request)
     {
-        $user = $request->user();
-        if (!$user) {
-            return response()->json(['error' => 'Usuario no autenticado'], 401);
-        }
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['error' => 'Usuario no autenticado'], 401);
+            }
 
-        return response()->json([
-            'success' => true,
-            'addresses' => $user->addresses()->orderByDesc('is_default')->get()
-        ]);
+            return response()->json([
+                'success' => true,
+                'addresses' => $user->addresses()->orderByDesc('is_default')->get(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ], 500);
+        }
     }
+
 
 }
