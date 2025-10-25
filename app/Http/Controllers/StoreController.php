@@ -86,15 +86,15 @@ class StoreController extends Controller
         $data = $validatedData;
 
         // 🔹 Agregar imágenes si vienen en payload
-        if ($request->filled('image')) {
-            $data['image'] = $request->image;
+        // 🔹 Agregar imágenes si vienen en payload
+        if ($request->has('image')) {
+            $data['image'] = $request->input('image');
         }
-        if ($request->filled('banner')) {
-            $data['banner'] = $request->banner;
+        if ($request->has('banner')) {
+            $data['banner'] = $request->input('banner');
         }
 
         $store->update($data);
-
 
         // 🔹 Actualizar redes sociales
         // 🔹 Actualizar redes sociales
