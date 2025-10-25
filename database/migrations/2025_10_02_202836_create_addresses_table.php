@@ -14,13 +14,14 @@ return new class extends Migration {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id(); // Primary Key
             $table->foreignId('customer_id')->constrained('users')->onDelete('cascade'); // Foreign Key to Users
-            $table->string('phone_number', 20); // Phone Number
+            $table->string('phone_number', 20)->nullable(); // Phone Number
             $table->string('street', 150)->nullable(); // Street
             $table->string('city', 100)->nullable(); // City
             $table->string('state', 100)->nullable(); // State
             $table->string('zip_code', 20)->nullable(); // Zip Code
             $table->string('country', 100)->nullable(); // Country
             $table->boolean('is_default')->default(false); // Is Default
+            $table->timestamps();
         });
     }
 
