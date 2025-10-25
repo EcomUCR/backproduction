@@ -97,15 +97,33 @@ class StoreController extends Controller
 
 
         // 🔹 Actualizar redes sociales
-        if ($request->has('social_links')) {
-            $store->storeSocials()->delete(); // Limpia anteriores
-            foreach ($request->social_links as $link) {
-                $store->storeSocials()->create([
-                    'platform' => $link['type'],
-                    'url' => $link['text'],
-                ]);
+        // 🔹 Actualizar redes sociales
+        if ($request->filled('social_links')) {
+            $links = $request->input('social_links');
+
+            // Si viene como string JSON, decodificarlo
+            if (is_string($links)) {
+                $decoded = json_decode($links, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $links = $decoded;
+                }
+            }
+
+            if (is_array($links)) {
+                // 🔸 Limpiar previas y recrear todas correctamente
+                $store->storeSocials()->delete();
+
+                foreach ($links as $link) {
+                    if (!empty($link['type']) && !empty($link['text'])) {
+                        $store->storeSocials()->create([
+                            'platform' => $link['type'],
+                            'url' => $link['text'],
+                        ]);
+                    }
+                }
             }
         }
+
 
         // 🔹 Recargar con relaciones
         $store->load(['user', 'storeSocials', 'banners', 'products', 'reviews']);
