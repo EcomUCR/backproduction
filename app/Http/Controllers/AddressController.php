@@ -14,7 +14,10 @@ class AddressController extends Controller
             return response()->json(['error' => 'Usuario no autenticado'], 401);
         }
 
-        return response()->json($user->addresses);
+        return response()->json([
+            'success' => true,
+            'addresses' => $user->addresses
+        ]);
     }
 
     public function store(Request $request)
@@ -43,7 +46,7 @@ class AddressController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Dirección creada correctamente',
-            'address' => $address
+            'address' => $address->fresh()
         ], 201);
     }
 
@@ -75,7 +78,7 @@ class AddressController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Dirección actualizada correctamente',
-            'address' => $address
+            'address' => $address->fresh()
         ]);
     }
 
@@ -89,6 +92,9 @@ class AddressController extends Controller
         $address = Address::where('user_id', $user->id)->findOrFail($id);
         $address->delete();
 
-        return response()->json(['success' => true, 'message' => 'Dirección eliminada correctamente']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Dirección eliminada correctamente'
+        ]);
     }
 }

@@ -17,11 +17,22 @@ class Address extends Model
         'state',
         'zip_code',
         'country',
-        'is_default'
+        'is_default',
     ];
 
-    public function customer()
+    protected $casts = [
+        'is_default' => 'boolean',
+    ];
+
+    // Inversa estándar
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // (Opcional) Atajo para filtrar la principal
+    public function scopeDefault($query)
+    {
+        return $query->where('is_default', true);
     }
 }

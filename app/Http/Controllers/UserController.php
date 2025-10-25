@@ -38,10 +38,12 @@ class UserController extends Controller
             ], 401);
         }
 
-        // Cargar la tienda del usuario
+        // Cargar la tienda y las direcciones del usuario
         $user->load([
             'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,support_email,status,is_verified',
+            'addresses:id,user_id,street,city,state,zip_code,country,phone_number,is_default',
         ]);
+
 
         return response()->json($user);
     }
@@ -148,66 +150,36 @@ class UserController extends Controller
         }
     }
 
-    public function changePassword(Request $request)
-{
-    $user = $request->user();
-
-    if (!$user) {
-        return response()->json(['error' => 'Usuario no autenticado.'], 401);
-    }
-
-    $validated = $request->validate([
-        'current_password' => 'required|string',
-        'new_password' => 'required|string|min:6|confirmed', // requiere new_password_confirmation
-    ]);
-
-    // Verificar contraseña actual
-    if (!\Hash::check($validated['current_password'], $user->password)) {
-        return response()->json([
-            'error' => 'La contraseña actual no es correcta.'
-        ], 400);
-    }
-
-    // Actualizar contraseña
-    $user->password = \Hash::make($validated['new_password']);
-    $user->save();
-
-    return response()->json([
-        'message' => 'Contraseña actualizada correctamente.'
-    ], 200);
-}
-
-
     public function update(Request $request, $id)
-{
-    $user = User::findOrFail($id);
+    {
+        $user = User::findOrFail($id);
 
-    $validated = $request->validate([
-        'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
-        'email' => 'sometimes|email|max:100|unique:users,email,' . $id,
-        'first_name' => 'nullable|string|max:80',
-        'last_name' => 'nullable|string|max:80',
-        'image' => 'nullable|string',
-        'status' => 'boolean',
-        'phone_number' => 'nullable|string|max:20',
-        'role' => 'in:ADMIN,SELLER,CUSTOMER',
-        'password' => 'nullable|string|min:6',
-    ]);
+        $validated = $request->validate([
+            'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
+            'email' => 'sometimes|email|max:100|unique:users,email,' . $id,
+            'first_name' => 'nullable|string|max:80',
+            'last_name' => 'nullable|string|max:80',
+            'image' => 'nullable|string',
+            'status' => 'boolean',
+            'phone_number' => 'nullable|string|max:20',
+            'role' => 'in:ADMIN,SELLER,CUSTOMER',
+            'password' => 'nullable|string|min:6',
+        ]);
 
-    // 🔐 Si viene contraseña nueva, encriptarla
-    if (!empty($validated['password'])) {
-        $validated['password'] = Hash::make($validated['password']);
-    } else {
-        unset($validated['password']);
+        // 🔐 Si viene contraseña nueva, encriptarla
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Usuario actualizado correctamente',
+            'user' => $user
+        ], 200);
     }
-
-    $user->update($validated);
-
-    return response()->json([
-        'message' => 'Usuario actualizado correctamente',
-        'user' => $user
-    ], 200);
-}
 
 
     /**
