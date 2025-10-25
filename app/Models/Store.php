@@ -41,7 +41,7 @@ class Store extends Model
 
     public function storeSocials()
     {
-        return $this->hasMany(StoreSocial::class);
+        return $this->hasMany(StoreSocial::class, 'store_id');
     }
 
     public function banners()

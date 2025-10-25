@@ -56,8 +56,6 @@ class StoreController extends Controller
     public function update(Request $request, $id)
     {
         $store = Store::findOrFail($id);
-
-        // Guardar valor anterior de verificación
         $wasVerified = (bool) $store->is_verified;
 
         $validatedData = $request->validate([
@@ -77,12 +75,30 @@ class StoreController extends Controller
             'banner' => 'nullable|string|max:1024',
             'is_verified' => 'nullable|boolean',
             'status' => 'nullable|string|in:ACTIVE,SUSPENDED,CLOSED',
+
+            // 🔹 Redes sociales
+            'social_links' => 'nullable|array',
+            'social_links.*.type' => 'required_with:social_links|string|max:50',
+            'social_links.*.text' => 'required_with:social_links|string|max:255',
         ]);
 
-        // Actualizar tienda
-        $store->update($validatedData);
+        // 🔹 Actualizar datos básicos
+        $data = $validatedData;
+
+        // 🔹 Agregar imágenes si vienen en payload
+        if ($request->filled('image')) {
+            $data['image'] = $request->image;
+        }
+        if ($request->filled('banner')) {
+            $data['banner'] = $request->banner;
+        }
+
+        $store->update($data);
+
+
+        // 🔹 Actualizar redes sociales
         if ($request->has('social_links')) {
-            $store->storeSocials()->delete(); // Limpia las anteriores
+            $store->storeSocials()->delete(); // Limpia anteriores
             foreach ($request->social_links as $link) {
                 $store->storeSocials()->create([
                     'platform' => $link['type'],
@@ -90,19 +106,16 @@ class StoreController extends Controller
                 ]);
             }
         }
+
         // 🔹 Recargar con relaciones
         $store->load(['user', 'storeSocials', 'banners', 'products', 'reviews']);
 
-        // Guardar valor nuevo
+        // 🔹 Si se verificó por primera vez, enviar notificación/correo
         $isNowVerified = (bool) $store->is_verified;
-
-        // ✅ Si cambió de no verificada → verificada
         if (!$wasVerified && $isNowVerified) {
             try {
                 $user = $store->user;
-
                 if ($user) {
-                    // 📨 1️⃣ Crear notificación interna
                     \App\Models\Notification::create([
                         'user_id' => $user->id,
                         'role' => $user->role,
@@ -119,9 +132,8 @@ class StoreController extends Controller
                         ],
                     ]);
 
-                    // 💌 2️⃣ Enviar correo HTML al usuario
                     $subject = '¡Tu tienda ha sido verificada!';
-                    $body = view('emails.store-verified-html', data: [
+                    $body = view('emails.store-verified-html', [
                         'store_name' => $store->name,
                         'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
                         'verification_date' => now()->format('d/m/Y H:i'),
@@ -140,6 +152,7 @@ class StoreController extends Controller
             'message' => 'Tienda actualizada correctamente',
         ]);
     }
+
 
 
     public function destroy($id)
