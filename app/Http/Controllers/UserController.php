@@ -40,12 +40,32 @@ class UserController extends Controller
 
         // Cargar la tienda y las direcciones del usuario
         $user->load([
-            'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,support_email,status,is_verified',
-            'addresses:id,user_id,street,city,state,zip_code,country,phone_number,is_default',
+            'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,support_email,status,is_verified'
         ]);
 
 
         return response()->json($user);
+    }
+    public function userAddresses(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'error' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        // ✅ Obtener direcciones del usuario autenticado
+        $addresses = $user->addresses()
+            ->select('id', 'street', 'city', 'state', 'zip_code', 'country', 'phone_number', 'is_default')
+            ->orderByDesc('is_default')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'addresses' => $addresses
+        ]);
     }
 
     /**
