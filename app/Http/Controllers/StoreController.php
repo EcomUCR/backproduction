@@ -81,7 +81,15 @@ class StoreController extends Controller
 
         // Actualizar tienda
         $store->update($validatedData);
-
+        if ($request->has('social_links')) {
+            $store->storeSocials()->delete(); // Limpia las anteriores
+            foreach ($request->social_links as $link) {
+                $store->storeSocials()->create([
+                    'platform' => $link['type'],
+                    'url' => $link['text'],
+                ]);
+            }
+        }
         // 🔹 Recargar con relaciones
         $store->load(['user', 'storeSocials', 'banners', 'products', 'reviews']);
 
