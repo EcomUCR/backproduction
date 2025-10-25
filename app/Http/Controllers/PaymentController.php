@@ -11,30 +11,61 @@ use App\Models\Cart;
 class PaymentController extends Controller
 {
     public function createPaymentIntent(Request $request)
-{
-    \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+    {
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+        $cart = Cart::where('user_id', auth()->id())
+            ->with('items.product')
+            ->first();
 
-    // ✅ Recalcular el total desde el carrito del usuario autenticado
-    $cart = Cart::where('user_id', auth()->id())->with('items.product')->first();
+        if (!$cart || $cart->items->isEmpty()) {
+            return response()->json([
+                'error' => true,
+                'message' => 'El carrito está vacío o no existe.'
+            ], 400);
+        }
 
-    $subtotal = $cart->items->sum(fn($item) => $item->product->price * $item->quantity);
-    $tax = $subtotal * 0.13;
-    $shipping = 1500;
-    $total = $subtotal + $tax + $shipping;
+        $subtotal = 0;
 
-    $amount = intval(round($total * 100)); // en céntimos
+        foreach ($cart->items as $item) {
+            $product = $item->product;
+            if (!$product || $product->status === 'ARCHIVED') {
+                continue;
+            }
+            $price = ($product->discount_price !== null && $product->discount_price > 0)
+                ? $product->discount_price
+                : $product->price;
 
-    $paymentIntent = \Stripe\PaymentIntent::create([
-        'amount' => $amount,
-        'currency' => 'crc',
-        'metadata' => [
-            'user_id' => auth()->id(),
-            'cart_id' => $cart->id,
-        ],
-    ]);
+            $subtotal += $price * $item->quantity;
+        }
 
-    return response()->json(['clientSecret' => $paymentIntent->client_secret]);
-}
+        if ($subtotal <= 0) {
+            return response()->json([
+                'error' => true,
+                'message' => 'No hay productos activos o válidos en el carrito para procesar el pago.'
+            ], 400);
+        }
+
+        $tax = round($subtotal * 0.13, 2);
+        $shipping = 1500;
+        $total = $subtotal + $tax + $shipping;
+
+        $amount = intval(round($total * 100));
+
+        $paymentIntent = \Stripe\PaymentIntent::create([
+            'amount' => $amount,
+            'currency' => 'crc',
+            'metadata' => [
+                'user_id' => auth()->id(),
+                'cart_id' => $cart->id,
+            ],
+        ]);
+
+        return response()->json([
+            'clientSecret' => $paymentIntent->client_secret,
+            'amount' => round($total, 2),
+            'currency' => 'CRC',
+        ]);
+    }
 
     public function webhook(Request $request)
     {

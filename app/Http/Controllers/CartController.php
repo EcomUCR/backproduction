@@ -187,11 +187,34 @@ class CartController extends Controller
 
         foreach ($cart->items as $item) {
             $product = $item->product;
+
+            // 🔸 Ignorar productos archivados
+            if (!$product || $product->status === 'ARCHIVED') {
+                continue;
+            }
+
             $price = ($product->discount_price && $product->discount_price > 0)
                 ? $product->discount_price
                 : $product->price;
+
             $subtotal += $price * $item->quantity;
+
+            // 🔹 Actualizar el precio unitario del ítem
             $item->update(['unit_price' => $price]);
+        }
+
+        // Si no hay productos activos, devolver totales en cero
+        if ($subtotal <= 0) {
+            return response()->json([
+                'message' => 'No hay productos activos en el carrito',
+                'totals' => [
+                    'subtotal' => 0,
+                    'taxes' => 0,
+                    'shipping' => 0,
+                    'total' => 0,
+                    'currency' => 'CRC',
+                ],
+            ]);
         }
 
         $taxes = round($subtotal * 0.13, 2);
@@ -204,7 +227,9 @@ class CartController extends Controller
             'shipping' => $shipping,
             'total' => round($total, 2),
             'currency' => 'CRC',
-            'items_count' => $cart->items->count(),
+            // Solo contar productos no archivados
+            'items_count' => $cart->items->where('product.status', '!=', 'ARCHIVED')->count(),
         ]);
     }
+
 }
