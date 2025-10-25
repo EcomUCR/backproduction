@@ -258,11 +258,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/session', [AuthenticatedSessionController::class, 'store']);
     Route::delete('/session', [AuthenticatedSessionController::class, 'destroy']);
 
-    Route::get('/debug-user', function (Request $request) {
-     return response()->json([
-            'user' => $request->user(),
-            'auth_header' => $request->header('Authorization'),
-     ]);
-    })->middleware('auth:sanctum');
 });
 
