@@ -92,7 +92,7 @@ class CartController extends Controller
 
         $cart->load([
             'items.product' => function ($q) {
-                $q->select('id', 'store_id', 'name', 'image_1_url', 'price', 'discount_price', 'stock');
+                $q->select('id', 'store_id', 'name', 'image_1_url', 'price', 'discount_price', 'stock', 'status');
             },
             'items.product.store' => function ($q) {
                 $q->select('id', 'name');
