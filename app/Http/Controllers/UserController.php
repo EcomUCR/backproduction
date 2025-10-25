@@ -148,6 +148,37 @@ class UserController extends Controller
         }
     }
 
+    public function update(Request $request, $id)
+{
+    $user = User::findOrFail($id);
+
+    $validated = $request->validate([
+        'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
+        'email' => 'sometimes|email|max:100|unique:users,email,' . $id,
+        'first_name' => 'nullable|string|max:80',
+        'last_name' => 'nullable|string|max:80',
+        'image' => 'nullable|string',
+        'status' => 'boolean',
+        'phone_number' => 'nullable|string|max:20',
+        'role' => 'in:ADMIN,SELLER,CUSTOMER',
+        'password' => 'nullable|string|min:6',
+    ]);
+
+    // 🔐 Si viene contraseña nueva, encriptarla
+    if (!empty($validated['password'])) {
+        $validated['password'] = Hash::make($validated['password']);
+    } else {
+        unset($validated['password']);
+    }
+
+    $user->update($validated);
+
+    return response()->json([
+        'message' => 'Usuario actualizado correctamente',
+        'user' => $user
+    ], 200);
+}
+
 
     /**
      * Iniciar sesión
