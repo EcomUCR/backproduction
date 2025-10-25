@@ -7,62 +7,74 @@ use Illuminate\Http\Request;
 
 class AddressController extends Controller
 {
-    public function index()
+    /**
+     * 📦 Listar direcciones del usuario autenticado
+     */
+    public function index(Request $request)
     {
-        $addresses = Address::all();
-        return response()->json($addresses);
+        return response()->json($request->user()->addresses);
     }
 
-    //hola juju
-
-    public function show($id)
-    {
-        $address = Address::findOrFail($id);
-        return response()->json($address);
-    }
-
+    /**
+     * ➕ Crear nueva dirección
+     */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'customer_id' => 'required|exists:users,id',
-            'phone_number' => 'required|string|max:20',
-            'street' => 'nullable|string|max:150',
-            'city' => 'nullable|string|max:100',
+        $validated = $request->validate([
+            'street' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
             'state' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:20',
-            'country' => 'nullable|string|max:100',
-            'is_default' => 'nullable|boolean',
+            'country' => 'required|string|max:100',
+            'phone_number' => 'nullable|string|max:20',
+            'is_default' => 'boolean',
         ]);
 
-        $address = Address::create($validatedData);
+        // Si la nueva dirección es predeterminada, desactivar las demás
+        if (!empty($validated['is_default']) && $validated['is_default']) {
+            $request->user()->addresses()->update(['is_default' => false]);
+        }
+
+        $address = $request->user()->addresses()->create($validated);
 
         return response()->json($address, 201);
     }
 
+    /**
+     * ✏️ Actualizar dirección existente
+     */
     public function update(Request $request, $id)
     {
-        $address = Address::findOrFail($id);
+        $address = Address::where('customer_id', $request->user()->id)->findOrFail($id);
 
-        $validatedData = $request->validate([
-            'phone_number' => 'sometimes|string|max:20',
-            'street' => 'nullable|string|max:150',
-            'city' => 'nullable|string|max:100',
+        $validated = $request->validate([
+            'street' => 'sometimes|string|max:255',
+            'city' => 'sometimes|string|max:100',
             'state' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:100',
-            'is_default' => 'nullable|boolean',
+            'phone_number' => 'nullable|string|max:20',
+            'is_default' => 'boolean',
         ]);
 
-        $address->update($validatedData);
+        // Si marca esta dirección como predeterminada
+        if (!empty($validated['is_default']) && $validated['is_default']) {
+            $request->user()->addresses()->update(['is_default' => false]);
+        }
+
+        $address->update($validated);
 
         return response()->json($address);
     }
 
-    public function destroy($id)
+    /**
+     * 🗑️ Eliminar dirección
+     */
+    public function destroy(Request $request, $id)
     {
-        $address = Address::findOrFail($id);
+        $address = Address::where('customer_id', $request->user()->id)->findOrFail($id);
         $address->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Dirección eliminada correctamente.']);
     }
 }
