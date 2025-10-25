@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use Illuminate\Http\Request;
 
+//comentario hola
+
 class AddressController extends Controller
 {
     public function index(Request $request)
