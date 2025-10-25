@@ -108,4 +108,18 @@ class AddressController extends Controller
             'message' => 'Dirección eliminada correctamente'
         ]);
     }
+
+    public function userAddresses(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'addresses' => $user->addresses()->orderByDesc('is_default')->get()
+        ]);
+    }
+
 }
