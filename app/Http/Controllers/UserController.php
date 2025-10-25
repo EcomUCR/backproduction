@@ -41,7 +41,9 @@ class UserController extends Controller
         // Cargar la tienda del usuario
         $user->load([
             'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,support_email,status,is_verified',
+            'addresses:id,customer_id,street,city,state,zip_code,country,is_default'
         ]);
+
 
         return response()->json($user);
     }
@@ -179,35 +181,35 @@ class UserController extends Controller
 
 
     public function update(Request $request, $id)
-{
-    $user = User::findOrFail($id);
+    {
+        $user = User::findOrFail($id);
 
-    $validated = $request->validate([
-        'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
-        'email' => 'sometimes|email|max:100|unique:users,email,' . $id,
-        'first_name' => 'nullable|string|max:80',
-        'last_name' => 'nullable|string|max:80',
-        'image' => 'nullable|string',
-        'status' => 'boolean',
-        'phone_number' => 'nullable|string|max:20',
-        'role' => 'in:ADMIN,SELLER,CUSTOMER',
-        'password' => 'nullable|string|min:6',
-    ]);
+        $validated = $request->validate([
+            'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
+            'email' => 'sometimes|email|max:100|unique:users,email,' . $id,
+            'first_name' => 'nullable|string|max:80',
+            'last_name' => 'nullable|string|max:80',
+            'image' => 'nullable|string',
+            'status' => 'boolean',
+            'phone_number' => 'nullable|string|max:20',
+            'role' => 'in:ADMIN,SELLER,CUSTOMER',
+            'password' => 'nullable|string|min:6',
+        ]);
 
-    // 🔐 Si viene contraseña nueva, encriptarla
-    if (!empty($validated['password'])) {
-        $validated['password'] = Hash::make($validated['password']);
-    } else {
-        unset($validated['password']);
+        // 🔐 Si viene contraseña nueva, encriptarla
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Usuario actualizado correctamente',
+            'user' => $user
+        ], 200);
     }
-
-    $user->update($validated);
-
-    return response()->json([
-        'message' => 'Usuario actualizado correctamente',
-        'user' => $user
-    ], 200);
-}
 
 
     /**

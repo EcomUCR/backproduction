@@ -7,62 +7,88 @@ use Illuminate\Http\Request;
 
 class AddressController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $addresses = Address::all();
-        return response()->json($addresses);
-    }
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
 
-    //hola juju
-
-    public function show($id)
-    {
-        $address = Address::findOrFail($id);
-        return response()->json($address);
+        return response()->json($user->addresses);
     }
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'customer_id' => 'required|exists:users,id',
-            'phone_number' => 'required|string|max:20',
-            'street' => 'nullable|string|max:150',
-            'city' => 'nullable|string|max:100',
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
+
+        $validated = $request->validate([
+            'street' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
             'state' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:20',
-            'country' => 'nullable|string|max:100',
-            'is_default' => 'nullable|boolean',
+            'country' => 'required|string|max:100',
+            'phone_number' => 'nullable|string|max:20',
+            'is_default' => 'boolean',
         ]);
 
-        $address = Address::create($validatedData);
+        if (!empty($validated['is_default']) && $validated['is_default']) {
+            $user->addresses()->update(['is_default' => false]);
+        }
 
-        return response()->json($address, 201);
+        $address = $user->addresses()->create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dirección creada correctamente',
+            'address' => $address
+        ], 201);
     }
 
     public function update(Request $request, $id)
     {
-        $address = Address::findOrFail($id);
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
 
-        $validatedData = $request->validate([
-            'phone_number' => 'sometimes|string|max:20',
-            'street' => 'nullable|string|max:150',
-            'city' => 'nullable|string|max:100',
+        $address = Address::where('user_id', $user->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'street' => 'sometimes|string|max:255',
+            'city' => 'sometimes|string|max:100',
             'state' => 'nullable|string|max:100',
             'zip_code' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:100',
-            'is_default' => 'nullable|boolean',
+            'phone_number' => 'nullable|string|max:20',
+            'is_default' => 'boolean',
         ]);
 
-        $address->update($validatedData);
+        if (!empty($validated['is_default']) && $validated['is_default']) {
+            $user->addresses()->update(['is_default' => false]);
+        }
 
-        return response()->json($address);
+        $address->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dirección actualizada correctamente',
+            'address' => $address
+        ]);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $address = Address::findOrFail($id);
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
+
+        $address = Address::where('user_id', $user->id)->findOrFail($id);
         $address->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['success' => true, 'message' => 'Dirección eliminada correctamente']);
     }
 }
