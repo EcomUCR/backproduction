@@ -37,6 +37,9 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutItemController;
 
+use App\Http\Controllers\WishlistItemController;
+use App\Http\Controllers\WishlistController;
+
 
 /*
 |--------------------------------------------------------------------------
