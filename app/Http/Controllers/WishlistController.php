@@ -8,12 +8,14 @@ use Illuminate\Support\Str;
 
 class WishlistController extends Controller
 {
+    // Get all wishlists with items.
     public function index()
     {
         $wishlists = Wishlist::with('items.product')->get();
         return response()->json($wishlists);
     }
 
+    // Get authenticated user's wishlist.
     public function me(Request $request)
     {
         $wishlist = Wishlist::firstOrCreate(
@@ -25,6 +27,7 @@ class WishlistController extends Controller
         return response()->json($wishlist);
     }
 
+    // Create a new wishlist.
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -41,6 +44,7 @@ class WishlistController extends Controller
         return response()->json($wishlist, 201);
     }
 
+    // Delete a wishlist.
     public function destroy($id)
     {
         $wishlist = Wishlist::findOrFail($id);
@@ -48,6 +52,7 @@ class WishlistController extends Controller
         return response()->json(null, 204);
     }
 
+    // Clear items from authenticated user's wishlist.
     public function clear(Request $request)
     {
         $wishlist = Wishlist::where('user_id', $request->user()->id)->first();
@@ -57,7 +62,7 @@ class WishlistController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    // ✅ Nueva ruta pública
+    // Get public wishlist by slug.
     public function showPublic($slug)
     {
         $wishlist = Wishlist::where('slug', $slug)
@@ -68,7 +73,7 @@ class WishlistController extends Controller
         return response()->json($wishlist);
     }
 
-    // ✅ Cambiar visibilidad pública/privada
+    // Toggle wishlist public/private visibility.
     public function toggleVisibility(Request $request)
     {
         $wishlist = Wishlist::where('user_id', $request->user()->id)->firstOrFail();

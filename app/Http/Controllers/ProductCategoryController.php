@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 
 class ProductCategoryController extends Controller
 {
+    // Retrieve all product-category relationships.
     public function index()
     {
         $productCategories = ProductCategory::all();
         return response()->json($productCategories);
     }
 
+    // Create a new product-category relationship.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -25,11 +27,12 @@ class ProductCategoryController extends Controller
         return response()->json($productCategory, 201);
     }
 
+    // Delete a specific product-category relationship.
     public function destroy($product_id, $category_id)
     {
         $productCategory = ProductCategory::where('product_id', $product_id)
-                                          ->where('category_id', $category_id)
-                                          ->firstOrFail();
+        ->where('category_id', $category_id)
+        ->firstOrFail();
         $productCategory->delete();
 
         return response()->json(null, 204);

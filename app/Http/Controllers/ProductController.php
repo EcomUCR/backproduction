@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    // 📦 Muestra todos los productos activos cuyas tiendas también estén activas
+    // Retrieve all active products from active and verified stores.
     public function index()
     {
         $products = DB::table('products')
@@ -23,7 +23,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    // 🔍 Mostrar un producto específico (solo si la tienda está activa y no está archivado)
+    // Retrieve a specific product if its store is active and product is not archived.
     public function show($id)
     {
         $product = DB::table('products')
@@ -38,7 +38,6 @@ class ProductController extends Controller
             return response()->json(['message' => 'Producto no encontrado o la tienda está inactiva'], 404);
         }
 
-        // 🔹 Agregar las categorías relacionadas
         $categories = DB::table('categories')
             ->join('product_category', 'categories.id', '=', 'product_category.category_id')
             ->where('product_category.product_id', '=', $id)
@@ -51,7 +50,7 @@ class ProductController extends Controller
     }
 
 
-    // 🏪 Productos destacados (solo activos y de tiendas activas)
+    // Retrieve featured products from active and verified stores.
     public function featured()
     {
         $featured = DB::table('products')
@@ -67,7 +66,7 @@ class ProductController extends Controller
         return response()->json($featured);
     }
 
-    // 🧩 No destacados (solo activos y de tiendas activas)
+    // Retrieve non-featured products from active and verified stores.
     public function notFeatured()
     {
         $notFeatured = DB::table('products')
@@ -83,17 +82,16 @@ class ProductController extends Controller
         return response()->json($notFeatured);
     }
 
-    // 🏬 Productos por tienda (solo si la tienda existe y está activa)
-    // 🏬 Productos por tienda (vista pública - solo productos ACTIVOS y tienda verificada)
+    // Retrieve all active products for a specific verified store.
     public function showByStore($store_id)
     {
         $products = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->where('products.store_id', '=', $store_id)
-            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'") // ✅ solo activos
-            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")  // ✅ tienda activa
-            ->where('stores.is_verified', true)   // ✅ tienda verificada
+            ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
+            ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
+            ->where('stores.is_verified', true)
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
             ->orderByDesc('products.created_at')
             ->get();
@@ -101,8 +99,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-
-    // 🏷️ Productos por categoría (solo activos y de tiendas activas)
+    // Retrieve all active products in a specific category from active stores
     public function byCategory($category_id)
     {
         $products = DB::table('products')
@@ -123,7 +120,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    // ⭐ Destacados por tienda (solo productos activos y tienda activa)
+    // Retrieve featured products for a specific verified store.
     public function featuredByStore($store_id)
     {
         $featured = DB::table('products')
@@ -140,7 +137,7 @@ class ProductController extends Controller
         return response()->json($featured);
     }
 
-    // 🛠️ Crear producto
+    // Create a new product and assign categories if provided.
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -162,7 +159,6 @@ class ProductController extends Controller
             'category_ids.*' => 'exists:categories,id',
         ]);
 
-        // 🔹 Guardar producto
         $id = DB::table('products')->insertGetId([
             'store_id' => $validated['store_id'],
             'sku' => $validated['sku'],
@@ -181,7 +177,6 @@ class ProductController extends Controller
             'updated_at' => now(),
         ]);
 
-        // 🔹 Registrar categorías si vienen
         if (!empty($validated['category_ids'])) {
             foreach ($validated['category_ids'] as $categoryId) {
                 DB::table('product_category')->insert([
@@ -193,7 +188,8 @@ class ProductController extends Controller
 
         return response()->json(DB::table('products')->find($id), 201);
     }
-    // ✏️ Actualizar producto
+    
+    // Update a product and synchronize its categories if provided.
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -213,9 +209,6 @@ class ProductController extends Controller
             'category_ids.*' => 'exists:categories,id',
         ]);
 
-        // ===============================
-        // 🔹 Construcción dinámica del update
-        // ===============================
         $fields = [
             'sku',
             'name',
@@ -234,7 +227,6 @@ class ProductController extends Controller
         $updateData = [];
 
         foreach ($fields as $field) {
-            // ⚠️ Si el campo viene en el request (aunque sea null), se actualiza
             if ($request->has($field)) {
                 $updateData[$field] = $request->input($field);
             }
@@ -242,16 +234,10 @@ class ProductController extends Controller
 
         $updateData['updated_at'] = now();
 
-        // ===============================
-        // 🔹 Actualización del producto
-        // ===============================
         DB::table('products')
             ->where('id', $id)
             ->update($updateData);
 
-        // ===============================
-        // 🔹 Sincronizar categorías (si vienen en el request)
-        // ===============================
         if ($request->has('category_ids')) {
             DB::table('product_category')->where('product_id', $id)->delete();
 
@@ -265,9 +251,6 @@ class ProductController extends Controller
             }
         }
 
-        // ===============================
-        // 🔹 Devolver producto actualizado
-        // ===============================
         $updatedProduct = DB::table('products')->find($id);
 
         return response()->json($updatedProduct);
@@ -275,18 +258,14 @@ class ProductController extends Controller
 
 
 
-    // ❌ Eliminar producto
+    // Delete a product by its ID.
     public function destroy($id)
     {
         DB::table('products')->where('id', '=', $id)->delete();
         return response()->json(null, 204);
     }
 
-    // ================================================================
-    // 🆕 NUEVOS MÉTODOS tipo StoreProductController (por tienda)
-    // ================================================================
-
-    // 📦 Todos los productos de una tienda (solo activos, tienda activa y verificada)
+    // Retrieve all active products for a specific verified store.
     public function indexByStore($store_id)
     {
         $products = DB::table('products')
@@ -303,7 +282,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    // 🔍 Producto específico de una tienda (con validaciones)
+    // Retrieve a specific product from a specific verified store.
     public function showByStoreProduct($store_id, $product_id)
     {
         $product = DB::table('products')
@@ -324,7 +303,7 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    // ⭐ Productos destacados por tienda (solo activos/verificados)
+    // Retrieve featured products from a specific verified store.
     public function featuredByStoreFull($store_id)
     {
         $featured = DB::table('products')
@@ -342,7 +321,7 @@ class ProductController extends Controller
         return response()->json($featured);
     }
 
-    // 🧩 Productos no destacados por tienda (solo activos/verificados)
+    // Retrieve non-featured products from a specific verified store.
     public function notFeaturedByStoreFull($store_id)
     {
         $notFeatured = DB::table('products')
@@ -359,7 +338,8 @@ class ProductController extends Controller
 
         return response()->json($notFeatured);
     }
-    // 👤 Productos completos de la tienda (solo excluye ARCHIVED)
+   
+    // Retrieve all products for a store excluding archived.
     public function allByStore($store_id)
     {
         $products = DB::table('products')
@@ -372,14 +352,15 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
-    // 💸 Productos en oferta por tienda (público)
+    
+    // Retrieve discounted products for a specific verified store.
     public function offersByStore($store_id)
     {
         $offers = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->where('products.store_id', '=', $store_id)
-            ->whereNotNull('products.discount_price') // debe tener descuento
+            ->whereNotNull('products.discount_price')
             ->where('products.discount_price', '>', 0)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
@@ -390,45 +371,47 @@ class ProductController extends Controller
 
         return response()->json($offers);
     }
-    // 🏆 Productos más vendidos (solo los que tengan al menos 1 venta)
+    
+    // Retrieve top-selling products across all stores.
     public function topSelling()
     {
         $products = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
-            ->where('products.sold_count', '>=', 1) // ✅ al menos una venta
+            ->where('products.sold_count', '>=', 1)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->where('stores.is_verified', true)
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->orderByDesc('products.sold_count') // ✅ orden de más vendidos
-            ->orderByDesc('products.created_at') // (desempate)
+            ->orderByDesc('products.sold_count')
+            ->orderByDesc('products.created_at')
             ->limit(20)
             ->get();
 
         return response()->json($products);
     }
-    // 🏆 Productos más vendidos de una tienda específica (solo los que tengan al menos 1 venta)
+    
+    // Retrieve top-selling products for a specific store.
     public function topSellingByStore($store_id)
     {
         $products = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
             ->where('products.store_id', '=', $store_id)
-            ->where('products.sold_count', '>=', 1) // ✅ mínimo una venta
+            ->where('products.sold_count', '>=', 1)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->where('stores.is_verified', true)
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->orderByDesc('products.sold_count') // ✅ más vendidos primero
-            ->orderByDesc('products.created_at') // desempate
+            ->orderByDesc('products.sold_count')
+            ->orderByDesc('products.created_at')
             ->limit(20)
             ->get();
 
         return response()->json($products);
     }
 
-    // 🔍 Buscar productos por nombre dentro de una tienda específica
+    // Search for products by name within a specific verified store.
     public function searchByStore(Request $request, $store_id)
     {
         $query = trim($request->input('q', ''));
@@ -445,14 +428,14 @@ class ProductController extends Controller
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->where('stores.is_verified', true)
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->where('products.name', 'ILIKE', "%{$query}%") // búsqueda insensible a mayúsculas
+            ->where('products.name', 'ILIKE', "%{$query}%")
             ->orderByDesc('products.created_at')
             ->get();
 
         return response()->json($products);
     }
 
-    // 🏆 Productos más vendidos por categoría (solo los que tengan al menos 1 venta)
+    // Retrieve top-selling products in a specific category.
     public function topSellingByCategory($category_id)
     {
         $products = DB::table('products')
@@ -465,13 +448,13 @@ class ProductController extends Controller
                 'categories.name as category_name'
             )
             ->where('product_category.category_id', '=', $category_id)
-            ->where('products.sold_count', '>=', 1) // ✅ al menos 1 venta
+            ->where('products.sold_count', '>=', 1)
             ->whereRaw("TRIM(products.status)::text = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status)::text = 'ACTIVE'")
             ->where('stores.is_verified', true)
             ->whereRaw("TRIM(products.status)::text <> 'ARCHIVED'")
-            ->orderByDesc('products.sold_count') // ✅ más vendidos primero
-            ->orderByDesc('products.created_at') // desempate por fecha
+            ->orderByDesc('products.sold_count')
+            ->orderByDesc('products.created_at')
             ->limit(20)
             ->get();
 

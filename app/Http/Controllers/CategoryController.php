@@ -7,18 +7,21 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    // Retrieve and return all categories.
     public function index()
     {
         $categories = Category::all();
         return response()->json($categories);
     }
 
+    // Retrieve and return a specific category by its ID.
     public function show($id)
     {
         $category = Category::findOrFail($id);
         return response()->json($category);
     }
 
+    // Create a new category with the provided name.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -30,6 +33,7 @@ class CategoryController extends Controller
         return response()->json($category, 201);
     }
 
+    // Update an existing category with the provided name.
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
@@ -43,6 +47,7 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
+    // Delete a category.
     public function destroy($id)
     {
         $category = Category::findOrFail($id);

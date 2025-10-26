@@ -7,18 +7,21 @@ use Illuminate\Http\Request;
 use App\Services\BrevoMailer;
 class ContactMessageController extends Controller
 {
+    // Retrieve and return all contact messages.
     public function index()
     {
         $contactMessages = ContactMessage::all();
         return response()->json($contactMessages);
     }
 
+    // Retrieve and return a specific contact message by its ID.
     public function show($id)
     {
         $contactMessage = ContactMessage::findOrFail($id);
         return response()->json($contactMessage);
     }
 
+    // Store a new contact message and send an email notification.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -28,11 +31,8 @@ class ContactMessageController extends Controller
             'message' => 'required|string',
             'read' => 'nullable|boolean',
         ]);
-
-        // Guarda en la base de datos (opcional)
+        
         $contactMessage = ContactMessage::create($validatedData);
-
-        // Arma el correo
         $subject = 'Nuevo mensaje desde el formulario de contacto';
         $to = env('MAIL_FROM_ADDRESS', 'ecomucr2025@gmail.com');
         $body = view('emails.contact', [
@@ -42,12 +42,12 @@ class ContactMessageController extends Controller
             'messageContent' => $validatedData['message']
         ])->render();
 
-        // ENVÍA EL CORREO
         BrevoMailer::send($to, $subject, $body);
 
         return response()->json($contactMessage, 201);
     }
 
+    // Update a contact message.
     public function update(Request $request, $id)
     {
         $contactMessage = ContactMessage::findOrFail($id);
@@ -65,6 +65,7 @@ class ContactMessageController extends Controller
         return response()->json($contactMessage);
     }
 
+    // Delete a contact message.
     public function destroy($id)
     {
         $contactMessage = ContactMessage::findOrFail($id);

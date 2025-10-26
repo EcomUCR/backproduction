@@ -7,18 +7,21 @@ use Illuminate\Http\Request;
 
 class StoreSocialController extends Controller
 {
+    // List all store socials.
     public function index()
     {
         $storeSocials = StoreSocial::all();
         return response()->json($storeSocials);
     }
 
+    // Get a specific store social.
     public function show($id)
     {
         $storeSocial = StoreSocial::findOrFail($id);
         return response()->json($storeSocial);
     }
 
+    // Create a new store social.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -32,6 +35,7 @@ class StoreSocialController extends Controller
         return response()->json($storeSocial, 201);
     }
 
+    // Update a store social.
     public function update(Request $request, $id)
     {
         $storeSocial = StoreSocial::findOrFail($id);
@@ -47,6 +51,7 @@ class StoreSocialController extends Controller
         return response()->json($storeSocial);
     }
 
+    // Delete a store social.
     public function destroy($id)
     {
         $storeSocial = StoreSocial::findOrFail($id);

@@ -7,18 +7,21 @@ use Illuminate\Http\Request;
 
 class ProductReviewController extends Controller
 {
+    // Retrieve all product reviews.
     public function index()
     {
         $productReviews = ProductReview::all();
         return response()->json($productReviews);
     }
 
+    // Retrieve a specific product review by ID.
     public function show($id)
     {
         $productReview = ProductReview::findOrFail($id);
         return response()->json($productReview);
     }
 
+    // Create a new product review.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -35,6 +38,7 @@ class ProductReviewController extends Controller
         return response()->json($productReview, 201);
     }
 
+    // Update an existing product review.
     public function update(Request $request, $id)
     {
         $productReview = ProductReview::findOrFail($id);
@@ -51,6 +55,7 @@ class ProductReviewController extends Controller
         return response()->json($productReview);
     }
 
+    // Delete a product review.
     public function destroy($id)
     {
         $productReview = ProductReview::findOrFail($id);

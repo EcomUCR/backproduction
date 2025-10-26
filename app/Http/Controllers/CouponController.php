@@ -8,9 +8,7 @@ use Illuminate\Support\Carbon;
 
 class CouponController extends Controller
 {
-    /**
-     * 📋 Listar todos los cupones
-     */
+    // List all coupons along with their related store, category, product, and user.
     public function index()
     {
         $coupons = Coupon::with(['store', 'category', 'product', 'user'])
@@ -20,9 +18,7 @@ class CouponController extends Controller
         return response()->json($coupons);
     }
 
-    /**
-     * ➕ Crear un nuevo cupón
-     */
+    // Create a new coupon with validation for uniqueness, type, value limits, and usage rules.
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -41,30 +37,26 @@ class CouponController extends Controller
             'expires_at' => 'nullable|date',
             'active' => 'boolean',
         ]);
-        // Verificar si ya existe un código igual
+
         $existing = Coupon::where('code', $validated['code'])->first();
         if ($existing) {
             return response()->json([
                 'message' => 'El código de cupón ya existe.',
                 'coupon' => $existing,
-            ], 409); // 409 Conflict
+            ], 409);
         }
         $coupon = Coupon::create($validated);
         return response()->json($coupon, 201);
     }
 
-    /**
-     * 🔍 Mostrar un cupón específico
-     */
+    // Retrieve a specific coupon along with its related store, category, product, and user.
     public function show($id)
     {
         $coupon = Coupon::with(['store', 'category', 'product', 'user'])->findOrFail($id);
         return response()->json($coupon);
     }
 
-    /**
-     * ✏️ Actualizar un cupón existente
-     */
+    // Update an existing coupon with optional data while validating business rules.
     public function update(Request $request, $id)
     {
         $coupon = Coupon::findOrFail($id);
@@ -90,9 +82,7 @@ class CouponController extends Controller
         return response()->json($coupon);
     }
 
-    /**
-     * ❌ Eliminar un cupón
-     */
+    // Delete a specific coupon.
     public function destroy($id)
     {
         $coupon = Coupon::findOrFail($id);
@@ -101,9 +91,7 @@ class CouponController extends Controller
         return response()->json(['message' => 'Cupón eliminado correctamente']);
     }
 
-    /**
-     * ✅ Validar un cupón antes del pago
-     */
+    // Validate a coupon before applying it to a payment.
     public function validateCoupon(Request $request)
     {
         $validated = $request->validate([
@@ -130,8 +118,6 @@ class CouponController extends Controller
             ], 400);
         }
 
-
-        // Retornar cupón válido y monto calculado
         $discount = 0;
 
         if ($coupon->type === 'PERCENTAGE') {

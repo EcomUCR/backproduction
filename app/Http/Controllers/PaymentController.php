@@ -10,6 +10,7 @@ use App\Models\Cart;
 
 class PaymentController extends Controller
 {
+    // Create a Stripe PaymentIntent for the authenticated user's cart.
     public function createPaymentIntent(Request $request)
     {
         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -67,6 +68,7 @@ class PaymentController extends Controller
         ]);
     }
 
+    // Handle Stripe webhook events for payment status updates.
     public function webhook(Request $request)
     {
         $payload = @file_get_contents('php://input');

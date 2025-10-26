@@ -7,9 +7,7 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    /**
-     * 📦 Devuelve las órdenes del usuario autenticado con sus productos.
-     */
+    // Retrieve all orders of the authenticated user along with their products.
     public function index(Request $request)
     {
         $user = $request->user();
@@ -28,9 +26,7 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    /**
-     * 🔍 Devuelve una orden específica con sus productos asociados.
-     */
+    // Retrieve a specific order along with its associated products.
     public function show($id)
     {
         $order = Order::with([
@@ -40,9 +36,7 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    /**
-     * 🧾 Crea una nueva orden con sus productos (OrderItems).
-     */
+    // Create a new order along with its associated items (OrderItems).
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -63,10 +57,8 @@ class OrderController extends Controller
             'items' => 'nullable|array',
         ]);
 
-        // Crear la orden
         $order = Order::create($validatedData);
 
-        // Crear items asociados (si existen)
         if (!empty($request->items)) {
             foreach ($request->items as $item) {
                 $order->items()->create([
@@ -85,9 +77,7 @@ class OrderController extends Controller
         ], 201);
     }
 
-    /**
-     * ✏️ Actualiza una orden existente.
-     */
+    // Update an existing order.
     public function update(Request $request, $id)
     {
         $order = Order::findOrFail($id);
@@ -116,9 +106,7 @@ class OrderController extends Controller
         ]);
     }
 
-    /**
-     * ❌ Elimina una orden y sus productos asociados.
-     */
+    // Delete an order along with its associated items.
     public function destroy($id)
     {
         $order = Order::findOrFail($id);
@@ -128,9 +116,7 @@ class OrderController extends Controller
         return response()->json(['message' => 'Orden eliminada correctamente 🗑️'], 204);
     }
 
-    /**
-     * 👤 Devuelve las órdenes de un usuario específico.
-     */
+    // Retrieve all orders for a specific user by the user's ID.
     public function userOrders($userId)
     {
         $orders = Order::where('user_id', $userId)

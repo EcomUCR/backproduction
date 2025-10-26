@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use Illuminate\Http\Request;
 
-//comentario hola
-
 class AddressController extends Controller
 {
+    // Retrieve and return all addresses for the authenticated user.
     public function index(Request $request)
     {
         $user = $request->user();
@@ -22,6 +21,7 @@ class AddressController extends Controller
         ]);
     }
 
+    // Create a new address for the authenticated user and handle default address logic.
     public function store(Request $request)
     {
         try {
@@ -53,7 +53,6 @@ class AddressController extends Controller
             ], 201);
 
         } catch (\Throwable $e) {
-            // 👇 Esta parte muestra el error real en el navegador
             return response()->json([
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -62,7 +61,7 @@ class AddressController extends Controller
         }
     }
 
-
+    // Update an existing address for the authenticated user and handle default address logic.
     public function update(Request $request, $id)
     {
         $user = $request->user();
@@ -95,6 +94,7 @@ class AddressController extends Controller
         ]);
     }
 
+    // Delete a specific address of the authenticated user.
     public function destroy(Request $request, $id)
     {
         $user = $request->user();

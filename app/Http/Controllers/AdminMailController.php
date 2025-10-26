@@ -8,10 +8,7 @@ use App\Services\BrevoMailer;
 
 class AdminMailController extends Controller
 {
-    /**
-     * Envía un correo HTML a todos los administradores
-     * cuando se crea una nueva tienda.
-     */
+    // Send an HTML email to all administrators when a new store is created.
     public function sendStoreVerificationEmail(Request $request)
     {
         $validatedData = $request->validate([
@@ -23,14 +20,12 @@ class AdminMailController extends Controller
             'admin_url'    => 'nullable|url'
         ]);
 
-        // Buscar administradores activos
         $admins = User::where('role', 'ADMIN')->get(['email']);
 
         if ($admins->isEmpty()) {
             return response()->json(['message' => 'No hay administradores para notificar'], 404);
         }
 
-        // Armar el correo igual que el contact controller
         $subject = 'Nueva solicitud de verificación de tienda';
         $body = view('emails.verification-request', [
             'store_name'   => $validatedData['store_name'],
@@ -41,7 +36,6 @@ class AdminMailController extends Controller
             'admin_url'    => $validatedData['admin_url'] ?? env('ADMIN_PANEL_URL', 'https://tukishopcr.com/admin/stores'),
         ])->render();
 
-        // Enviar el correo a todos los admins (uno por uno, como en ContactController)
         foreach ($admins as $admin) {
             BrevoMailer::send(
                 $admin->email,
