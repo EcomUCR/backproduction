@@ -112,7 +112,8 @@ Route::get('/store/{store_id}/search', [ProductController::class, 'searchByStore
 
 // 👤 Todos los productos (excepto ARCHIVED) visibles para el dueño
 Route::get('/store/{store_id}/all', [ProductController::class, 'allByStore']);
-
+Route::post('/contact-messages/{id}/reply', [ContactMessageController::class, 'reply'])
+    ->middleware('auth:sanctum');
 // Mensajes de contacto
 Route::apiResource('contact-messages', ContactMessageController::class);
 
@@ -187,9 +188,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::patch('/notifications/{id}/archive', [NotificationController::class, 'archive']);
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
-
-
-    Route::post('/contact-messages/{id}/reply', [ContactMessageController::class, 'reply']);
 
     // 👤 Usuario
     Route::get('/users', [UserController::class, 'index']);
