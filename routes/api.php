@@ -181,6 +181,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/addresses/{id}', [AddressController::class, 'update']);
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
     Route::get('/user/addresses', [AddressController::class, 'userAddresses']);
+
     // 📩 Notificaciones
     Route::post('/contact-messages/{id}/reply', [ContactMessageController::class, 'reply']);
     Route::get('/notifications', [NotificationController::class, 'index']);
@@ -195,6 +196,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 💬 Responder mensaje directamente desde el buzón
     Route::post('/contact-messages/{id}/reply', [ContactMessageController::class, 'reply']);
+    
     // 👤 Usuario
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/me', [UserController::class, 'me']);
@@ -253,6 +255,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/orders/{id}', [OrderController::class, 'update']);
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
     Route::get('/user/{userId}/orders', [OrderController::class, 'userOrders']);
+    Route::get('/stores/{storeId}/orders', [OrderController::class, 'storeOrders']);
 
     // 🌟 Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']);

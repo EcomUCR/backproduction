@@ -142,4 +142,17 @@ class OrderController extends Controller
 
         return response()->json($orders);
     }
+
+    //Devuelve las órdenes que contienen productos de una tienda específica.
+    public function storeOrders($storeId)
+    {
+        $orders = Order::whereHas('items', function ($q) use ($storeId) {
+           $q->where('store_id', $storeId);
+     })
+        ->with(['items.product:id,store_id,name,price,discount_price,image_1_url'])
+        ->orderByDesc('created_at')
+        ->get();
+
+        return response()->json($orders);
+    }
 }
