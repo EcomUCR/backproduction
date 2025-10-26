@@ -154,7 +154,45 @@ class UserController extends Controller
         }
     }
 
-    // Update a user.
+   public function changePassword(Request $request)
+{
+    $user = $request->user();
+
+    if (!$user) {
+        return response()->json(['error' => 'Usuario no autenticado.'], 401);
+    }
+
+    $validated = $request->validate([
+        'current_password' => 'required|string',
+        'new_password' => 'required|string|min:6|confirmed', // requiere new_password_confirmation
+    ]);
+
+    // Verificar contraseña actual
+    if (!\Hash::check($validated['current_password'], $user->password)) {
+        return response()->json([
+            'error' => 'La contraseña actual no es correcta.'
+        ], 400);
+    }
+
+    try {
+        // Actualizar contraseña
+        $user->password = \Hash::make($validated['new_password']);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Contraseña actualizada correctamente.'
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error('Error al actualizar la contraseña: ' . $e->getMessage());
+        return response()->json([
+            'error' => 'Ocurrió un problema al actualizar la contraseña.',
+            'details' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
