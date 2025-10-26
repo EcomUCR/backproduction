@@ -36,10 +36,7 @@ class ContactMessageController extends Controller
             'read' => 'nullable|boolean',
         ]);
 
-        // ✅ Guarda el mensaje
         $contactMessage = ContactMessage::create($validatedData);
-
-        // ✅ Arma y envía el correo
         $subject = 'Nuevo mensaje desde el formulario de contacto';
         $to = env('MAIL_FROM_ADDRESS', 'ecomucr2025@gmail.com');
         $body = view('emails.contact', [
@@ -51,7 +48,6 @@ class ContactMessageController extends Controller
 
         BrevoMailer::send($to, $subject, $body);
 
-        // ✅ Notificar a todos los admins
         try {
             $admins = User::where('role', 'ADMIN')->get();
             foreach ($admins as $admin) {
@@ -84,9 +80,7 @@ class ContactMessageController extends Controller
         ], 201);
     }
 
-    /**
-     * 💬 Responder a un mensaje de contacto directamente desde el buzón.
-     */
+    // Reply to a contact message from the inbox.
     public function reply(Request $request, $id)
     {
         $contactMessage = ContactMessage::findOrFail($id);
@@ -96,14 +90,12 @@ class ContactMessageController extends Controller
         ]);
 
         try {
-            // Verifica que el mensaje tenga correo de origen
             if (!$contactMessage->email) {
                 return response()->json([
                     'error' => 'El mensaje original no tiene un correo asociado para responder.',
                 ], 400);
             }
 
-            // Armar el correo de respuesta
             $subject = 'Re: ' . ($contactMessage->subject ?? 'Tu mensaje a TukiShop');
             $body = view('emails.contact-reply', [
                 'userName' => $contactMessage->name ?? 'Usuario',
@@ -112,13 +104,9 @@ class ContactMessageController extends Controller
                 'companyName' => env('APP_NAME', 'TukiShop'),
             ])->render();
 
-            // Enviar respuesta al remitente original
             BrevoMailer::send($contactMessage->email, $subject, $body);
-
-            // Opcional: registrar en log o base de datos
             Log::info("📨 Respuesta enviada a mensaje de contacto ID {$contactMessage->id}");
 
-            // Notificar al primer admin (opcional)
             $admin = User::where('role', 'ADMIN')->first();
             if ($admin) {
                 Notification::create([
@@ -144,6 +132,7 @@ class ContactMessageController extends Controller
         }
     }
 
+    // Update an existing contact message.
     public function update(Request $request, $id)
     {
         $contactMessage = ContactMessage::findOrFail($id);

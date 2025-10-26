@@ -99,7 +99,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    // Retrieve all active products in a specific category from active stores
+    // Retrieve all active products in a specific category from active stores.
     public function byCategory($category_id)
     {
         $products = DB::table('products')

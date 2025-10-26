@@ -23,7 +23,7 @@ class UserController extends Controller
     }
 
 
-    // Show authenticated user.
+    // Show authenticated user with related data.
     public function me(Request $request)
     {
         $user = $request->user();
@@ -64,14 +64,14 @@ class UserController extends Controller
         ]);
     }
 
-    // Show a user by ID.
+    // Show a user by ID with store relation.
     public function show($id)
     {
         $user = User::with('store:id,user_id,name,slug,status')->findOrFail($id);
         return response()->json($user);
     }
 
-    // Create a new user.
+    // Create a new user, cart, and store (if seller), and notify admins.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -154,8 +154,9 @@ class UserController extends Controller
         }
     }
 
-   public function changePassword(Request $request)
-{
+    // Change password for authenticated user.
+    public function changePassword(Request $request)
+    {
     $user = $request->user();
 
     if (!$user) {
@@ -164,10 +165,9 @@ class UserController extends Controller
 
     $validated = $request->validate([
         'current_password' => 'required|string',
-        'new_password' => 'required|string|min:6|confirmed', // requiere new_password_confirmation
+        'new_password' => 'required|string|min:6|confirmed',
     ]);
 
-    // Verificar contraseña actual
     if (!\Hash::check($validated['current_password'], $user->password)) {
         return response()->json([
             'error' => 'La contraseña actual no es correcta.'
@@ -175,7 +175,6 @@ class UserController extends Controller
     }
 
     try {
-        // Actualizar contraseña
         $user->password = \Hash::make($validated['new_password']);
         $user->save();
 
@@ -191,8 +190,7 @@ class UserController extends Controller
     }
 }
 
-
-
+    // Update user information.
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
