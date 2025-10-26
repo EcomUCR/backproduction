@@ -150,7 +150,7 @@ class UserController extends Controller
         }
     }
 
-    public function changePassword(Request $request)
+   public function changePassword(Request $request)
 {
     $user = $request->user();
 
@@ -170,14 +170,23 @@ class UserController extends Controller
         ], 400);
     }
 
-    // Actualizar contraseña
-    $user->password = \Hash::make($validated['new_password']);
-    $user->save();
+    try {
+        // Actualizar contraseña
+        $user->password = \Hash::make($validated['new_password']);
+        $user->save();
 
-    return response()->json([
-        'message' => 'Contraseña actualizada correctamente.'
-    ], 200);
+        return response()->json([
+            'message' => 'Contraseña actualizada correctamente.'
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error('Error al actualizar la contraseña: ' . $e->getMessage());
+        return response()->json([
+            'error' => 'Ocurrió un problema al actualizar la contraseña.',
+            'details' => $e->getMessage()
+        ], 500);
+    }
 }
+
 
 
     public function update(Request $request, $id)
