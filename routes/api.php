@@ -189,8 +189,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 
 
-    Route::post('/contact-messages/{id}/reply', [ContactMessageController::class, 'reply'])
-        ->middleware('auth:sanctum');
+    Route::post('/contact-messages/{id}/reply', [ContactMessageController::class, 'reply']);
 
     // 👤 Usuario
     Route::get('/users', [UserController::class, 'index']);
