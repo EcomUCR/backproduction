@@ -188,6 +188,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/notifications/{id}/archive', [NotificationController::class, 'archive']);
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 
+
+    Route::post('/contact-messages/{id}/reply', [ContactMessageController::class, 'reply'])
+        ->middleware('auth:sanctum');
+
     // 👤 Usuario
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/me', [UserController::class, 'me']);
