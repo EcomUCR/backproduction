@@ -196,7 +196,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 💬 Responder mensaje directamente desde el buzón
     Route::post('/contact-messages/{id}/reply', [ContactMessageController::class, 'reply']);
-    
+
     // 👤 Usuario
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/me', [UserController::class, 'me']);
@@ -206,7 +206,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}/store', [UserController::class, 'getStore']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     Route::patch('/users/{id}', [UserController::class, 'update']);
+    Route::patch('admin/users/{id}', [UserController::class, 'adminUpdate']);
+
     Route::put('/users/{id}/status', [UserController::class, 'updateStatus']);
+
 
     // 🏬 Tiendas
     Route::get('/stores/user/{user_id}', [StoreController::class, 'showByUser']);

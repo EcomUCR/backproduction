@@ -187,6 +187,72 @@ class UserController extends Controller
             ], 500);
         }
     }
+    // ✅ Actualizar un usuario desde el panel de administración
+    public function adminUpdate(Request $request, $id)
+    {
+        // 🔹 Reutiliza la validación del método update
+        $validated = $request->validate([
+            'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
+            'email' => 'sometimes|email|max:100|unique:users,email,' . $id,
+            'first_name' => 'nullable|string|max:80',
+            'last_name' => 'nullable|string|max:80',
+            'image' => 'nullable|string',
+            'status' => 'boolean',
+            'phone_number' => 'nullable|string|max:20',
+            'role' => 'in:ADMIN,SELLER,CUSTOMER',
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        // 🔹 Cifra la contraseña si viene
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        // 🔹 Actualiza usuario (igual que en update())
+        $user->update($validated);
+
+        try {
+            // 📨 Crear notificación interna
+            Notification::create([
+                'user_id' => $user->id,
+                'role' => $user->role,
+                'type' => 'USER_UPDATED_BY_ADMIN',
+                'title' => '⚙️ Tu perfil ha sido actualizado por un administrador',
+                'message' => "Un administrador ha realizado cambios en tu cuenta de TukiShop. 
+                          Si no reconoces esta acción, contáctanos inmediatamente.",
+                'related_id' => $user->id,
+                'related_type' => 'user',
+                'priority' => 'NORMAL',
+                'is_read' => false,
+                'data' => [
+                    'user_id' => $user->id,
+                    'username' => $user->username,
+                    'updated_by' => 'ADMIN',
+                ],
+            ]);
+
+            // 📨 Enviar correo de aviso
+            $subject = '⚙️ Tu perfil ha sido actualizado por un administrador';
+            $body = view('emails.user-updated-by-admin-html', [
+                'name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
+                'email' => $user->email,
+                'dashboard_url' => env('DASHBOARD_URL', 'https://tukishopcr.com/dashboard/profile'),
+            ])->render();
+
+            BrevoMailer::send($user->email, $subject, $body);
+        } catch (\Exception $e) {
+            \Log::error('❌ Error al enviar correo/notificación de actualización de admin: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'message' => 'Usuario actualizado correctamente por el administrador',
+            'user' => $user,
+        ], 200);
+    }
 
     // Change password for authenticated user.
     public function changePassword(Request $request)
