@@ -155,7 +155,7 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'discount_price' => 'nullable|numeric',
             'stock' => 'nullable|integer',
-            'sold_count' => 0,
+            'sold_count' => 'nullable|integer',
             'status' => 'nullable|string|in:ACTIVE,INACTIVE,ARCHIVED,DRAFT',
             'is_featured' => 'nullable|boolean',
             'category_ids' => 'nullable|array',
