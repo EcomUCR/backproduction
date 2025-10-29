@@ -53,11 +53,14 @@ class StoreController extends Controller
             'status' => 'nullable|string|in:ACTIVE,SUSPENDED,CLOSED',
         ]);
 
+        // 🆕 rating no se incluye manualmente
+        $validatedData['rating'] = 0.0;
+
         $store = Store::create($validatedData);
         return response()->json($store, 201);
     }
 
-    // Update an existing store, including social links and verification notifications.
+    // Update an existing store
     public function update(Request $request, $id)
     {
         $store = Store::findOrFail($id);
@@ -87,29 +90,25 @@ class StoreController extends Controller
 
         $data = $validatedData;
 
-        if ($request->has('image')) {
-            $data['image'] = $request->input('image');
-        }
-        if ($request->has('banner')) {
-            $data['banner'] = $request->input('banner');
-        }
+        // Mantener imágenes si se pasan
+        if ($request->has('image')) $data['image'] = $request->input('image');
+        if ($request->has('banner')) $data['banner'] = $request->input('banner');
+
+        // 🧠 rating no se modifica desde request
+        unset($data['rating']);
 
         $store->update($data);
 
+        // 🔄 Actualización social_links (sin cambios)
         if ($request->filled('social_links')) {
             $links = $request->input('social_links');
-
             if (is_string($links)) {
                 $decoded = json_decode($links, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $links = $decoded;
-                }
+                if (json_last_error() === JSON_ERROR_NONE) $links = $decoded;
             }
 
             if (is_array($links)) {
-
                 $store->storeSocials()->delete();
-
                 foreach ($links as $link) {
                     if (!empty($link['type']) && !empty($link['text'])) {
                         $store->storeSocials()->create([
@@ -121,8 +120,10 @@ class StoreController extends Controller
             }
         }
 
+        // 🔄 Reload de relaciones
         $store->load(['user', 'storeSocials', 'banners', 'products', 'reviews']);
 
+        // 🔔 Notificación si fue verificada
         $isNowVerified = (bool) $store->is_verified;
         if (!$wasVerified && $isNowVerified) {
             try {
@@ -164,8 +165,7 @@ class StoreController extends Controller
             'message' => 'Tienda actualizada correctamente',
         ]);
     }
-    // ✅ Actualizar tienda desde el panel de administración
-    // ✅ Actualizar tienda desde el panel de administración
+
     // ✅ Actualizar tienda desde el panel de administración
     public function adminUpdate(Request $request, $id)
     {
@@ -194,22 +194,21 @@ class StoreController extends Controller
             'social_links.*.text' => 'required_with:social_links|string|max:255',
         ]);
 
-        // 🔹 Actualiza la tienda (misma lógica del update original)
+        // 🧠 rating nunca se actualiza desde admin manualmente
+        unset($validatedData['rating']);
+
         $store->update($validatedData);
 
+        // Resto del código sin cambios ↓↓↓
         if ($request->filled('social_links')) {
             $links = $request->input('social_links');
-
             if (is_string($links)) {
                 $decoded = json_decode($links, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $links = $decoded;
-                }
+                if (json_last_error() === JSON_ERROR_NONE) $links = $decoded;
             }
 
             if (is_array($links)) {
                 $store->storeSocials()->delete();
-
                 foreach ($links as $link) {
                     if (!empty($link['type']) && !empty($link['text'])) {
                         $store->storeSocials()->create([
@@ -228,7 +227,6 @@ class StoreController extends Controller
             $user = $store->user;
 
             if ($user) {
-                // 🟨 Si la tienda fue verificada en esta actualización
                 if (!$wasVerified && $isNowVerified) {
                     \App\Models\Notification::create([
                         'user_id' => $user->id,
@@ -255,16 +253,14 @@ class StoreController extends Controller
                     ])->render();
 
                     \App\Services\BrevoMailer::send($user->email, $subject, $body);
-                }
-                // 🟩 Si no se modificó la verificación
-                else {
+                } else {
                     \App\Models\Notification::create([
                         'user_id' => $user->id,
                         'role' => $user->role,
                         'type' => 'STORE_UPDATED_BY_ADMIN',
                         'title' => '⚙️ Tu tienda fue actualizada por un administrador',
                         'message' => "Un administrador ha realizado cambios en tu tienda '{$store->name}'. 
-                                  Si no reconoces esta acción, contáctanos para más información.",
+                                      Si no reconoces esta acción, contáctanos para más información.",
                         'related_id' => $store->id,
                         'related_type' => 'store',
                         'priority' => 'NORMAL',
@@ -295,8 +291,6 @@ class StoreController extends Controller
             'message' => 'Tienda actualizada correctamente por el administrador',
         ]);
     }
-
-
 
     // Delete a store.
     public function destroy($id)
