@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Notification;
+use App\Services\BrevoMailer;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -90,6 +92,38 @@ class UserController extends Controller
             $user = User::create($validatedData);
             $cart = Cart::create(['user_id' => $user->id]);
             $user->setRelation('cart', $cart);
+            // 📨 Enviar notificación y correo de bienvenida
+            try {
+                // Crear notificación
+                Notification::create([
+                    'user_id' => $user->id,
+                    'role' => $user->role,
+                    'type' => 'WELCOME_USER',
+                    'title' => '👋 ¡Bienvenido a TukiShop!',
+                    'message' => "Hola {$user->username}, gracias por registrarte en TukiShop. 🎉\nExplora productos, crea tu tienda o empieza a comprar de inmediato.",
+                    'related_id' => $user->id,
+                    'related_type' => 'user',
+                    'priority' => 'NORMAL',
+                    'is_read' => false,
+                    'data' => [
+                        'user_id' => $user->id,
+                        'username' => $user->username,
+                        'role' => $user->role,
+                    ],
+                ]);
+
+                // Enviar correo de bienvenida
+                $subject = '🎉 ¡Bienvenido a TukiShop!';
+                $body = view('emails.welcome-user-html', [
+                    'name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
+                    'role' => $user->role,
+                    'login_url' => env('DASHBOARD_URL', 'https://tukishopcr.com/login'),
+                ])->render();
+
+                BrevoMailer::send($user->email, $subject, $body);
+            } catch (\Exception $e) {
+                \Log::error('❌ Error al enviar correo/notificación de bienvenida: ' . $e->getMessage());
+            }
 
             if ($user->role === 'SELLER') {
                 $store = $user->store()->create([
@@ -157,38 +191,38 @@ class UserController extends Controller
     // Change password for authenticated user.
     public function changePassword(Request $request)
     {
-    $user = $request->user();
+        $user = $request->user();
 
-    if (!$user) {
-        return response()->json(['error' => 'Usuario no autenticado.'], 401);
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado.'], 401);
+        }
+
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (!\Hash::check($validated['current_password'], $user->password)) {
+            return response()->json([
+                'error' => 'La contraseña actual no es correcta.'
+            ], 400);
+        }
+
+        try {
+            $user->password = \Hash::make($validated['new_password']);
+            $user->save();
+
+            return response()->json([
+                'message' => 'Contraseña actualizada correctamente.'
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar la contraseña: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Ocurrió un problema al actualizar la contraseña.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
-
-    $validated = $request->validate([
-        'current_password' => 'required|string',
-        'new_password' => 'required|string|min:6|confirmed',
-    ]);
-
-    if (!\Hash::check($validated['current_password'], $user->password)) {
-        return response()->json([
-            'error' => 'La contraseña actual no es correcta.'
-        ], 400);
-    }
-
-    try {
-        $user->password = \Hash::make($validated['new_password']);
-        $user->save();
-
-        return response()->json([
-            'message' => 'Contraseña actualizada correctamente.'
-        ], 200);
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar la contraseña: ' . $e->getMessage());
-        return response()->json([
-            'error' => 'Ocurrió un problema al actualizar la contraseña.',
-            'details' => $e->getMessage()
-        ], 500);
-    }
-}
 
     // Update user information.
     public function update(Request $request, $id)
