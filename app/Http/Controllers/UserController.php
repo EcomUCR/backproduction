@@ -117,7 +117,7 @@ class UserController extends Controller
                 $body = view('emails.welcome-user-html', [
                     'name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
                     'role' => $user->role,
-                    'login_url' => env('DASHBOARD_URL', 'https://tukishopcr.com/login'),
+                    'login_url' => env('DASHBOARD_URL', 'https://tukishop.vercel.app/loginRegister'),
                 ])->render();
 
                 BrevoMailer::send($user->email, $subject, $body);
