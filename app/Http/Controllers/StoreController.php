@@ -7,11 +7,13 @@ use Illuminate\Http\Request;
 
 class StoreController extends Controller
 {
+    // List all stores.
     public function index()
     {
         return response()->json(Store::all());
     }
 
+    // Show store associated with a specific user.
     public function showByUser($user_id)
     {
         $store = Store::with(['user', 'storeSocials', 'banners', 'products', 'reviews'])
@@ -25,12 +27,14 @@ class StoreController extends Controller
         return response()->json(['store' => $store]);
     }
 
+    // Show a specific store by ID.
     public function show($id)
     {
         $store = Store::with(['user', 'storeSocials', 'banners', 'products', 'reviews'])->findOrFail($id);
         return response()->json($store);
     }
 
+    // Create a new store.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -53,6 +57,7 @@ class StoreController extends Controller
         return response()->json($store, 201);
     }
 
+    // Update an existing store, including social links and verification notifications.
     public function update(Request $request, $id)
     {
         $store = Store::findOrFail($id);
@@ -75,18 +80,13 @@ class StoreController extends Controller
             'banner' => 'nullable|string|max:1024',
             'is_verified' => 'nullable|boolean',
             'status' => 'nullable|string|in:ACTIVE,SUSPENDED,CLOSED',
-
-            // 🔹 Redes sociales
             'social_links' => 'nullable|array',
             'social_links.*.type' => 'required_with:social_links|string|max:50',
             'social_links.*.text' => 'required_with:social_links|string|max:255',
         ]);
 
-        // 🔹 Actualizar datos básicos
         $data = $validatedData;
 
-        // 🔹 Agregar imágenes si vienen en payload
-        // 🔹 Agregar imágenes si vienen en payload
         if ($request->has('image')) {
             $data['image'] = $request->input('image');
         }
@@ -96,12 +96,9 @@ class StoreController extends Controller
 
         $store->update($data);
 
-        // 🔹 Actualizar redes sociales
-        // 🔹 Actualizar redes sociales
         if ($request->filled('social_links')) {
             $links = $request->input('social_links');
 
-            // Si viene como string JSON, decodificarlo
             if (is_string($links)) {
                 $decoded = json_decode($links, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
@@ -110,7 +107,7 @@ class StoreController extends Controller
             }
 
             if (is_array($links)) {
-                // 🔸 Limpiar previas y recrear todas correctamente
+
                 $store->storeSocials()->delete();
 
                 foreach ($links as $link) {
@@ -124,11 +121,8 @@ class StoreController extends Controller
             }
         }
 
-
-        // 🔹 Recargar con relaciones
         $store->load(['user', 'storeSocials', 'banners', 'products', 'reviews']);
 
-        // 🔹 Si se verificó por primera vez, enviar notificación/correo
         $isNowVerified = (bool) $store->is_verified;
         if (!$wasVerified && $isNowVerified) {
             try {
@@ -171,8 +165,7 @@ class StoreController extends Controller
         ]);
     }
 
-
-
+    // Delete a store.
     public function destroy($id)
     {
         $store = Store::findOrFail($id);

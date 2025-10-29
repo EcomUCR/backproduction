@@ -13,10 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class StoreReviewNotificationController extends Controller
 {
-    /**
-     * Envía una notificación por correo y crea una notificación interna
-     * cuando una tienda recibe una nueva reseña.
-     */
+    // Send notification and email when a store receives a new review.
     public function sendReviewNotification(Request $request)
     {
         $validated = $request->validate([
@@ -24,12 +21,10 @@ class StoreReviewNotificationController extends Controller
             'review_id' => 'required|exists:reviews,id',
         ]);
 
-        // 📦 Obtiene los datos necesarios
         $store = Store::with('user')->findOrFail($validated['store_id']);
         $review = StoreReview::with('user')->findOrFail($validated['review_id']);
         $seller = $store->user;
 
-        // 🧩 Datos del correo
         $subject = 'Has recibido una nueva reseña en tu tienda | TukiShop';
         $to = $seller->email;
 
@@ -44,13 +39,11 @@ class StoreReviewNotificationController extends Controller
         ])->render();
 
         try {
-            // 📬 Enviar correo
             BrevoMailer::send($to, $subject, $body);
         } catch (\Throwable $th) {
             Log::error('Error al enviar correo de reseña: ' . $th->getMessage());
         }
 
-        // 🔔 Crear notificación interna
         Notification::create([
             'user_id' => $seller->id,
             'role' => 'SELLER',

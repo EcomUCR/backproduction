@@ -7,18 +7,21 @@ use Illuminate\Http\Request;
 
 class StoreCategoryController extends Controller
 {
+    // List all store categories.
     public function index()
     {
         $storeCategories = StoreCategory::all();
         return response()->json($storeCategories);
     }
 
+    // Show a specific store category.
     public function show($id)
     {
         $storeCategory = StoreCategory::findOrFail($id);
         return response()->json($storeCategory);
     }
 
+    // Create a new store category.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -30,6 +33,7 @@ class StoreCategoryController extends Controller
         return response()->json($storeCategory, 201);
     }
 
+    // Update an existing store category.
     public function update(Request $request, $id)
     {
         $storeCategory = StoreCategory::findOrFail($id);
@@ -43,6 +47,7 @@ class StoreCategoryController extends Controller
         return response()->json($storeCategory);
     }
 
+    // Delete a store category.
     public function destroy($id)
     {
         $storeCategory = StoreCategory::findOrFail($id);

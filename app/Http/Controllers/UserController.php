@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Cart;
 class UserController extends Controller
 {
-    /**
-     * Listar todos los usuarios
-     */
+    // List all users.
     public function index()
     {
         $users = User::with([
@@ -25,9 +23,7 @@ class UserController extends Controller
     }
 
 
-    /**
-     * Obtener el usuario autenticado con sus datos relacionados
-     */
+    // Show authenticated user with related data.
     public function me(Request $request)
     {
         $user = $request->user();
@@ -38,7 +34,6 @@ class UserController extends Controller
             ], 401);
         }
 
-        // Cargar la tienda y las direcciones del usuario
         $user->load([
             'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,support_email,status,is_verified'
         ]);
@@ -46,6 +41,8 @@ class UserController extends Controller
 
         return response()->json($user);
     }
+
+    // Get authenticated user's addresses.
     public function userAddresses(Request $request)
     {
         $user = $request->user();
@@ -56,7 +53,6 @@ class UserController extends Controller
             ], 401);
         }
 
-        // ✅ Obtener direcciones del usuario autenticado
         $addresses = $user->addresses()
             ->select('id', 'street', 'city', 'state', 'zip_code', 'country', 'phone_number', 'is_default')
             ->orderByDesc('is_default')
@@ -68,18 +64,14 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Mostrar un usuario por ID
-     */
+    // Show a user by ID with store relation.
     public function show($id)
     {
         $user = User::with('store:id,user_id,name,slug,status')->findOrFail($id);
         return response()->json($user);
     }
 
-    /**
-     * Registrar un nuevo usuario
-     */
+    // Create a new user, cart, and store (if seller), and notify admins.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -92,18 +84,13 @@ class UserController extends Controller
             'role' => 'required|string|in:ADMIN,SELLER,CUSTOMER',
         ]);
 
-        // 🔐 Encriptar contraseña
         $validatedData['password'] = Hash::make($validatedData['password']);
 
         try {
-            // 👤 Crear usuario
             $user = User::create($validatedData);
-
-            // 🛒 Crear carrito
             $cart = Cart::create(['user_id' => $user->id]);
             $user->setRelation('cart', $cart);
 
-            // 🏬 Si es vendedor, crear tienda y notificar a los administradores
             if ($user->role === 'SELLER') {
                 $store = $user->store()->create([
                     'name' => $user->username,
@@ -113,8 +100,6 @@ class UserController extends Controller
                 ]);
 
                 $user->setRelation('store', $store);
-
-                // 🔔 Crear notificación interna
                 $admins = \App\Models\User::where('role', 'ADMIN')->get();
 
                 foreach ($admins as $admin) {
@@ -136,7 +121,6 @@ class UserController extends Controller
                     ]);
                 }
 
-                // 📧 Enviar correo HTML a todos los administradores
                 $admins = \App\Models\User::where('role', 'ADMIN')->get(['email']);
 
                 if ($admins->isNotEmpty()) {
@@ -170,8 +154,9 @@ class UserController extends Controller
         }
     }
 
-   public function changePassword(Request $request)
-{
+    // Change password for authenticated user.
+    public function changePassword(Request $request)
+    {
     $user = $request->user();
 
     if (!$user) {
@@ -180,10 +165,9 @@ class UserController extends Controller
 
     $validated = $request->validate([
         'current_password' => 'required|string',
-        'new_password' => 'required|string|min:6|confirmed', // requiere new_password_confirmation
+        'new_password' => 'required|string|min:6|confirmed',
     ]);
 
-    // Verificar contraseña actual
     if (!\Hash::check($validated['current_password'], $user->password)) {
         return response()->json([
             'error' => 'La contraseña actual no es correcta.'
@@ -191,7 +175,6 @@ class UserController extends Controller
     }
 
     try {
-        // Actualizar contraseña
         $user->password = \Hash::make($validated['new_password']);
         $user->save();
 
@@ -207,8 +190,7 @@ class UserController extends Controller
     }
 }
 
-
-
+    // Update user information.
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -225,7 +207,6 @@ class UserController extends Controller
             'password' => 'nullable|string|min:6',
         ]);
 
-        // 🔐 Si viene contraseña nueva, encriptarla
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
@@ -241,9 +222,7 @@ class UserController extends Controller
     }
 
 
-    /**
-     * Iniciar sesión
-     */
+    // Authenticate user and return token.
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -251,7 +230,6 @@ class UserController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        // Buscar usuario
         $user = User::where('email', $credentials['email'])->first();
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
@@ -260,7 +238,6 @@ class UserController extends Controller
             ], 401);
         }
 
-        // Crear token de acceso con Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -269,9 +246,7 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Obtener la tienda asociada a un usuario
-     */
+    // Get store associated with user.
     public function getStore($id)
     {
         $user = User::with([
@@ -307,9 +282,7 @@ class UserController extends Controller
     }
 
 
-    /**
-     * Eliminar usuario y todas sus relaciones
-     */
+    // Delete a user.
     public function destroy($id)
     {
         try {
@@ -325,7 +298,7 @@ class UserController extends Controller
             ])->findOrFail($id);
 
             if ($user->store) {
-                // Eliminar reseñas de productos antes de borrar los productos
+
                 foreach ($user->store->products as $product) {
                     $product->productReviews()->delete();
                 }
@@ -336,7 +309,6 @@ class UserController extends Controller
                 $user->store->delete();
             }
 
-            // Eliminar otras relaciones
             $user->orders()->delete();
             $user->addresses()->delete();
             $user->productReviews()->delete();
@@ -356,6 +328,7 @@ class UserController extends Controller
         }
     }
 
+    // Update user's status.
     public function updateStatus($id, Request $request)
     {
         $user = User::findOrFail($id);

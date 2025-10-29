@@ -7,18 +7,21 @@ use Illuminate\Http\Request;
 
 class StoreBannerController extends Controller
 {
+    // List all store banners.
     public function index()
     {
         $storeBanners = StoreBanner::all();
         return response()->json($storeBanners);
     }
 
+    // Show a specific store banner.
     public function show($id)
     {
         $storeBanner = StoreBanner::findOrFail($id);
         return response()->json($storeBanner);
     }
 
+    // Create a new store banner.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -35,6 +38,7 @@ class StoreBannerController extends Controller
         return response()->json($storeBanner, 201);
     }
 
+    // Update an existing store banner.
     public function update(Request $request, $id)
     {
         $storeBanner = StoreBanner::findOrFail($id);
@@ -53,6 +57,7 @@ class StoreBannerController extends Controller
         return response()->json($storeBanner);
     }
 
+    // Delete a store banner.
     public function destroy($id)
     {
         $storeBanner = StoreBanner::findOrFail($id);

@@ -8,12 +8,13 @@ use App\Models\Product;
 
 class CartController extends Controller
 {
+    // Retrieve and return all carts.
     public function index()
     {
         return response()->json(Cart::all());
     }
 
-    // 🛒 Agregar producto al carrito
+    // Add a product to the authenticated user's cart.
     public function addItem(Request $request)
     {
         $request->validate([
@@ -48,11 +49,13 @@ class CartController extends Controller
         ]);
     }
 
+    // Retrieve and return a specific cart by its ID.
     public function show($id)
     {
         return response()->json(Cart::findOrFail($id));
     }
 
+    // Create a new cart for a user.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -64,6 +67,7 @@ class CartController extends Controller
         return response()->json($cart, 201);
     }
 
+    // Update an existing cart with the provided data.
     public function update(Request $request, $id)
     {
         $cart = Cart::findOrFail($id);
@@ -77,6 +81,7 @@ class CartController extends Controller
         return response()->json($cart);
     }
 
+    // Delete a cart by its ID.
     public function destroy($id)
     {
         $cart = Cart::findOrFail($id);
@@ -85,7 +90,7 @@ class CartController extends Controller
         return response()->json(null, 204);
     }
 
-    // 👤 Obtener carrito del usuario autenticado
+    // Retrieve the authenticated user's cart, creating one if it doesn't exist.
     public function me(Request $request)
     {
         $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
@@ -102,7 +107,7 @@ class CartController extends Controller
         return response()->json($cart);
     }
 
-    // 🧹 Vaciar carrito
+    // Empty all items from the authenticated user's cart.
     public function clear(Request $request)
     {
         try {
@@ -135,7 +140,7 @@ class CartController extends Controller
         }
     }
 
-    // ✏️ Actualizar cantidad
+    // Update the quantity of a specific item in the authenticated user's cart.
     public function updateItem(Request $request, $id)
     {
         $request->validate(['quantity' => 'required|integer|min:1']);
@@ -150,7 +155,7 @@ class CartController extends Controller
         return response()->json(['message' => 'Cantidad actualizada', 'cart' => $cart]);
     }
 
-    // ❌ Eliminar producto
+    // Remove a specific item from the authenticated user's cart.
     public function removeItem($id)
     {
         $user = request()->user();
@@ -162,7 +167,7 @@ class CartController extends Controller
         return response()->json(['message' => 'Producto eliminado', 'cart' => $cart]);
     }
 
-    // 💰 Totales del carrito
+    // Calculate and return the totals (subtotal, taxes, shipping, total) of the authenticated user's cart.
     public function totals(Request $request)
     {
         $user = $request->user();
@@ -188,7 +193,6 @@ class CartController extends Controller
         foreach ($cart->items as $item) {
             $product = $item->product;
 
-            // 🔸 Ignorar productos archivados
             if (!$product || $product->status === 'ARCHIVED') {
                 continue;
             }
@@ -198,12 +202,9 @@ class CartController extends Controller
                 : $product->price;
 
             $subtotal += $price * $item->quantity;
-
-            // 🔹 Actualizar el precio unitario del ítem
             $item->update(['unit_price' => $price]);
         }
 
-        // Si no hay productos activos, devolver totales en cero
         if ($subtotal <= 0) {
             return response()->json([
                 'message' => 'No hay productos activos en el carrito',
@@ -227,7 +228,6 @@ class CartController extends Controller
             'shipping' => $shipping,
             'total' => round($total, 2),
             'currency' => 'CRC',
-            // Solo contar productos no archivados
             'items_count' => $cart->items->where('product.status', '!=', 'ARCHIVED')->count(),
         ]);
     }

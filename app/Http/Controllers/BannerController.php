@@ -7,27 +7,21 @@ use Illuminate\Http\Request;
 
 class BannerController extends Controller
 {
-    /**
-     * Mostrar todos los banners.
-     */
+    // Retrieve and return all banners.
     public function index()
     {
         $banners = Banner::all();
         return response()->json($banners);
     }
 
-    /**
-     * Mostrar un banner específico.
-     */
+    // Retrieve and return a specific banner by its ID.
     public function show($id)
     {
         $banner = Banner::findOrFail($id);
         return response()->json($banner);
     }
 
-    /**
-     * Crear un nuevo banner.
-     */
+    // Create a new banner with the provided data.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -49,9 +43,7 @@ class BannerController extends Controller
         return response()->json($banner, 201);
     }
 
-    /**
-     * Actualizar un banner existente.
-     */
+    // Update an existing banner with the provided data.
     public function update(Request $request, $id)
     {
         $banner = Banner::findOrFail($id);
@@ -75,9 +67,7 @@ class BannerController extends Controller
         return response()->json($banner);
     }
 
-    /**
-     * Eliminar un banner.
-     */
+    // Delete a banner.
     public function destroy($id)
     {
         $banner = Banner::findOrFail($id);

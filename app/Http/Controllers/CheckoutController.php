@@ -8,10 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
-    /**
-     * 🧾 Inicializa una nueva orden antes del pago.
-     * Crea la orden base con estado "PENDING" y datos del cliente.
-     */
+    // Initialize a new order before payment with PENDING status and customer details.
     public function init(Request $request)
     {
         $user = $request->user();
@@ -23,7 +20,6 @@ class CheckoutController extends Controller
             ], 401);
         }
 
-        // ✅ Validar datos del pedido base
         $validated = $request->validate([
             'subtotal' => 'required|numeric|min:0',
             'shipping' => 'nullable|numeric|min:0',
@@ -37,7 +33,6 @@ class CheckoutController extends Controller
         ]);
 
         try {
-            // 🧾 Crear la orden inicial (sin items todavía)
             $order = Order::create([
                 'user_id' => $user->id,
                 'status' => 'PENDING',
@@ -71,10 +66,7 @@ class CheckoutController extends Controller
         }
     }
 
-    /**
-     * 💳 Confirma el pago y actualiza la orden.
-     * Cambia el estado, guarda el ID del pago y el método de pago.
-     */
+    // Confirm a payment and update the order status, payment ID, and payment method.
     public function confirm(Request $request)
     {
         $user = $request->user();
@@ -86,7 +78,6 @@ class CheckoutController extends Controller
             ], 401);
         }
 
-        // ✅ Validar los datos de confirmación del pago
         $validated = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'status' => 'required|string|in:PAID,FAILED,CANCELLED',

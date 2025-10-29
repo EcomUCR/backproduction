@@ -7,6 +7,7 @@ use OpenAI\Client;
 
 class OpenAIController extends Controller
 {
+    // Generate a creative product description using OpenAI based on the provided product name.
     public function generateDescription(Request $request)
     {
         $request->validate([

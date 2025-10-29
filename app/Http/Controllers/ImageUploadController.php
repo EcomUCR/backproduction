@@ -7,13 +7,13 @@ use Cloudinary\Cloudinary;
 
 class ImageUploadController extends Controller
 {
+    // Handles image uploads to Cloudinary and returns the URL.
     public function upload(Request $request)
     {
         $request->validate([
             'image' => 'required|image|max:4096',
         ]);
-
-        // Instancia Cloudinary con los datos de tu .env
+        
         $cloudinary = new Cloudinary([
             'cloud' => [
                 'cloud_name' => env('CLOUDINARY_CLOUD_NAME', 'dpbghs8ep'),

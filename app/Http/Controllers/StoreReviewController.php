@@ -12,18 +12,21 @@ use Illuminate\Support\Facades\Log;
 
 class StoreReviewController extends Controller
 {
+    // List all store reviews.
     public function index()
     {
         $storeReviews = StoreReview::all();
         return response()->json($storeReviews);
     }
 
+    // Show a specific store review by ID.
     public function show($id)
     {
         $storeReview = StoreReview::findOrFail($id);
         return response()->json($storeReview);
     }
 
+    // Create a new store review, send notification and email to the store owner.
     public function store(Request $request)
     {
         try {
@@ -36,15 +39,12 @@ class StoreReviewController extends Controller
                 'dislike' => 'nullable|boolean',
             ]);
 
-            // ✅ Crear reseña
             $storeReview = StoreReview::create($validatedData);
 
-            // 🔎 Obtener datos relacionados
             $store = Store::with('user')->findOrFail($validatedData['store_id']);
             $seller = $store->user;
             $reviewer = User::findOrFail($validatedData['user_id']);
 
-            // 📩 Datos del correo
             $subject = 'Has recibido una nueva reseña en tu tienda | TukiShop';
             $to = $seller->email;
 
@@ -59,14 +59,11 @@ class StoreReviewController extends Controller
             ])->render();
 
             try {
-                // ✉️ Enviar correo al dueño de la tienda
                 BrevoMailer::send($to, $subject, $body);
             } catch (\Throwable $th) {
-                // El envío del correo falla, pero no detiene el flujo
                 Log::warning('⚠️ Error al enviar correo de reseña: ' . $th->getMessage());
             }
 
-            // 🔔 Crear notificaciones
             Notification::create([
                 'user_id' => $seller->id,
                 'role' => 'SELLER',
@@ -107,7 +104,6 @@ class StoreReviewController extends Controller
             ], 201);
 
         } catch (\Throwable $th) {
-            // 🔍 Captura y muestra el error real como JSON
             return response()->json([
                 'error' => true,
                 'message' => $th->getMessage(),
@@ -116,7 +112,7 @@ class StoreReviewController extends Controller
         }
     }
 
-
+    // Update an existing store review.
     public function update(Request $request, $id)
     {
         $storeReview = StoreReview::findOrFail($id);
@@ -131,6 +127,7 @@ class StoreReviewController extends Controller
         return response()->json($storeReview);
     }
 
+    // Delete a store review by its ID.
     public function destroy($id)
     {
         $storeReview = StoreReview::findOrFail($id);
@@ -139,6 +136,7 @@ class StoreReviewController extends Controller
         return response()->json(null, 204);
     }
 
+    // Get summary statistics (average rating, distribution, total) for a store.
     public function summary($store_id)
     {
         $reviews = StoreReview::where('store_id', $store_id)->get();
@@ -152,6 +150,7 @@ class StoreReviewController extends Controller
         ]);
     }
 
+    // Get all reviews for a specific store with user details.
     public function reviewsByStore($store_id)
     {
         $reviews = StoreReview::where('store_id', $store_id)

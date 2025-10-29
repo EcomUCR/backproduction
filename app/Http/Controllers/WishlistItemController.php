@@ -8,12 +8,14 @@ use Illuminate\Http\Request;
 
 class WishlistItemController extends Controller
 {
+    // Get all wishlist items with products.
     public function index()
     {
         $items = WishlistItem::with('product')->get();
         return response()->json($items);
     }
 
+    // Add a product to authenticated user's wishlist.
     public function addItem(Request $request)
     {
         $request->validate([
@@ -38,6 +40,7 @@ class WishlistItemController extends Controller
         ]);
     }
 
+    // Remove a product from authenticated user's wishlist.
     public function removeItem($id)
     {
         $user = request()->user();
@@ -52,6 +55,7 @@ class WishlistItemController extends Controller
         ]);
     }
 
+    // Delete a wishlist item by ID.
     public function destroy($id)
     {
         $wishlistItem = WishlistItem::findOrFail($id);

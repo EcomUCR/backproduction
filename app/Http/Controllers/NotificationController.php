@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    // 📜 Listar notificaciones del usuario autenticado
+    // List all notifications for the authenticated user.
     public function index()
     {
         $user = Auth::user();
@@ -20,7 +20,7 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
-    // 👁️ Marcar notificación como leída
+    // Mark a specific notification as read.
     public function markAsRead($id)
     {
         $notification = Notification::findOrFail($id);
@@ -30,7 +30,7 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Notificación marcada como leída']);
     }
 
-    // 🗄️ Archivar notificación
+    // Archive a specific notification.
     public function archive($id)
     {
         $notification = Notification::findOrFail($id);
@@ -40,7 +40,7 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Notificación archivada']);
     }
 
-    // 🧹 Eliminar notificación
+    // Delete a specific notification by its ID.
     public function destroy($id)
     {
         $notification = Notification::findOrFail($id);
@@ -49,7 +49,7 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Notificación eliminada']);
     }
 
-    // 🆕 Crear una nueva notificación (manual o desde eventos del sistema)
+    // Create a new notification, either manually or from system events.
     public function store(Request $request)
     {
         $validated = $request->validate([

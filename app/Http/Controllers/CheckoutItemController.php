@@ -11,10 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class CheckoutItemController extends Controller
 {
-    /**
-     * 📦 Añade productos a una orden existente.
-     * Además, retorna los detalles completos de producto y tienda.
-     */
+    // Add products to an existing order and return detailed information about the created items.
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -32,12 +29,9 @@ class CheckoutItemController extends Controller
             $createdItems = [];
 
             foreach ($validated['items'] as $index => $item) {
-                // 🔹 Sanitizar tipos
                 $unitPrice = isset($item['unit_price']) ? (float)$item['unit_price'] : 0;
                 $quantity = isset($item['quantity']) ? (int)$item['quantity'] : 1;
                 $discount = isset($item['discount_pct']) ? (float)$item['discount_pct'] : 0;
-
-                // 🧾 Crear el item
                 $orderItem = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => (int)$item['product_id'],
@@ -46,8 +40,7 @@ class CheckoutItemController extends Controller
                     'unit_price' => $unitPrice,
                     'discount_pct' => $discount,
                 ]);
-
-                // 🔍 Registrar logs si algo sale raro
+                
                 if ($unitPrice === 0) {
                     \Log::warning("⚠️ Item sin precio unitario", [
                         'index' => $index,
