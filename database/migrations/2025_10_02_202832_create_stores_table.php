@@ -28,6 +28,7 @@ return new class extends Migration {
             $table->string('support_email', 120)->nullable(); // Support Email
             $table->string('support_phone', 30)->nullable(); // Support Phone
             $table->boolean('is_verified')->default(false); // Is Verified
+            $table->decimal('rating', 3, 2)->default(0.00);
             $table->timestamp('verification_date')->nullable(); // Verification Date
             $table->string('status', 20)->default('ACTIVE'); // Status
             $table->timestamps(); // Created At & Updated At
