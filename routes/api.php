@@ -214,6 +214,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // 🏬 Tiendas
     Route::get('/stores/user/{user_id}', [StoreController::class, 'showByUser']);
     Route::patch('/stores/{id}', [StoreController::class, 'update']);
+    Route::patch('admin/stores/{id}', [StoreController::class, 'adminUpdate']);
+
     Route::put('/stores/{id}', [StoreController::class, 'update']);
 
     // 🎨 Banners
