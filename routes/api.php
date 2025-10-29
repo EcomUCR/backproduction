@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\BannerImageController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -48,6 +50,8 @@ use App\Http\Controllers\WishlistController;
 |--------------------------------------------------------------------------
 | Rutas que no requieren autenticación
 */
+//Reportes
+Route::post('/reports', [ReportController::class, 'store']);
 
 //OpenAI API
 Route::post('/openai/description', [OpenAIController::class, 'generateDescription'])
@@ -145,6 +149,7 @@ Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 
 //Banners
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
+Route::get('/banner-images', [BannerImageController::class, 'index']);
 
 // Wishlist pública
 Route::get('/wishlist/public/{slug}', [WishlistController::class, 'showPublic']);
@@ -223,7 +228,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/banners/{id}', [BannerController::class, 'update']);
     Route::patch('/banners/{id}', [BannerController::class, 'update']);
     Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
-
+    Route::post('/banner-images', [BannerImageController::class, 'store']);   // crear nuevo banner
+    Route::delete('/banner-images/{id}', [BannerImageController::class, 'destroy']);
+    
     // 🛒 Carrito
     Route::get('/cart/me', [CartController::class, 'me']);
     Route::post('/cart/clear', [CartController::class, 'clear']);
@@ -280,5 +287,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/session', [AuthenticatedSessionController::class, 'store']);
     Route::delete('/session', [AuthenticatedSessionController::class, 'destroy']);
 
+    //Reportes
+    Route::get('/reports', [ReportController::class, 'index']);     // listar todos
+    Route::get('/reports/{id}', [ReportController::class, 'show']); // ver detalle
+    Route::put('/reports/{id}', [ReportController::class, 'update']); // actualizar estado / notas
+    Route::delete('/reports/{id}', [ReportController::class, 'destroy']); // eliminar
 });
 
