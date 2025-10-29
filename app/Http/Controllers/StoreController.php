@@ -165,6 +165,7 @@ class StoreController extends Controller
         ]);
     }
     // ✅ Actualizar tienda desde el panel de administración
+    // ✅ Actualizar tienda desde el panel de administración
     public function adminUpdate(Request $request, $id)
     {
         $store = Store::findOrFail($id);
@@ -221,48 +222,12 @@ class StoreController extends Controller
 
         $store->load(['user', 'storeSocials', 'banners', 'products', 'reviews']);
 
-        try {
-            $user = $store->user;
-
-            if ($user) {
-                // 📨 Crear notificación interna
-                \App\Models\Notification::create([
-                    'user_id' => $user->id,
-                    'role' => $user->role,
-                    'type' => 'STORE_UPDATED_BY_ADMIN',
-                    'title' => '⚙️ Tu tienda fue actualizada por un administrador',
-                    'message' => "Un administrador ha realizado cambios en tu tienda '{$store->name}'. 
-                              Si no reconoces esta acción, contáctanos para más información.",
-                    'related_id' => $store->id,
-                    'related_type' => 'store',
-                    'priority' => 'NORMAL',
-                    'is_read' => false,
-                    'data' => [
-                        'store_id' => $store->id,
-                        'store_name' => $store->name,
-                        'updated_by' => 'ADMIN',
-                    ],
-                ]);
-
-                // 💌 Enviar correo al dueño de la tienda
-                $subject = '⚙️ Tu tienda ha sido actualizada por un administrador';
-                $body = view('emails.store-updated-by-admin-html', [
-                    'store_name' => $store->name,
-                    'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
-                    'dashboard_url' => env('DASHBOARD_URL', 'https://tukishopcr.com/dashboard/store'),
-                ])->render();
-
-                \App\Services\BrevoMailer::send($user->email, $subject, $body);
-            }
-        } catch (\Exception $e) {
-            \Log::error('❌ Error al enviar correo/notificación de actualización de tienda por admin: ' . $e->getMessage());
-        }
-
         return response()->json([
             'store' => $store,
             'message' => 'Tienda actualizada correctamente por el administrador',
         ]);
     }
+
 
     // Delete a store.
     public function destroy($id)
