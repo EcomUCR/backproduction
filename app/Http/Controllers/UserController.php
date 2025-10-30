@@ -187,28 +187,48 @@ class UserController extends Controller
         }
     }
 
-    // ✅ Authenticate user by email OR username and return token.
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'login' => 'required|string|max:100',
-            'password' => 'required|string|min:6',
+    // ✅ Authenticate user by email OR username (case-insensitive, con logs)
+public function login(Request $request)
+{
+    $credentials = $request->validate([
+        'login' => 'required|string|max:100',
+        'password' => 'required|string|min:6',
+    ]);
+
+    $loginType = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+    // 🔍 Búsqueda insensible a mayúsculas
+    $user = User::whereRaw("LOWER($loginType) = LOWER(?)", [$credentials['login']])->first();
+
+    // 🧩 Log para Render (ayuda a depurar fácilmente)
+    \Log::info('🧩 Intento de login', [
+        'login_enviado' => $credentials['login'],
+        'tipo_login' => $loginType,
+        'usuario_encontrado' => $user ? $user->id : 'no encontrado',
+    ]);
+
+    if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        \Log::warning('⚠️ Login fallido', [
+            'usuario' => $credentials['login'],
+            'razon' => !$user ? 'Usuario no encontrado' : 'Contraseña incorrecta',
         ]);
 
-        $loginType = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        $user = User::where($loginType, $credentials['login'])->first();
-
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            return response()->json(['error' => 'Credenciales inválidas'], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-        ]);
+        return response()->json(['error' => 'Credenciales inválidas'], 401);
     }
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    \Log::info('✅ Login exitoso', [
+        'user_id' => $user->id,
+        'username' => $user->username,
+    ]);
+
+    return response()->json([
+        'user' => $user,
+        'token' => $token,
+    ]);
+}
+
 
     // Get store associated with user.
     public function getStore($id)
