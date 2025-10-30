@@ -1,14 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Notification;
 use App\Services\BrevoMailer;
-
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Cart;
+
 class UserController extends Controller
 {
     // List all users.
@@ -19,11 +20,10 @@ class UserController extends Controller
                 $query->select('id', 'user_id', 'name', 'category_id', 'image', 'banner', 'slug')
                     ->with(['storeSocials', 'banners']);
             },
-        ])->get(['id', 'username', 'email', 'first_name', 'last_name', 'image', 'status', 'phone_number', 'role', 'created_at', 'updated_at']); // columnas del usuario
+        ])->get(['id', 'username', 'email', 'first_name', 'last_name', 'image', 'status', 'phone_number', 'role', 'created_at', 'updated_at']);
 
         return response()->json($users);
     }
-
 
     // Show authenticated user with related data.
     public function me(Request $request)
@@ -39,7 +39,6 @@ class UserController extends Controller
         $user->load([
             'store:id,user_id,name,slug,description,image,banner,registered_address,support_phone,support_email,status,is_verified'
         ]);
-
 
         return response()->json($user);
     }
@@ -92,15 +91,15 @@ class UserController extends Controller
             $user = User::create($validatedData);
             $cart = Cart::create(['user_id' => $user->id]);
             $user->setRelation('cart', $cart);
-            // 📨 Enviar notificación y correo de bienvenida
+
+            // 📨 Notificación y correo de bienvenida
             try {
-                // Crear notificación
                 Notification::create([
                     'user_id' => $user->id,
                     'role' => $user->role,
                     'type' => 'WELCOME_USER',
                     'title' => '👋 ¡Bienvenido a TukiShop!',
-                    'message' => "Hola {$user->username}, gracias por registrarte en TukiShop. 🎉\nExplora productos, crea tu tienda o empieza a comprar de inmediato.",
+                    'message' => "Hola {$user->username}, gracias por registrarte en TukiShop. 🎉",
                     'related_id' => $user->id,
                     'related_type' => 'user',
                     'priority' => 'NORMAL',
@@ -112,7 +111,6 @@ class UserController extends Controller
                     ],
                 ]);
 
-                // Enviar correo de bienvenida
                 $subject = '🎉 ¡Bienvenido a TukiShop!';
                 $body = view('emails.welcome-user-html', [
                     'name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
@@ -134,10 +132,11 @@ class UserController extends Controller
                 ]);
 
                 $user->setRelation('store', $store);
-                $admins = \App\Models\User::where('role', 'ADMIN')->get();
+
+                $admins = User::where('role', 'ADMIN')->get();
 
                 foreach ($admins as $admin) {
-                    \App\Models\Notification::create([
+                    Notification::create([
                         'user_id' => $admin->id,
                         'role' => 'ADMIN',
                         'type' => 'STORE_VERIFICATION',
@@ -155,11 +154,11 @@ class UserController extends Controller
                     ]);
                 }
 
-                $admins = \App\Models\User::where('role', 'ADMIN')->get(['email']);
+                $admins = User::where('role', 'ADMIN')->get(['email']);
 
                 if ($admins->isNotEmpty()) {
                     $subject = 'Nueva solicitud de verificación de tienda';
-                    $body = view('emails.verification-request-html', data: [
+                    $body = view('emails.verification-request-html', [
                         'store_name' => $store->name,
                         'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
                         'owner_email' => $user->email,
@@ -169,7 +168,7 @@ class UserController extends Controller
                     ])->render();
 
                     foreach ($admins as $admin) {
-                        \App\Services\BrevoMailer::send($admin->email, $subject, $body);
+                        BrevoMailer::send($admin->email, $subject, $body);
                     }
                 }
             }
@@ -187,71 +186,81 @@ class UserController extends Controller
             ], 500);
         }
     }
-    // ✅ Actualizar un usuario desde el panel de administración
-    public function adminUpdate(Request $request, $id)
-    {
-        // 🔹 Reutiliza la validación del método update
-        $validated = $request->validate([
-            'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
-            'email' => 'sometimes|email|max:100|unique:users,email,' . $id,
-            'first_name' => 'nullable|string|max:80',
-            'last_name' => 'nullable|string|max:80',
-            'image' => 'nullable|string',
-            'status' => 'boolean',
-            'phone_number' => 'nullable|string|max:20',
-            'role' => 'in:ADMIN,SELLER,CUSTOMER',
-            'password' => 'nullable|string|min:6',
+
+    // ✅ Authenticate user by email OR username (case-insensitive, con logs)
+public function login(Request $request)
+{
+    $credentials = $request->validate([
+        'login' => 'required|string|max:100',
+        'password' => 'required|string|min:6',
+    ]);
+
+    $loginType = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+    // 🔍 Búsqueda insensible a mayúsculas
+    $user = User::whereRaw("LOWER($loginType) = LOWER(?)", [$credentials['login']])->first();
+
+    // 🧩 Log para Render (ayuda a depurar fácilmente)
+    \Log::info('🧩 Intento de login', [
+        'login_enviado' => $credentials['login'],
+        'tipo_login' => $loginType,
+        'usuario_encontrado' => $user ? $user->id : 'no encontrado',
+    ]);
+
+    if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        \Log::warning('⚠️ Login fallido', [
+            'usuario' => $credentials['login'],
+            'razon' => !$user ? 'Usuario no encontrado' : 'Contraseña incorrecta',
         ]);
 
-        $user = User::findOrFail($id);
+        return response()->json(['error' => 'Credenciales inválidas'], 401);
+    }
 
-        // 🔹 Cifra la contraseña si viene
-        if (!empty($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
-        } else {
-            unset($validated['password']);
-        }
+    $token = $user->createToken('auth_token')->plainTextToken;
 
-        // 🔹 Actualiza usuario (igual que en update())
-        $user->update($validated);
+    \Log::info('✅ Login exitoso', [
+        'user_id' => $user->id,
+        'username' => $user->username,
+    ]);
 
-        try {
-            // 📨 Crear notificación interna
-            Notification::create([
-                'user_id' => $user->id,
-                'role' => $user->role,
-                'type' => 'USER_UPDATED_BY_ADMIN',
-                'title' => '⚙️ Tu perfil ha sido actualizado por un administrador',
-                'message' => "Un administrador ha realizado cambios en tu cuenta de TukiShop. 
-                          Si no reconoces esta acción, contáctanos inmediatamente.",
-                'related_id' => $user->id,
-                'related_type' => 'user',
-                'priority' => 'NORMAL',
-                'is_read' => false,
-                'data' => [
-                    'user_id' => $user->id,
-                    'username' => $user->username,
-                    'updated_by' => 'ADMIN',
-                ],
-            ]);
+    return response()->json([
+        'user' => $user,
+        'token' => $token,
+    ]);
+}
 
-            // 📨 Enviar correo de aviso
-            $subject = '⚙️ Tu perfil ha sido actualizado por un administrador';
-            $body = view('emails.user-updated-by-admin-html', [
-                'name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
-                'email' => $user->email,
-                'dashboard_url' => env('DASHBOARD_URL', 'https://tukishopcr.com/dashboard/profile'),
-            ])->render();
 
-            BrevoMailer::send($user->email, $subject, $body);
-        } catch (\Exception $e) {
-            \Log::error('❌ Error al enviar correo/notificación de actualización de admin: ' . $e->getMessage());
+    // Get store associated with user.
+    public function getStore($id)
+    {
+        $user = User::with([
+            'store' => function ($query) {
+                $query->select(
+                    'id',
+                    'user_id',
+                    'name',
+                    'slug',
+                    'description',
+                    'category_id',
+                    'status',
+                    'is_verified',
+                    'banner',
+                    'image',
+                    'support_email',
+                    'support_phone',
+                    'registered_address'
+                )->with(['products:id,store_id,name,price,image_1_url']);
+            }
+        ])->findOrFail($id);
+
+        if (!$user->store) {
+            return response()->json(['message' => 'El usuario no tiene una tienda asociada'], 404);
         }
 
         return response()->json([
-            'message' => 'Usuario actualizado correctamente por el administrador',
-            'user' => $user,
-        ], 200);
+            'message' => 'Tienda encontrada correctamente',
+            'store' => $user->store,
+        ]);
     }
 
     // Change password for authenticated user.
@@ -268,29 +277,25 @@ class UserController extends Controller
             'new_password' => 'required|string|min:6|confirmed',
         ]);
 
-        if (!\Hash::check($validated['current_password'], $user->password)) {
-            return response()->json([
-                'error' => 'La contraseña actual no es correcta.'
-            ], 400);
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return response()->json(['error' => 'La contraseña actual no es correcta.'], 400);
         }
 
         try {
-            $user->password = \Hash::make($validated['new_password']);
+            $user->password = Hash::make($validated['new_password']);
             $user->save();
 
-            return response()->json([
-                'message' => 'Contraseña actualizada correctamente.'
-            ], 200);
+            return response()->json(['message' => 'Contraseña actualizada correctamente.'], 200);
         } catch (\Exception $e) {
             \Log::error('Error al actualizar la contraseña: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Ocurrió un problema al actualizar la contraseña.',
-                'details' => $e->getMessage()
+                'details' => $e->getMessage(),
             ], 500);
         }
     }
 
-    // Update user information.
+    // Update user info.
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -317,72 +322,11 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Usuario actualizado correctamente',
-            'user' => $user
+            'user' => $user,
         ], 200);
     }
 
-
-    // Authenticate user and return token.
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|string|email|max:100',
-            'password' => 'required|string|min:6',
-        ]);
-
-        $user = User::where('email', $credentials['email'])->first();
-
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            return response()->json([
-                'error' => 'Credenciales inválidas'
-            ], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-        ]);
-    }
-
-    // Get store associated with user.
-    public function getStore($id)
-    {
-        $user = User::with([
-            'store' => function ($query) {
-                $query->select(
-                    'id',
-                    'user_id',
-                    'name',
-                    'slug',
-                    'description',
-                    'category_id',
-                    'status',
-                    'is_verified',
-                    'banner',
-                    'image',
-                    'support_email',
-                    'support_phone',
-                    'registered_address'
-                )->with(['products:id,store_id,name,price,image_1_url']);
-            }
-        ])->findOrFail($id);
-
-        if (!$user->store) {
-            return response()->json([
-                'message' => 'El usuario no tiene una tienda asociada'
-            ], 404);
-        }
-
-        return response()->json([
-            'message' => 'Tienda encontrada correctamente',
-            'store' => $user->store
-        ]);
-    }
-
-
-    // Delete a user.
+    // Delete user and related data.
     public function destroy($id)
     {
         try {
@@ -394,15 +338,13 @@ class UserController extends Controller
                 'addresses',
                 'productReviews',
                 'storeReviews',
-                'transactions'
+                'transactions',
             ])->findOrFail($id);
 
             if ($user->store) {
-
                 foreach ($user->store->products as $product) {
                     $product->productReviews()->delete();
                 }
-
                 $user->store->banners()->delete();
                 $user->store->storeSocials()->delete();
                 $user->store->products()->delete();
@@ -414,16 +356,13 @@ class UserController extends Controller
             $user->productReviews()->delete();
             $user->storeReviews()->delete();
             $user->transactions()->delete();
-
             $user->delete();
 
-            return response()->json([
-                'message' => 'Usuario y sus relaciones eliminados correctamente'
-            ], 200);
+            return response()->json(['message' => 'Usuario y sus relaciones eliminados correctamente'], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error al eliminar el usuario',
-                'details' => $e->getMessage()
+                'details' => $e->getMessage(),
             ], 500);
         }
     }
