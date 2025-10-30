@@ -113,6 +113,7 @@ Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStor
 Route::get('/stores', [StoreController::class, 'index']);
 Route::put('/stores/{id}', [StoreController::class, 'update']);
 Route::get('/store/{store_id}/search', [ProductController::class, 'searchByStore']);
+Route::get('/store/{id}/rating', [StoreController::class, 'getRating']);
 
 // 👤 Todos los productos (excepto ARCHIVED) visibles para el dueño
 Route::get('/store/{store_id}/all', [ProductController::class, 'allByStore']);
@@ -230,7 +231,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
     Route::post('/banner-images', [BannerImageController::class, 'store']);   // crear nuevo banner
     Route::delete('/banner-images/{id}', [BannerImageController::class, 'destroy']);
-    
+
     // 🛒 Carrito
     Route::get('/cart/me', [CartController::class, 'me']);
     Route::post('/cart/clear', [CartController::class, 'clear']);

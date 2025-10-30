@@ -297,6 +297,25 @@ class StoreController extends Controller
     }
 
 
+    /**
+     * Obtener solo el rating de una tienda específica.
+     */
+    public function getRating($id)
+    {
+        $store = Store::select('id', 'name', 'rating')
+            ->where('id', $id)
+            ->first();
+
+        if (!$store) {
+            return response()->json(['message' => 'Tienda no encontrada'], 404);
+        }
+
+        return response()->json([
+            'store_id' => $store->id,
+            'store_name' => $store->name,
+            'rating' => (float) $store->rating,
+        ]);
+    }
 
     // Delete a store.
     public function destroy($id)

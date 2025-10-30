@@ -25,6 +25,7 @@ class Store extends Model
         'support_email',
         'support_phone',
         'is_verified',
+        'rating',
         'verification_date',
         'status'
     ];
