@@ -20,16 +20,17 @@ class ReportController extends Controller
     /**
      * Crear un nuevo reporte
      */
-    public function store(Request $request)
-    {
+ public function store(Request $request)
+{
+    try {
         $validated = $request->validate([
             'order_id' => 'nullable|exists:orders,id',
             'name' => 'required|string|max:100',
             'email' => 'required|email|max:120',
             'subject' => 'nullable|string|max:120',
             'description' => 'required|string',
-            'images' => 'nullable|array', // 👈 acepta array de URLs
-            'images.*' => 'string',
+            'images' => 'nullable|array',     // Array de URLs
+            'images.*' => 'string',           // Cada una es una URL (Cloudinary)
         ]);
 
         // 🧮 Generar número único de reporte
@@ -37,7 +38,7 @@ class ReportController extends Controller
         $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
         $reportNumber = 'REP-' . $nextNumber;
 
-        // Crear el reporte
+        // 💾 Crear el reporte
         $report = Report::create([
             ...$validated,
             'report_number' => $reportNumber,
@@ -45,9 +46,17 @@ class ReportController extends Controller
 
         return response()->json([
             'message' => 'Reporte creado correctamente.',
-            'report' => $report
+            'report' => $report,
         ], 201);
+
+    } catch (\Throwable $e) {
+        \Log::error('❌ Error al crear reporte: ' . $e->getMessage());
+        return response()->json([
+            'error' => true,
+            'message' => $e->getMessage(),
+        ], 500);
     }
+}
 
     /**
      * Mostrar un reporte específico

@@ -173,7 +173,6 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
     }
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
