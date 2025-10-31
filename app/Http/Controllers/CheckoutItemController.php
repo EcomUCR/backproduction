@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class CheckoutItemController extends Controller
 {
-    // Add products to an existing order and return detailed information about the created items.
+    /**
+     * Añadir productos a una orden existente,
+     * rebajar stock y devolver la información detallada.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -29,29 +31,62 @@ class CheckoutItemController extends Controller
             $createdItems = [];
 
             foreach ($validated['items'] as $index => $item) {
-                $unitPrice = isset($item['unit_price']) ? (float)$item['unit_price'] : 0;
-                $quantity = isset($item['quantity']) ? (int)$item['quantity'] : 1;
-                $discount = isset($item['discount_pct']) ? (float)$item['discount_pct'] : 0;
+                $product = Product::find($item['product_id']);
+
+                if (!$product) {
+                    Log::warning("⚠️ Producto no encontrado", [
+                        'product_id' => $item['product_id'],
+                    ]);
+                    continue;
+                }
+
+                $unitPrice = (float) ($item['unit_price'] ?? 0);
+                $quantity = (int) ($item['quantity'] ?? 1);
+                $discount = (float) ($item['discount_pct'] ?? 0);
+
+                // 🧮 Validar stock suficiente
+                if ($product->stock < $quantity) {
+                    Log::warning("⚠️ Stock insuficiente para producto {$product->id}", [
+                        'stock_actual' => $product->stock,
+                        'cantidad_solicitada' => $quantity,
+                    ]);
+
+                    return response()->json([
+                        'error' => true,
+                        'message' => "Stock insuficiente para el producto '{$product->name}'",
+                        'available_stock' => $product->stock,
+                    ], 400);
+                }
+
+                // 🧾 Crear OrderItem
                 $orderItem = OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => (int)$item['product_id'],
+                    'product_id' => $product->id,
                     'store_id' => $item['store_id'] ?? null,
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'discount_pct' => $discount,
                 ]);
-                
+
+                // 🔻 Rebajar stock en base de datos
+                $product->decrement('stock', $quantity);
+
+                // 🚨 Advertencia si el precio unitario no fue definido
                 if ($unitPrice === 0) {
-                    \Log::warning("⚠️ Item sin precio unitario", [
+                    Log::warning("⚠️ Item sin precio unitario", [
                         'index' => $index,
-                        'product_id' => $item['product_id'],
+                        'product_id' => $product->id,
                         'data' => $item,
                     ]);
                 }
 
+                // 🔁 Cargar relación con producto (stock actualizado)
+                $orderItem->load([
+                    'product:id,name,stock,price,discount_price,image_1_url'
+                ]);
+
                 $createdItems[] = $orderItem;
             }
-
 
             return response()->json([
                 'success' => true,
@@ -62,6 +97,7 @@ class CheckoutItemController extends Controller
             Log::error('❌ Error al añadir productos a la orden', [
                 'order_id' => $request->order_id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
