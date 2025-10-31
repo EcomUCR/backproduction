@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
@@ -27,9 +28,20 @@ class ReportController extends Controller
             'email' => 'required|email|max:120',
             'subject' => 'nullable|string|max:120',
             'description' => 'required|string',
+            'images' => 'nullable|array', // 👈 acepta array de URLs
+            'images.*' => 'string',
         ]);
 
-        $report = Report::create($validated);
+        // 🧮 Generar número único de reporte
+        $lastId = Report::max('id') ?? 0;
+        $nextNumber = str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
+        $reportNumber = 'REP-' . $nextNumber;
+
+        // Crear el reporte
+        $report = Report::create([
+            ...$validated,
+            'report_number' => $reportNumber,
+        ]);
 
         return response()->json([
             'message' => 'Reporte creado correctamente.',

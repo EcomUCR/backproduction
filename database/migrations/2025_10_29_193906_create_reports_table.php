@@ -14,6 +14,7 @@ return new class extends Migration {
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
+            $table->string('report_number', 50)->unique();
             $table->foreignId('order_id')
                 ->nullable()
                 ->constrained('orders')
@@ -22,6 +23,7 @@ return new class extends Migration {
             $table->string('email', 120);
             $table->string('subject', 120)->nullable();
             $table->text('description');
+            $table->json('images')->nullable();
             $table->string('status', 20)->default('PENDING'); // PENDING | IN_REVIEW | RESOLVED | REJECTED
             $table->text('admin_notes')->nullable();
             $table->boolean('read')->default(false);
