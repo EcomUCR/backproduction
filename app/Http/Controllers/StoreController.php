@@ -150,7 +150,7 @@ class StoreController extends Controller
                         'store_name' => $store->name,
                         'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
                         'verification_date' => now()->format('d/m/Y H:i'),
-                        'dashboard_url' => env('DASHBOARD_URL', 'https://tukishopcr.com/dashboard/store'),
+                        'dashboard_url' => env('DASHBOARD_URL', 'https://tukishop.vercel.app/profile'),
                     ])->render();
 
                     \App\Services\BrevoMailer::send($user->email, $subject, $body);
@@ -276,7 +276,7 @@ class StoreController extends Controller
                     $body = view('emails.store-updated-by-admin-html', [
                         'store_name' => $store->name,
                         'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
-                        'dashboard_url' => env('DASHBOARD_URL', 'https://tukishopcr.com/dashboard/store'),
+                        'dashboard_url' => env('DASHBOARD_URL', 'https://tukishop.vercel.app/profile'),
                     ])->render();
 
                     \App\Services\BrevoMailer::send($user->email, $subject, $body);

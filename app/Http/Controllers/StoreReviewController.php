@@ -55,7 +55,7 @@ class StoreReviewController extends Controller
                 'rating' => $storeReview->rating,
                 'comment' => $storeReview->comment ?? '(Sin comentario)',
                 'date' => $storeReview->created_at->format('d/m/Y'),
-                'store_dashboard_url' => url("/seller/dashboard/reviews/{$store->id}")
+                'store_dashboard_url' => url("/store/{$store->id}")
             ])->render();
 
             try {

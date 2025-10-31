@@ -164,7 +164,7 @@ class UserController extends Controller
                         'owner_email' => $user->email,
                         'owner_phone' => $user->phone_number ?? 'No especificado',
                         'request_date' => now()->format('d/m/Y H:i'),
-                        'admin_url' => env('ADMIN_PANEL_URL', 'https://tukishopcr.com/admin/stores'),
+                        'admin_url' => env('ADMIN_PANEL_URL', 'https://tukishop.vercel.app/profiles'),
                     ])->render();
 
                     foreach ($admins as $admin) {
@@ -314,7 +314,7 @@ class UserController extends Controller
             $body = view('emails.user-updated-by-admin-html', [
                 'name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
                 'email' => $user->email,
-                'dashboard_url' => env('DASHBOARD_URL', 'https://tukishopcr.com/dashboard/profile'),
+                'dashboard_url' => env('DASHBOARD_URL', 'https://tukishop.vercel.app/profile'),
             ])->render();
 
             BrevoMailer::send($user->email, $subject, $body);
