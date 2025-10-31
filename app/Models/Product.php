@@ -24,8 +24,15 @@ class Product extends Model
         'image_1_url',
         'image_2_url',
         'image_3_url',
+        'rating', // 🆕 Campo agregado
     ];
 
+    protected $casts = [
+        'is_featured' => 'boolean',
+        'rating' => 'float', // 🧮 Se asegura de devolver decimal
+    ];
+
+    // 🔹 Relaciones
     public function store()
     {
         return $this->belongsTo(Store::class);
@@ -46,8 +53,16 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    // 🔹 Accesor dinámico
     public function getTotalSoldAttribute()
     {
         return $this->orderItems()->sum('quantity');
+    }
+
+    // 🧠 Nuevo método: recalcular rating promedio
+    public function updateRatingFromReviews(): void
+    {
+        $average = $this->reviews()->avg('rating') ?? 0;
+        $this->update(['rating' => round($average, 1)]);
     }
 }

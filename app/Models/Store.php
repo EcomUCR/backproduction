@@ -27,14 +27,19 @@ class Store extends Model
         'is_verified',
         'rating',
         'verification_date',
-        'status'
+        'rating',
+        'status',
     ];
+
     protected $with = ['user', 'storeSocials', 'banners', 'products', 'reviews'];
 
     protected $casts = [
         'is_verified' => 'boolean',
+        'rating' => 'float', 
+        'verification_date' => 'datetime',
     ];
 
+    // Relaciones
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -58,5 +63,12 @@ class Store extends Model
     public function reviews()
     {
         return $this->hasMany(StoreReview::class);
+    }
+
+    // 🧠 Método opcional para actualizar promedio de rating desde reseñas
+    public function updateRatingFromReviews(): void
+    {
+        $average = $this->reviews()->avg('rating') ?? 0;
+        $this->update(['rating' => round($average, 1)]);
     }
 }

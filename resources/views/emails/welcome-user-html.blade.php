@@ -24,7 +24,7 @@
           <tr>
             <td style="padding:32px 28px;">
               <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#111827;">
-                ¡Bienvenido a <strong>TukiShop</strong>! 🎉
+               🎉 ¡Bienvenido a <strong>TukiShop</strong>! 🎉
               </h1>
 
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#111827;">
@@ -37,7 +37,7 @@
                 </p>
               @elseif($role === 'CUSTOMER')
                 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#111827;">
-                  ¡Empieza a explorar miles de productos únicos de tiendas locales y disfruta una experiencia de compra diferente! 🛍️
+                  ¡Empieza a explorar miles de productos únicos de tiendas locales y disfruta una experiencia de compra diferente! 
                 </p>
               @else
                 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#111827;">
@@ -68,7 +68,7 @@
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:16px;background:#f9fafb;color:#6b7280;font-size:12px;">
-              © {{ date('Y') }} TukiShop — Tu plataforma de ventas local 💛
+              © {{ date('Y') }} TukiShop — Tu plataforma de ventas local 
             </td>
           </tr>
 

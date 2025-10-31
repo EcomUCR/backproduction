@@ -178,6 +178,7 @@ class ProductController extends Controller
             'image_1_url' => $validated['image_1_url'],
             'image_2_url' => $validated['image_2_url'] ?? null,
             'image_3_url' => $validated['image_3_url'] ?? null,
+            'rating' => 0.0,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
