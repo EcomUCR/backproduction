@@ -24,7 +24,7 @@
           <tr>
             <td style="padding:32px 28px;">
               <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#111827;">
-                🎉 ¡Tu tienda ha sido verificada!
+                🎉 ¡Tu tienda ha sido verificada! 🎉
               </h1>
 
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#111827;">
@@ -59,7 +59,7 @@
               </p>
 
               <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#000000;">
-                A partir de ahora, tus productos y perfil mostrarán el distintivo de verificación ✅, brindando mayor confianza a tus clientes.
+                A partir de ahora, puedes crear tus productos y modificar tu tienda.
               </p>
 
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">

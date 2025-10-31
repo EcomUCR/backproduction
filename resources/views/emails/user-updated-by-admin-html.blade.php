@@ -21,7 +21,7 @@
           <!-- Contenido -->
           <tr>
             <td style="padding:32px 28px;">
-              <h1 style="margin:0 0 12px;font-size:22px;color:#111827;">Actualización en tu perfil ⚙️</h1>
+              <h1 style="margin:0 0 12px;font-size:22px;color:#111827;">Actualización en tu perfil</h1>
               <p style="margin:0 0 16px;font-size:15px;color:#111827;">
                 Hola <strong>{{ $name }}</strong>, te informamos que un administrador de <strong>TukiShop</strong> ha realizado cambios en tu cuenta.
               </p>
@@ -46,7 +46,7 @@
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:16px;background:#f9fafb;color:#6b7280;font-size:12px;">
-              © {{ date('Y') }} TukiShop — Tu plataforma de ventas local 💛
+              © {{ date('Y') }} TukiShop — Tu plataforma de ventas local 
             </td>
           </tr>
         </table>

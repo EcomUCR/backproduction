@@ -54,7 +54,7 @@
 
               <!-- Firma -->
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#111827;">
-                Gracias por contactarte con <strong>{{ $companyName }}</strong> 💛
+                Gracias por contactarte con <strong>{{ $companyName }}</strong> 
               </p>
 
               <p style="margin:0 0 24px;font-size:15px;color:#111827;">
