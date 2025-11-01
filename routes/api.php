@@ -30,6 +30,7 @@ use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\BannerController;
 use App\Services\VisaClient;
 use App\Services\Contracts\VisaClientContract;
+use App\Http\Controllers\PageBannerController;
 
 // use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
@@ -151,6 +152,9 @@ Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
 Route::get('/banner-images', [BannerImageController::class, 'index']);
+// Page Banners
+Route::get('/page-banners', [PageBannerController::class, 'index']);
+Route::get('/page-banners/{id}', [PageBannerController::class, 'show']);
 
 // Wishlist pública
 Route::get('/wishlist/public/{slug}', [WishlistController::class, 'showPublic']);
@@ -230,6 +234,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
     Route::post('/banner-images', [BannerImageController::class, 'store']);   // crear nuevo banner
     Route::delete('/banner-images/{id}', [BannerImageController::class, 'destroy']);
+    // 🎨 Page Banners
+    Route::post('/page-banners', [PageBannerController::class, 'store']);
+    Route::put('/page-banners/{id}', [PageBannerController::class, 'update']);
+    Route::patch('/page-banners/{id}', [PageBannerController::class, 'update']);
+    Route::delete('/page-banners/{id}', [PageBannerController::class, 'destroy']);
 
     // 🛒 Carrito
     Route::get('/cart/me', [CartController::class, 'me']);
