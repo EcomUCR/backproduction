@@ -179,7 +179,7 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
 });
 
 // Carrito - Totales - público
-Route::get('/cart/totals', [CartController::class, 'totals']);
+Route::post('/cart/calculateProductTotal', [CartController::class, 'calculateProductTotal']);
 
 /*
 |--------------------------------------------------------------------------
