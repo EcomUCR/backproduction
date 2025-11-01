@@ -17,10 +17,17 @@ class ProductController extends Controller
             ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
             ->where('stores.is_verified', true)
             ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
-            ->orderByDesc('products.created_at')
             ->get();
 
-        return response()->json($products);
+        // 🧩 Semilla fija según día del año
+        $seed = intval(date('z')); // 0–365
+        srand($seed);
+
+        // 🔀 Barajar con esa semilla
+        $shuffled = $products->shuffle();
+
+        // 🔢 Limitar si querés (por rendimiento)
+        return response()->json($shuffled->take(30)->values());
     }
 
     // Retrieve a specific product if its store is active and product is not archived.
@@ -48,6 +55,29 @@ class ProductController extends Controller
 
         return response()->json($product);
     }
+    // Retrieve all discounted products (offers) across verified and active stores.
+    public function getOffers()
+    {
+        $products = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->select(
+                'products.*',
+                'stores.name as store_name',
+                DB::raw('(products.price - products.discount_price) AS discount_difference')
+            )
+            ->whereNotNull('products.discount_price')
+            ->where('products.discount_price', '>', 0)
+            ->whereRaw("TRIM(products.status) = 'ACTIVE'")
+            ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
+            ->orderByDesc('discount_difference')
+            ->orderByDesc('products.created_at')
+            ->limit(50) // 🔹 Ajustable según tu preferencia
+            ->get();
+
+        return response()->json($products);
+    }
 
     // Retrieve featured products from active and verified stores.
     public function featured()
@@ -59,10 +89,18 @@ class ProductController extends Controller
             ->whereRaw("TRIM(products.status) = 'ACTIVE'")
             ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
             ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
-            ->limit(10)
+            ->where('stores.is_verified', true)
             ->get();
 
-        return response()->json($featured);
+        // 🔹 Generar semilla según día del año (0–365)
+        $seed = intval(date('z'));
+        srand($seed);
+
+        // 🔀 Barajar determinísticamente
+        $shuffled = $featured->shuffle();
+
+        // 🔢 Mostrar máximo 20 (por ejemplo)
+        return response()->json($shuffled->take(20)->values());
     }
 
 
@@ -498,6 +536,4 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
-
-
 }
