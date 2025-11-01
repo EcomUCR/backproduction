@@ -62,30 +62,46 @@ class ProductController extends Controller
             $products = DB::table('products')
                 ->join('stores', 'stores.id', '=', 'products.store_id')
                 ->select(
-                    'products.*',
-                    'stores.name as store_name',
-                    DB::raw('(products.price - COALESCE(products.discount_price, 0)) AS discount_difference')
+                    'products.id',
+                    'products.name',
+                    'products.price',
+                    'products.discount_price',
+                    'products.image_1_url',
+                    'products.image_2_url',
+                    'products.image_3_url',
+                    'products.status',
+                    'products.is_featured',
+                    'products.created_at',
+                    'stores.name as store_name'
                 )
+                // ✅ Solo productos con descuento válido
                 ->whereNotNull('products.discount_price')
                 ->where('products.discount_price', '>', 0)
-                ->whereRaw("TRIM(products.status) = 'ACTIVE'")
-                ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+                ->whereColumn('products.discount_price', '<', 'products.price')
+                ->where('products.status', 'ACTIVE')
+                ->where('stores.status', 'ACTIVE')
                 ->where('stores.is_verified', true)
-                ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
-                ->orderByDesc('discount_difference')
+                ->where('products.status', '<>', 'ARCHIVED')
+                // ✅ Ordenar por mayor descuento relativo
+                ->orderByRaw('(products.price - products.discount_price) DESC')
                 ->orderByDesc('products.created_at')
                 ->limit(50)
                 ->get();
 
-            return response()->json($products);
+            // 🧩 Barajar para más variedad
+            $shuffled = $products->shuffle()->values();
+
+            return response()->json($shuffled);
         } catch (\Throwable $e) {
             \Log::error('❌ Error en getOffers(): ' . $e->getMessage());
             return response()->json([
                 'error' => true,
-                'message' => 'Error interno al obtener ofertas: ' . $e->getMessage(),
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
+
+
 
 
     // Retrieve featured products from active and verified stores.
