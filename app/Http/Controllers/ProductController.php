@@ -78,17 +78,17 @@ class ProductController extends Controller
                 ->whereNotNull('products.discount_price')
                 ->where('products.discount_price', '>', 0)
                 ->whereColumn('products.discount_price', '<', 'products.price')
-                ->where('products.status', 'ACTIVE')
-                ->where('stores.status', 'ACTIVE')
+                ->whereRaw("TRIM(products.status) = 'ACTIVE'")
+                ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
                 ->where('stores.is_verified', true)
-                ->where('products.status', '<>', 'ARCHIVED')
-                // ✅ Convertir explícitamente a DECIMAL antes de restar
-                ->orderByRaw('(CAST(products.price AS DECIMAL(10,2)) - CAST(products.discount_price AS DECIMAL(10,2))) DESC')
+                ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
+                // ✅ Evitar errores con COALESCE en el cálculo
+                ->orderByRaw('(COALESCE(products.price,0) - COALESCE(products.discount_price,0)) DESC')
                 ->orderByDesc('products.created_at')
                 ->limit(50)
                 ->get();
 
-            // 🔀 Barajar productos para variedad
+            // 🔀 Barajar los resultados para variedad
             return response()->json($products->shuffle()->values());
         } catch (\Throwable $e) {
             \Log::error('❌ Error en getOffers(): ' . $e->getMessage());
@@ -98,6 +98,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
 
     // Retrieve featured products from active and verified stores.
     public function featured()
