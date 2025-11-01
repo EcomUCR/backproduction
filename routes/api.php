@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\BannerImageController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
@@ -57,6 +58,7 @@ Route::post('/reports', [ReportController::class, 'store']);
 //OpenAI API
 Route::post('/openai/description', [OpenAIController::class, 'generateDescription'])
     ->middleware('throttle:10,1'); // opcional: 10 peticiones por minuto por IP
+Route::post('/chatbot', [ChatbotController::class, 'handle']);
 
 //Imagenes
 Route::post('/upload-image', [ImageUploadController::class, 'upload']);
