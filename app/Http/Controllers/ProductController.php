@@ -82,16 +82,14 @@ class ProductController extends Controller
                 ->where('stores.status', 'ACTIVE')
                 ->where('stores.is_verified', true)
                 ->where('products.status', '<>', 'ARCHIVED')
-                // ✅ Ordenar por mayor descuento relativo
-                ->orderByRaw('(products.price - products.discount_price) DESC')
+                // ✅ Convertir explícitamente a DECIMAL antes de restar
+                ->orderByRaw('(CAST(products.price AS DECIMAL(10,2)) - CAST(products.discount_price AS DECIMAL(10,2))) DESC')
                 ->orderByDesc('products.created_at')
                 ->limit(50)
                 ->get();
 
-            // 🧩 Barajar para más variedad
-            $shuffled = $products->shuffle()->values();
-
-            return response()->json($shuffled);
+            // 🔀 Barajar productos para variedad
+            return response()->json($products->shuffle()->values());
         } catch (\Throwable $e) {
             \Log::error('❌ Error en getOffers(): ' . $e->getMessage());
             return response()->json([
@@ -100,9 +98,6 @@ class ProductController extends Controller
             ], 500);
         }
     }
-
-
-
 
     // Retrieve featured products from active and verified stores.
     public function featured()
