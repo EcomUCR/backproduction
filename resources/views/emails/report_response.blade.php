@@ -24,7 +24,7 @@
           <tr>
             <td style="padding:32px 28px;">
               <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#111827;">
-                📩 Nuevo reporte recibido
+                Nuevo reporte recibido
               </h1>
 
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#111827;">
@@ -48,9 +48,9 @@
                     <p style="margin:4px 0 12px;font-size:15px;color:#000000;">
                       @switch($report->status)
                         @case('PENDING') Pendiente de revisión 🕐 @break
-                        @case('IN_REVIEW') En revisión 🔎 @break
-                        @case('RESOLVED') Resuelto ✅ @break
-                        @case('REJECTED') Rechazado ❌ @break
+                        @case('IN_REVIEW') En revisión  @break
+                        @case('RESOLVED') Resuelto  @break
+                        @case('REJECTED') Rechazado  @break
                         @default Pendiente
                       @endswitch
                     </p>
