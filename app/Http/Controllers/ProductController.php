@@ -8,8 +8,10 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
     // Retrieve all active products from active and verified stores.
-    public function index()
+    public function index(Request $request)
     {
+        $perPage = $request->query('per_page', 30);
+
         $products = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
             ->select('products.*', 'stores.name as store_name')
@@ -17,18 +19,14 @@ class ProductController extends Controller
             ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
             ->where('stores.is_verified', true)
             ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
-            ->get();
+            ->orderByDesc('products.created_at')
+            ->paginate($perPage);
 
-        // 🧩 Semilla fija según día del año
-        $seed = intval(date('z')); // 0–365
-        srand($seed);
-
-        // 🔀 Barajar con esa semilla
-        $shuffled = $products->shuffle();
-
-        // 🔢 Limitar si querés (por rendimiento)
-        return response()->json($shuffled->take(30)->values());
+        // Esto devuelve estructura JSON con meta y links automáticos:
+        // { data: [...], current_page: 1, last_page: 5, total: 150, per_page: 30 }
+        return response()->json($products);
     }
+
 
     // Retrieve a specific product if its store is active and product is not archived.
     public function show($id)
