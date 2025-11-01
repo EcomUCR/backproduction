@@ -58,26 +58,35 @@ class ProductController extends Controller
     // Retrieve all discounted products (offers) across verified and active stores.
     public function getOffers()
     {
-        $products = DB::table('products')
-            ->join('stores', 'stores.id', '=', 'products.store_id')
-            ->select(
-                'products.*',
-                'stores.name as store_name',
-                DB::raw('(products.price - products.discount_price) AS discount_difference')
-            )
-            ->whereNotNull('products.discount_price')
-            ->where('products.discount_price', '>', 0)
-            ->whereRaw("TRIM(products.status) = 'ACTIVE'")
-            ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
-            ->where('stores.is_verified', true)
-            ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
-            ->orderByDesc('discount_difference')
-            ->orderByDesc('products.created_at')
-            ->limit(50) // 🔹 Ajustable según tu preferencia
-            ->get();
+        try {
+            $products = DB::table('products')
+                ->join('stores', 'stores.id', '=', 'products.store_id')
+                ->select(
+                    'products.*',
+                    'stores.name as store_name',
+                    DB::raw('(products.price - COALESCE(products.discount_price, 0)) AS discount_difference')
+                )
+                ->whereNotNull('products.discount_price')
+                ->where('products.discount_price', '>', 0)
+                ->whereRaw("TRIM(products.status) = 'ACTIVE'")
+                ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+                ->where('stores.is_verified', true)
+                ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
+                ->orderByDesc('discount_difference')
+                ->orderByDesc('products.created_at')
+                ->limit(50)
+                ->get();
 
-        return response()->json($products);
+            return response()->json($products);
+        } catch (\Throwable $e) {
+            \Log::error('❌ Error en getOffers(): ' . $e->getMessage());
+            return response()->json([
+                'error' => true,
+                'message' => 'Error interno al obtener ofertas: ' . $e->getMessage(),
+            ], 500);
+        }
     }
+
 
     // Retrieve featured products from active and verified stores.
     public function featured()
