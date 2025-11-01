@@ -178,7 +178,7 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
     }
 });
 
-// Carrito - Totales
+// Carrito - Totales - público
 Route::get('/cart/totals', [CartController::class, 'totals']);
 
 /*
@@ -253,6 +253,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
+    Route::get('/cart/totals', [CartController::class, 'totals']);
     
 
     // 💳 NUEVO Checkout modular
