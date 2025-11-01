@@ -58,25 +58,45 @@ class ProductController extends Controller
     // Retrieve all discounted products (offers) across verified and active stores.
     public function getOffers()
     {
-        $products = DB::table('products')
-            ->join('stores', 'stores.id', '=', 'products.store_id')
-            ->select(
-                'products.*',
-                'stores.name as store_name',
-                DB::raw('(products.price - products.discount_price) AS discount_difference')
-            )
-            ->whereNotNull('products.discount_price')
-            ->where('products.discount_price', '>', 0)
-            ->whereRaw("TRIM(products.status) = 'ACTIVE'")
-            ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
-            ->where('stores.is_verified', true)
-            ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
-            ->orderByDesc('discount_difference')
-            ->orderByDesc('products.created_at')
-            ->limit(50) // 🔹 Ajustable según tu preferencia
-            ->get();
+        try {
+            $products = DB::table('products')
+                ->join('stores', 'stores.id', '=', 'products.store_id')
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.price',
+                    'products.discount_price',
+                    'products.image_1_url',
+                    'products.image_2_url',
+                    'products.image_3_url',
+                    'products.status',
+                    'products.is_featured',
+                    'products.created_at',
+                    'stores.name as store_name'
+                )
+                // ✅ Solo productos con descuento válido
+                ->whereNotNull('products.discount_price')
+                ->where('products.discount_price', '>', 0)
+                ->whereColumn('products.discount_price', '<', 'products.price')
+                ->where('products.status', 'ACTIVE')
+                ->where('stores.status', 'ACTIVE')
+                ->where('stores.is_verified', true)
+                ->where('products.status', '<>', 'ARCHIVED')
+                // ✅ Convertir explícitamente a DECIMAL antes de restar
+                ->orderByRaw('(CAST(products.price AS DECIMAL(10,2)) - CAST(products.discount_price AS DECIMAL(10,2))) DESC')
+                ->orderByDesc('products.created_at')
+                ->limit(50)
+                ->get();
 
-        return response()->json($products);
+            // 🔀 Barajar productos para variedad
+            return response()->json($products->shuffle()->values());
+        } catch (\Throwable $e) {
+            \Log::error('❌ Error en getOffers(): ' . $e->getMessage());
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     // Retrieve featured products from active and verified stores.
