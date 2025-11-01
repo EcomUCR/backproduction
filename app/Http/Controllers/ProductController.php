@@ -74,29 +74,29 @@ class ProductController extends Controller
                     'products.created_at',
                     'stores.name as store_name'
                 )
-                // 🧩 Evita problemas con nulls:
-                // Solo ofertas donde ambos precios existen y el descuento es válido
+                // 🧩 Solo productos con descuento válido
                 ->whereNotNull('products.price')
                 ->whereNotNull('products.discount_price')
                 ->where('products.discount_price', '>', 0)
                 ->whereRaw('products.discount_price < products.price')
 
-                // 🏪 Tiendas activas y verificadas
+                // 🏪 Solo productos y tiendas activas y verificadas
                 ->where('products.status', 'ACTIVE')
                 ->where('stores.status', 'ACTIVE')
                 ->where('stores.is_verified', true)
 
-                // 🧮 Calcular diferencia de precio (maneja nulls con COALESCE)
-                ->selectRaw('(COALESCE(products.price, 0) - COALESCE(products.discount_price, 0)) AS discount_diff')
+                // 📉 Calcular el % de descuento real
+                // (1 - discount_price / price) * 100
+                ->selectRaw('(100 * (1 - (COALESCE(products.discount_price, 0) / NULLIF(products.price, 0)))) AS discount_percent')
 
-                // 🧱 Ordenar primero por mayor diferencia de precio, luego por fecha
-                ->orderByDesc('discount_diff')
+                // 🔢 Ordenar por % de descuento (mayor primero), luego por fecha
+                ->orderByDesc('discount_percent')
                 ->orderByDesc('products.created_at')
 
                 ->limit(50)
                 ->get();
 
-            // 🔀 Aleatorizar para variar el orden cada día (semilla por día)
+            // 🔀 Mezclar un poco (opcional)
             $seed = intval(date('z'));
             srand($seed);
             $shuffled = $products->shuffle();
@@ -114,8 +114,6 @@ class ProductController extends Controller
             ], 500);
         }
     }
-
-
 
     // Retrieve featured products from active and verified stores.
     public function featured()
