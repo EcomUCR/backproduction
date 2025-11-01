@@ -74,30 +74,47 @@ class ProductController extends Controller
                     'products.created_at',
                     'stores.name as store_name'
                 )
-                // ✅ Solo productos con descuento válido
+                // 🧩 Evita problemas con nulls:
+                // Solo ofertas donde ambos precios existen y el descuento es válido
+                ->whereNotNull('products.price')
                 ->whereNotNull('products.discount_price')
                 ->where('products.discount_price', '>', 0)
-                ->whereColumn('products.discount_price', '<', 'products.price')
-                ->whereRaw("TRIM(products.status) = 'ACTIVE'")
-                ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+                ->whereRaw('products.discount_price < products.price')
+
+                // 🏪 Tiendas activas y verificadas
+                ->where('products.status', 'ACTIVE')
+                ->where('stores.status', 'ACTIVE')
                 ->where('stores.is_verified', true)
-                ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
-                // ✅ Evitar errores con COALESCE en el cálculo
-                ->orderByRaw('(COALESCE(products.price,0) - COALESCE(products.discount_price,0)) DESC')
+
+                // 🧮 Calcular diferencia de precio (maneja nulls con COALESCE)
+                ->selectRaw('(COALESCE(products.price, 0) - COALESCE(products.discount_price, 0)) AS discount_diff')
+
+                // 🧱 Ordenar primero por mayor diferencia de precio, luego por fecha
+                ->orderByDesc('discount_diff')
                 ->orderByDesc('products.created_at')
+
                 ->limit(50)
                 ->get();
 
-            // 🔀 Barajar los resultados para variedad
-            return response()->json($products->shuffle()->values());
+            // 🔀 Aleatorizar para variar el orden cada día (semilla por día)
+            $seed = intval(date('z'));
+            srand($seed);
+            $shuffled = $products->shuffle();
+
+            return response()->json($shuffled->values());
         } catch (\Throwable $e) {
-            \Log::error('❌ Error en getOffers(): ' . $e->getMessage());
+            \Log::error('❌ getOffers() failed', [
+                'msg' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
             return response()->json([
                 'error' => true,
-                'message' => $e->getMessage(),
+                'message' => 'Error obteniendo ofertas: ' . $e->getMessage(),
             ], 500);
         }
     }
+
 
 
     // Retrieve featured products from active and verified stores.

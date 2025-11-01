@@ -30,7 +30,6 @@ return new class extends Migration {
             $table->boolean('is_verified')->default(false); // Is Verified
             $table->decimal('rating', 3, 2)->default(0.00);
             $table->timestamp('verification_date')->nullable(); // Verification Date
-            $table->decimal('rating', 2, 1)->default(0);
             $table->string('status', 20)->default('ACTIVE'); // Status
             $table->timestamps(); // Created At & Updated At
         });
