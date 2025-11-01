@@ -30,7 +30,6 @@ use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\BannerController;
 use App\Services\VisaClient;
 use App\Services\Contracts\VisaClientContract;
-use App\Http\Controllers\PageBannerController;
 
 // use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
@@ -100,12 +99,11 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])
 Route::post('/contact-messages', [ContactMessageController::class, 'store']);
 
 // Productos públicos (solo lectura)
-Route::get('/products', action: [ProductController::class, 'index']);              // todos los productos
+Route::get('/products', [ProductController::class, 'index']);              // todos los productos
 Route::get('/products/search', [ProductController::class, 'search']);      // buscar
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/{id}', [ProductController::class, 'show']);          // detalle
 Route::get('/products/vendor/{vendorId}', [ProductController::class, 'byVendor']); // productos por vendor
-Route::get('/products/offers', [ProductController::class, 'getOffers']); // productos por vendor
 Route::get('/categories/{id}/products', [ProductController::class, 'byCategory']);
 Route::get('/stores/{store_id}/featured', [ProductController::class, 'featuredByStore']);
 
@@ -115,7 +113,6 @@ Route::get('/stores/{store_id}/products', [ProductController::class, 'showByStor
 Route::get('/stores', [StoreController::class, 'index']);
 Route::put('/stores/{id}', [StoreController::class, 'update']);
 Route::get('/store/{store_id}/search', [ProductController::class, 'searchByStore']);
-Route::get('/store/{id}/rating', [StoreController::class, 'getRating']);
 
 // 👤 Todos los productos (excepto ARCHIVED) visibles para el dueño
 Route::get('/store/{store_id}/all', [ProductController::class, 'allByStore']);
@@ -153,9 +150,6 @@ Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
 Route::get('/banner-images', [BannerImageController::class, 'index']);
-// Page Banners
-Route::get('/page-banners', [PageBannerController::class, 'index']);
-Route::get('/page-banners/{id}', [PageBannerController::class, 'show']);
 
 // Wishlist pública
 Route::get('/wishlist/public/{slug}', [WishlistController::class, 'showPublic']);
@@ -178,8 +172,9 @@ Route::get('/visa/test', function (VisaClientContract $visa) {
     }
 });
 
-// Carrito - Totales
-Route::get('/cart/totals', [CartController::class, 'totals']);
+//total de un producto (público)
+Route::post('/cart/calculateProductTotal', [CartController::class, 'calculateProductTotal']);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -238,12 +233,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
     Route::post('/banner-images', [BannerImageController::class, 'store']);   // crear nuevo banner
     Route::delete('/banner-images/{id}', [BannerImageController::class, 'destroy']);
-    // 🎨 Page Banners
-    Route::post('/page-banners', [PageBannerController::class, 'store']);
-    Route::put('/page-banners/{id}', [PageBannerController::class, 'update']);
-    Route::patch('/page-banners/{id}', [PageBannerController::class, 'update']);
-    Route::delete('/page-banners/{id}', [PageBannerController::class, 'destroy']);
-
+    
     // 🛒 Carrito
     Route::get('/cart/me', [CartController::class, 'me']);
     Route::post('/cart/clear', [CartController::class, 'clear']);
@@ -253,7 +243,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart/items', [CartItemController::class, 'add']);
     Route::patch('/cart/items/{item}', [CartItemController::class, 'updateQuantity']);
     Route::delete('/cart/items/{item}', [CartItemController::class, 'destroy']);
-    
+    Route::get('/cart/totals', [CartController::class, 'totals']);
 
     // 💳 NUEVO Checkout modular
     Route::post('/checkout/init', [CheckoutController::class, 'init']); // crea orden vacía

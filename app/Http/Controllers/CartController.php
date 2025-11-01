@@ -232,4 +232,44 @@ class CartController extends Controller
         ]);
     }
 
+    // Calcular el total de un solo producto (público)
+public function calculateProductTotal(Request $request)
+{
+    $request->validate([
+        'product_id' => 'required|exists:products,id',
+        'quantity' => 'nullable|integer|min:1',
+    ]);
+
+    $quantity = $request->quantity ?? 1;
+    $product = Product::findOrFail($request->product_id);
+
+    // Tomar el precio con descuento si existe
+    $unitPrice = ($product->discount_price && $product->discount_price > 0)
+        ? $product->discount_price
+        : $product->price;
+
+    $subtotal = $unitPrice * $quantity;
+    $taxes = round($subtotal * 0.13, 2); // 13% de IVA
+    $shipping = 3000;
+    $total = $subtotal + $taxes + $shipping;
+
+    return response()->json([
+        'ok' => true,
+        'message' => 'Total calculado correctamente',
+        'product' => [
+            'id' => $product->id,
+            'name' => $product->name,
+            'unit_price' => $unitPrice,
+            'quantity' => $quantity,
+        ],
+        'totals' => [
+            'subtotal' => round($subtotal, 2),
+            'taxes' => $taxes,
+            'shipping' => $shipping,
+            'total' => round($total, 2),
+            'currency' => 'CRC',
+        ],
+    ]);
+}
+
 }
