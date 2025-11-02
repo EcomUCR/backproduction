@@ -24,7 +24,7 @@ class ProductReviewController extends Controller
     // Create a new product review.
    public function store(Request $request)
 {
-    $user = $request->user(); // 🔹 Obtener el usuario autenticado
+    $user = $request->user(); // obtiene el usuario del token
 
     $validatedData = $request->validate([
         'product_id' => 'required|exists:products,id',
@@ -32,16 +32,20 @@ class ProductReviewController extends Controller
         'comment' => 'nullable|string',
     ]);
 
-    // Asignar user_id automáticamente
+    // asignar automáticamente el user_id autenticado
     $validatedData['user_id'] = $user->id;
 
     $productReview = ProductReview::create($validatedData);
 
+    // actualizar promedio de rating del producto
+    $productReview->product->updateRatingFromReviews();
+
     return response()->json([
         'message' => 'Reseña creada correctamente',
-        'review' => $productReview,
+        'review' => $productReview
     ], 201);
 }
+
 
 
     public function indexByProduct($product_id)
