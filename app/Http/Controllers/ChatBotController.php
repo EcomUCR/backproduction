@@ -9,69 +9,89 @@ use OpenAI;
 class ChatbotController extends Controller
 {
     public function handle(Request $request)
-    {
-        $request->validate([
-            'message' => 'required|string|max:500',
-        ]);
+{
+    $request->validate([
+        'message' => 'required|string|max:500',
+    ]);
 
-        $userMessage = trim($request->input('message'));
-        $client = \OpenAI::client(env('OPENAI_API_KEY'));
+    $userMessage = trim($request->input('message'));
+    $client = \OpenAI::client(env('OPENAI_API_KEY'));
 
-        try {
-            // 🧠 Paso 1. Detectar intención principal
-            $response = $client->chat()->create([
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => "
+    // ⚙️ Permitir modo debug controlado (solo si lo pedís desde Postman)
+    $debug = $request->header('X-Debug-Chatbot') === 'true';
+
+    try {
+        if ($debug) {
+            $steps = ['init' => 'ok'];
+        }
+
+        // Paso 1: Solicitud al modelo para detectar intención
+        if ($debug) $steps['before_openai'] = 'sending to model';
+        $response = $client->chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => "
 Eres el asistente oficial de TukiShop. 
-Tu personalidad es natural, amigable, con tono cercano (como un amigo que ayuda a comprar).
-Tu tarea es analizar el mensaje y decidir una acción, devolviendo SIEMPRE un JSON válido:
+Tu personalidad es natural, amigable y cercana.
+Devuelve SIEMPRE un JSON puro con el siguiente formato:
 {
   \"action\": \"buscar_productos\" | \"info_plataforma\" | \"enlaces\" | \"conversacion\" | \"sin_respuesta\",
   \"query\": \"texto o palabra clave\"
-}
-Si el usuario solo saluda o hace una pregunta informal (ej. 'hola', 'qué tal', 'cómo estás'),
-responde con {\"action\": \"conversacion\", \"query\": \"saludo\"}.
-",
-                    ],
-                    ['role' => 'user', 'content' => $userMessage],
+}",
                 ],
-            ]);
+                ['role' => 'user', 'content' => $userMessage],
+            ],
+        ]);
 
-            $content = $response->choices[0]->message->content ?? '{}';
+        if ($debug) $steps['after_openai'] = 'response received';
+
+        // Paso 2: Procesar respuesta del modelo
+        $content = $response->choices[0]->message->content ?? '{}';
+        if ($debug) $steps['raw_response'] = $content;
+
+        $intent = json_decode($content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // limpiar si trae texto fuera de llaves
+            $content = preg_replace('/^[^{]+|[^}]+$/', '', $content);
             $intent = json_decode($content, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $content = preg_replace('/^[^{]+|[^}]+$/', '', $content);
-                $intent = json_decode($content, true);
-            }
-
-            $action = $intent['action'] ?? 'sin_respuesta';
-            $query = $intent['query'] ?? '';
-
-            // 🔀 Dirigir según intención detectada
-            return match ($action) {
-                'buscar_productos' => $this->buscarProductos($query, $client),
-                'info_plataforma' => $this->infoPlataforma($query, $client),
-                'enlaces' => $this->enlacesRelacionados($query, $client),
-                'conversacion' => $this->respuestaConversacional($query, $userMessage, $client),
-                default => $this->respuestaGenerica($userMessage, $client),
-            };
-        } catch (\Throwable $e) {
-            \Log::error('❌ Error en ChatbotController', [
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile(),
-            ]);
-
-            return response()->json([
-                'message' => 'Error interno en el chatbot.',
-                'error' => $e->getMessage(),
-            ], 500);
         }
+
+        if ($debug) $steps['parsed_intent'] = $intent;
+
+        $action = $intent['action'] ?? 'sin_respuesta';
+        $query = $intent['query'] ?? '';
+
+        if ($debug) {
+            return response()->json([
+                'status' => 'ok',
+                'action' => $action,
+                'query' => $query,
+                'steps' => $steps,
+            ]);
+        }
+
+        // Paso 3: Continuar flujo normal
+        return match ($action) {
+            'buscar_productos' => $this->buscarProductos($query, $client),
+            'info_plataforma' => $this->infoPlataforma($query, $client),
+            'enlaces' => $this->enlacesRelacionados($query, $client),
+            'conversacion' => $this->respuestaConversacional($query, $userMessage, $client),
+            default => $this->respuestaGenerica($userMessage, $client),
+        };
+    } catch (\Throwable $e) {
+        // ⚠️ Enviar los detalles del error directamente al cliente
+        return response()->json([
+            'error' => true,
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => collect(explode("\n", $e->getTraceAsString()))->take(5),
+        ], 500);
     }
+}
+
 
     // ============================================================
     // 🗣️ Conversación natural (saludos, charla)
