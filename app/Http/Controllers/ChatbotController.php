@@ -57,7 +57,9 @@ Devuelve un JSON **válido y solo JSON**:
                     'results' => [],
                 ]);
             }
-
+            if (preg_match('/(contact|red|facebook|instagram|tiktok|x\.com|twitter|seguir|hablar|comunicar|mensaje|escribir)/i', $userMessage)) {
+                return $this->mostrarRedes($userMessage, $client);
+            }
             // 🧠 Paso 1: Clasificar intención general
             $intentResponse = $client->chat()->create([
                 'model' => 'gpt-4o-mini',
@@ -133,6 +135,17 @@ Ejemplo de salida:
                 return $this->buscarTiendas($userMessage, $client, $categories, $keywords);
             }
 
+
+            if (
+                str_contains(strtolower($userMessage), 'contact') ||
+                str_contains(strtolower($userMessage), 'red') ||
+                str_contains(strtolower($userMessage), 'facebook') ||
+                str_contains(strtolower($userMessage), 'instagram') ||
+                str_contains(strtolower($userMessage), 'tiktok') ||
+                str_contains(strtolower($userMessage), 'x.com')
+            ) {
+                return $this->mostrarRedes($userMessage, $client);
+            }
             return $this->buscarProductos($userMessage, $client, $categories, $keywords);
 
         } catch (\Throwable $e) {
@@ -763,4 +776,115 @@ Devuelve un JSON válido EXACTO:
         }
     }
 
+    private function mostrarRedes(string $userMessage, $client)
+    {
+        // 🔹 Diccionario de redes con links oficiales
+        $socialLinks = [
+            'facebook' => 'https://www.facebook.com/share/17QLNhZePP/',
+            'instagram' => 'https://www.instagram.com/tukishop_cr?igsh=MTYyeHNjcHRsbGo0ZQ==',
+            'tiktok' => 'https://www.tiktok.com/@tukishopcr?is_from_webapp=1&sender_device=pc',
+            'x' => 'https://x.com/TukiShopCR?s=09',
+            'twitter' => 'https://x.com/TukiShopCR?s=09', // alias
+            'whatsapp' => 'https://wa.me/50687355629', // ✅ nuevo
+        ];
+
+        $normalized = strtolower($userMessage);
+
+        // 🧠 Detectar si el usuario habla de TODAS las redes
+        $generalIntent = preg_match('/(red(es)?|contact(ar|o)?|social|seguir|cuentas|dónde los encuentro|comunicar|mensaje|hablar)/i', $normalized);
+
+        // Si es una pregunta general, devolver TODAS las redes incluyendo WhatsApp
+        if ($generalIntent && !preg_match('/facebook|instagram|tiktok|x|twitter|whatsapp|wa/i', $normalized)) {
+            $message = "¡Claro! 🌐 Podés seguirnos o escribirnos en nuestras redes oficiales de TukiShop:";
+            $socials = [];
+
+            foreach (['facebook', 'instagram', 'tiktok', 'x', 'whatsapp'] as $key) {
+                $socials[] = [
+                    'social' => $key,
+                    'link' => $socialLinks[$key],
+                ];
+            }
+
+            return response()->json([
+                'message' => $message,
+                'socials' => $socials,
+                'showButton' => true,
+            ]);
+        }
+
+        // 🔍 Detección local ampliada (con sinónimos)
+        $detected = null;
+        $aliases = [
+            'facebook' => ['facebook', 'face', 'fb', 'meta'],
+            'instagram' => ['instagram', 'insta', 'ig'],
+            'tiktok' => ['tiktok', 'tik tok', 'tictoc'],
+            'x' => ['x', 'twitter', 'tw', 'x.com'],
+            'whatsapp' => ['whatsapp', 'wasap', 'wa', 'whats', 'wsp', 'whatsap'], // ✅ nuevo
+        ];
+
+        foreach ($aliases as $key => $variants) {
+            foreach ($variants as $v) {
+                if (str_contains($normalized, $v)) {
+                    $detected = $key;
+                    break 2;
+                }
+            }
+        }
+
+        // 🔁 Si no la detecta localmente, intentar con modelo
+        if (!$detected) {
+            try {
+                $prompt = "
+Eres el asistente de TukiShop.
+El usuario escribió: '{$userMessage}'.
+Indica a cuál red social o canal se refiere (facebook, instagram, tiktok, x o whatsapp).
+Devuelve SOLO un JSON válido:
+{ \"network\": \"facebook\" | \"instagram\" | \"tiktok\" | \"x\" | \"whatsapp\" | null }
+";
+                $response = $client->chat()->create([
+                    'model' => 'gpt-4o-mini',
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                ]);
+
+                $json = $response->choices[0]->message->content ?? '{}';
+                $json = preg_replace('/^[^{]+|[^}]+$/', '', $json);
+                $parsed = json_decode($json, true);
+
+                $network = strtolower($parsed['network'] ?? 'facebook');
+                $detected = array_key_exists($network, $socialLinks) ? $network : 'facebook';
+            } catch (\Throwable $e) {
+                $detected = 'facebook';
+            }
+        }
+
+        // 🔗 Obtener enlace
+        $link = $socialLinks[$detected] ?? $socialLinks['facebook'];
+
+        // ✨ Generar respuesta natural
+        try {
+            $promptMsg = "
+Eres el asistente de TukiShop.
+Genera una respuesta cálida y breve (máx. 2 líneas) invitando a contactarnos o seguirnos en {$detected}.
+";
+            $msgResponse = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [['role' => 'user', 'content' => $promptMsg]],
+            ]);
+
+            $message = trim($msgResponse->choices[0]->message->content ?? '');
+            if ($message === '') {
+                $message = "¡Podés contactarnos por {$detected}! 💬";
+            }
+        } catch (\Throwable $e) {
+            $message = "¡Podés contactarnos por {$detected}! 💬";
+        }
+
+        // ✅ Respuesta estándar
+        return response()->json([
+            'message' => $message,
+            'social' => $detected,
+            'link' => $link,
+            'showButton' => true,
+        ]);
+    }
 }
