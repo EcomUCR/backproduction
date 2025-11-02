@@ -16,7 +16,7 @@ class ChatbotController extends Controller
 
     $userMessage = trim($request->input('message'));
     $client = \OpenAI::client(env('OPENAI_API_KEY'));
-
+///
     // ⚙️ Permitir modo debug controlado (solo si lo pedís desde Postman)
     $debug = $request->header('X-Debug-Chatbot') === 'true';
 
