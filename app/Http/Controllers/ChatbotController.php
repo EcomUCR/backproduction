@@ -9,125 +9,121 @@ use OpenAI;
 class ChatbotController extends Controller
 {
     public function handle(Request $request)
-{
-    $request->validate([
-        'message' => 'required|string|max:500',
-    ]);
-
-    $userMessage = trim($request->input('message'));
-    $client = \OpenAI::client(env('OPENAI_API_KEY'));
-///
-    // ⚙️ Permitir modo debug controlado (solo si lo pedís desde Postman)
-    $debug = $request->header('X-Debug-Chatbot') === 'true';
-
-    try {
-        if ($debug) {
-            $steps = ['init' => 'ok'];
-        }
-
-        // Paso 1: Solicitud al modelo para detectar intención
-        if ($debug) $steps['before_openai'] = 'sending to model';
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => "
-Eres el asistente oficial de TukiShop. 
-Tu personalidad es natural, amigable y cercana.
-Devuelve SIEMPRE un JSON puro con el siguiente formato:
-{
-  \"action\": \"buscar_productos\" | \"info_plataforma\" | \"enlaces\" | \"conversacion\" | \"sin_respuesta\",
-  \"query\": \"texto o palabra clave\"
-}",
-                ],
-                ['role' => 'user', 'content' => $userMessage],
-            ],
+    {
+        $request->validate([
+            'message' => 'required|string|max:500',
         ]);
 
-        if ($debug) $steps['after_openai'] = 'response received';
+        $userMessage = trim($request->input('message'));
+        $client = \OpenAI::client(env('OPENAI_API_KEY'));
 
-        // Paso 2: Procesar respuesta del modelo
-        $content = $response->choices[0]->message->content ?? '{}';
-        if ($debug) $steps['raw_response'] = $content;
+        try {
+            // 🧠 Paso 1: Clasificar intención general
+            // 🧠 Paso 1: Clasificar intención general (incluye navegación)
+            $intentResponse = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => "
+Eres el asistente oficial de TukiShop.
+Tu tarea es determinar la intención principal del mensaje del usuario.
 
-        $intent = json_decode($content, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            // limpiar si trae texto fuera de llaves
-            $content = preg_replace('/^[^{]+|[^}]+$/', '', $content);
-            $intent = json_decode($content, true);
-        }
+Tipos posibles:
+- \"chat\": saludo, charla o agradecimiento (ej. 'hola', 'cómo estás', 'gracias')
+- \"search\": búsqueda de productos, categorías o artículos (ej. 'busco una prenda', 'tienen celulares?')
+- \"navigate\": el usuario quiere ir a una sección de la app (carrito, perfil, vender, ayuda, etc.)
 
-        if ($debug) $steps['parsed_intent'] = $intent;
-
-        $action = $intent['action'] ?? 'sin_respuesta';
-        $query = $intent['query'] ?? '';
-
-        if ($debug) {
-            return response()->json([
-                'status' => 'ok',
-                'action' => $action,
-                'query' => $query,
-                'steps' => $steps,
-            ]);
-        }
-
-        // Paso 3: Continuar flujo normal
-        return match ($action) {
-            'buscar_productos' => $this->buscarProductos($query, $client),
-            'info_plataforma' => $this->infoPlataforma($query, $client),
-            'enlaces' => $this->enlacesRelacionados($query, $client),
-            'conversacion' => $this->respuestaConversacional($query, $userMessage, $client),
-            default => $this->respuestaGenerica($userMessage, $client),
-        };
-    } catch (\Throwable $e) {
-        // ⚠️ Enviar los detalles del error directamente al cliente
-        return response()->json([
-            'error' => true,
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => collect(explode("\n", $e->getTraceAsString()))->take(5),
-        ], 500);
-    }
+Devuelve SIEMPRE un JSON con formato:
+{
+  \"type\": \"chat\" | \"search\" | \"navigate\"
 }
+"
+                    ],
+                    ['role' => 'user', 'content' => $userMessage],
+                ],
+            ]);
+
+            $intentText = $intentResponse->choices[0]->message->content ?? '{}';
+            $intent = json_decode($intentText, true);
+            $type = $intent['type'] ?? 'search';
+
+            // 🔀 Enrutamiento según tipo
+            if ($type === 'chat') {
+                return $this->conversar($userMessage, $client);
+            } elseif ($type === 'navigate') {
+                return $this->navegar($userMessage, $client);
+            }
 
 
-    // ============================================================
-    // 🗣️ Conversación natural (saludos, charla)
-    // ============================================================
-    private function respuestaConversacional(string $query, string $userMessage, $client)
-    {
-        $prompt = "
-Eres el asistente de TukiShop, cálido, natural y simpático.
-Responde al usuario de forma fluida, amistosa y breve. 
-Si el usuario te saluda, respóndele con un saludo amistoso y ofrece ayuda (por ejemplo: '¡Hola! 😊 ¿En qué puedo ayudarte hoy?').
-No des respuestas genéricas, suena humano, no tan formal.
-Usuario dijo: '{$userMessage}'.
+            $intentText = $intentResponse->choices[0]->message->content ?? '{}';
+            $intent = json_decode($intentText, true);
+            $type = $intent['type'] ?? 'search';
+
+            if ($type === 'chat') {
+                return $this->conversar($userMessage, $client);
+            }
+
+            // 🧩 Paso 2: Detectar categorías y palabras clave
+            $categoryAndKeywordPrompt = "
+Eres un asistente de clasificación de productos para TukiShop.
+Dada esta lista de categorías:
+
+Arte, Automotriz, Belleza, Comida, Decoración, Deportes, Gaming, Herramientas, 
+Hogar, Jardinería, Juegos, Juguetes, Libros, Limpieza, Mascotas, Música, 
+Oficina, Ropa, Salud, Tecnología, Otros.
+
+El usuario escribió: '{$userMessage}'.
+
+Tu tarea:
+1. Devuelve un JSON con:
+   - \"categories\": hasta 4 categorías relevantes del listado anterior.
+   - \"keywords\": hasta 6 palabras clave relevantes para buscar dentro de esas categorías.
+
+Ejemplo de salida:
+{
+  \"categories\": [\"Ropa\", \"Moda\"],
+  \"keywords\": [\"camisa\", \"blusa\", \"prenda\"]
+}
 ";
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-        ]);
+            $extractResponse = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [['role' => 'user', 'content' => $categoryAndKeywordPrompt]],
+            ]);
 
-        return response()->json([
-            'message' => $response->choices[0]->message->content ?? "¡Hola! 😊 ¿En qué puedo ayudarte hoy?",
-            'results' => [],
-        ]);
+            $extractText = $extractResponse->choices[0]->message->content ?? '{}';
+            $extractText = preg_replace('/^[^{]+|[^}]+$/', '', $extractText);
+            $parsed = json_decode($extractText, true);
+
+            $categories = $parsed['categories'] ?? [];
+            $keywords = $parsed['keywords'] ?? [];
+            if (str_contains(strtolower($userMessage), 'tienda') || str_contains(strtolower($userMessage), 'vendedor')) {
+                return $this->buscarTiendas($userMessage, $client, $categories, $keywords);
+            }
+
+            return $this->buscarProductos($userMessage, $client, $categories, $keywords);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], 500);
+        }
     }
 
-    // ============================================================
-    // 🔍 1. Buscar productos (igual que antes)
-    // ============================================================
-    private function buscarProductos(string $query, $client)
+    private function buscarProductos(string $query, $client, array $categories = [], array $keywords = [])
     {
-        $query = trim($query);
-        $keywords = preg_split('/\s+/', strtolower($query));
+        // Limpieza básica
+        $categories = array_filter($categories, fn($c) => strlen($c) > 1);
+        $keywords = array_filter($keywords, fn($w) => strlen($w) > 2);
 
-        $products = DB::table('products')
+        // 🧩 Paso 1: obtener candidatos SQL combinando categoría + keywords
+        $productsQuery = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
-            ->leftJoin('product_category', 'products.id', '=', 'product_category.product_id')
+            ->leftJoin('product_category', 'product_category.product_id', '=', 'products.id')
             ->leftJoin('categories', 'categories.id', '=', 'product_category.category_id')
             ->select(
                 'products.id',
@@ -137,166 +133,453 @@ Usuario dijo: '{$userMessage}'.
                 'products.discount_price',
                 'products.image_1_url',
                 'stores.name as store_name',
-                DB::raw("COALESCE(categories.name::text, 'Sin categoría') as category_name")
+                DB::raw("COALESCE(categories.name, 'Sin categoría') as category_name")
             )
-            ->where('products.status', 'ACTIVE')
-            ->where('stores.status', 'ACTIVE')
-            ->whereRaw('stores.is_verified = true::boolean')
-            ->where(function ($q) use ($keywords) {
-                foreach ($keywords as $word) {
-                    $q->orWhereRaw("LOWER(products.name) ILIKE ?", ["%{$word}%"])
-                        ->orWhereRaw("LOWER(products.description) ILIKE ?", ["%{$word}%"])
-                        ->orWhereRaw("LOWER(products.details) ILIKE ?", ["%{$word}%"])
-                        ->orWhereRaw("LOWER(categories.name) ILIKE ?", ["%{$word}%"])
-                        ->orWhereRaw("LOWER(stores.name) ILIKE ?", ["%{$word}%"]);
+            ->whereRaw("TRIM(products.status) = 'ACTIVE'")
+            ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+            ->where('stores.is_verified', true);
+
+        // 🧭 Si hay categorías detectadas, filtrarlas primero
+        if (!empty($categories)) {
+            $productsQuery->where(function ($q) use ($categories) {
+                foreach ($categories as $cat) {
+                    $q->orWhereRaw("LOWER(categories.name) LIKE ?", ["%" . strtolower($cat) . "%"]);
                 }
-            })
-            ->limit(10)
-            ->get();
-
-        if ($products->isEmpty()) {
-            $simplified = substr($query, 0, 6);
-            $fallback = DB::table('products')
-                ->join('stores', 'stores.id', '=', 'products.store_id')
-                ->select(
-                    'products.id',
-                    'products.name',
-                    'products.image_1_url',
-                    'products.price',
-                    'products.discount_price',
-                    'stores.name as store_name'
-                )
-                ->where('products.status', 'ACTIVE')
-                ->where('stores.status', 'ACTIVE')
-                ->whereRaw('stores.is_verified = true::boolean')
-                ->where(function ($q) use ($simplified) {
-                    $q->whereRaw("LOWER(products.name) ILIKE ?", ["%{$simplified}%"])
-                        ->orWhereRaw("LOWER(products.description) ILIKE ?", ["%{$simplified}%"]);
-                })
-                ->limit(10)
-                ->get();
-
-            if ($fallback->isEmpty()) {
-                return response()->json([
-                    'message' => "No encontré resultados exactos para '{$query}', pero puedo ayudarte a buscar algo similar.",
-                    'results' => [],
-                ]);
-            }
-
-            $products = $fallback;
+            });
         }
 
-        $names = $products->pluck('name')->take(3)->implode(', ');
-        $prompt = "Eres el asistente de TukiShop. 
-Genera una respuesta natural, cálida y breve (máximo 2 líneas) para el usuario que buscó '{$query}'.
-Menciona de forma fluida algunos productos como {$names}, 
-pero sin dar descripciones largas ni muchos detalles. 
-Evita repetir ideas o sonar exagerado.";
+        // 🧠 Luego, filtrar adicionalmente por las palabras clave (nombre/desc/detalle)
+        if (!empty($keywords)) {
+            $productsQuery->where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $fuzzy = substr($word, -1) === 's' ? substr($word, 0, -1) : "{$word}s";
+                    $q->orWhereRaw("LOWER(products.name) LIKE ?", ["%{$word}%"])
+                        ->orWhereRaw("LOWER(products.name) LIKE ?", ["%{$fuzzy}%"])
+                        ->orWhereRaw("LOWER(products.description) LIKE ?", ["%{$word}%"])
+                        ->orWhereRaw("LOWER(products.description) LIKE ?", ["%{$fuzzy}%"])
+                        ->orWhereRaw("LOWER(products.details) LIKE ?", ["%{$word}%"])
+                        ->orWhereRaw("LOWER(products.details) LIKE ?", ["%{$fuzzy}%"]);
+                }
+            });
+        }
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-        ]);
+        $candidates = $productsQuery->limit(12)->get();
 
-        $message = $response->choices[0]->message->content ?? "Encontré algunos productos relacionados con '{$query}'.";
+        if ($candidates->isEmpty()) {
+            return response()->json([
+                'message' => "No encontré productos que coincidan con '{$query}'. ¿Querés intentar con otra palabra? 🛍️",
+                'results' => [],
+            ]);
+        }
+
+        // 🧠 Paso 2: Enviar a OpenAI para ranking semántico
+        try {
+            $candidateList = $candidates->map(function ($p) {
+                return "{$p->id} - {$p->name} ({$p->store_name}) [Categoría: {$p->category_name}]";
+            })->implode("\n");
+
+            $rerankPrompt = "
+Eres el asistente de búsqueda inteligente de TukiShop.
+El usuario escribió: '{$query}'.
+Categorías detectadas: " . implode(', ', $categories) . ".
+Palabras clave: " . implode(', ', $keywords) . ".
+
+Selecciona los 4 productos más relevantes de esta lista, priorizando coincidencias de categoría y relación semántica con la intención.
+Evita mezclar categorías distintas.
+Devuelve un JSON válido:
+{
+  \"selected_ids\": [lista con los IDs más relevantes, máximo 4]
+}
+
+Lista de productos:
+{$candidateList}
+";
+
+            $rerankResponse = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [['role' => 'user', 'content' => $rerankPrompt]],
+            ]);
+
+            $json = $rerankResponse->choices[0]->message->content ?? '{}';
+            $json = preg_replace('/^[^{]+|[^}]+$/', '', $json);
+            $parsed = json_decode($json, true);
+            $selectedIds = $parsed['selected_ids'] ?? [];
+
+            $finalProducts = empty($selectedIds)
+                ? $candidates->take(4)
+                : $candidates->filter(fn($p) => in_array($p->id, $selectedIds))->take(4);
+
+        } catch (\Throwable $e) {
+            $finalProducts = $candidates->take(4);
+        }
+
+        // ✨ Paso 3: Respuesta cálida y breve
+        try {
+            $names = $finalProducts->pluck('name')->implode(', ');
+            $prompt = "Eres el asistente de TukiShop. 
+Responde de forma cálida y natural (máx. 2 líneas) sobre los resultados para '{$query}', 
+mencionando algunos productos como {$names}.";
+
+            $response = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [['role' => 'user', 'content' => $prompt]],
+            ]);
+
+            $message = $response->choices[0]->message->content ?? "Encontré varios productos relacionados con '{$query}' 😊";
+        } catch (\Throwable $e) {
+            $message = "Encontré varios productos relacionados con '{$query}' 😊";
+        }
 
         return response()->json([
             'message' => $message,
-            'results' => $products,
+            'results' => $finalProducts->values(),
         ]);
     }
 
-
-
-    // ============================================================
-    // 📘 2. Info plataforma (igual que antes)
-    // ============================================================
-    private function infoPlataforma(string $query, $client)
+    private function buscarTiendas(string $query, $client, array $categories = [], array $keywords = [])
     {
-        $infos = [
-            'envío' => 'Envíos en todo el país dentro de 1 a 3 días hábiles.',
-            'pago' => 'Pagos con Visa, Mastercard y Stripe.',
-            'devolución' => 'Devoluciones dentro de los primeros 15 días.',
-            'cuenta' => 'Puedes crear tu cuenta para guardar direcciones y pedidos.',
-            'tienda' => 'Puedes crear tu propia tienda y vender productos.',
-        ];
+        $categories = array_values(array_filter($categories, fn($c) => is_string($c) && strlen($c) > 1));
+        $keywords = array_values(array_filter($keywords, fn($w) => is_string($w) && strlen($w) > 2));
 
-        $found = collect($infos)->first(function ($_, $key) use ($query) {
-            return str_contains($query, $key);
-        });
+        // ---------- 1) Buscar TIENDAS directamente ----------
+        // ---------- 1️⃣ Buscar TIENDAS por nombre, descripción o categoría ----------
+        $storesQuery = DB::table('stores')
+            ->leftJoin('store_categories', 'store_categories.id', '=', 'stores.category_id')
+            ->select(
+                'stores.id',
+                'stores.name',
+                'stores.description',
+                'stores.image',
+                'stores.banner',
+                'stores.rating',
+                DB::raw("COALESCE(store_categories.name, 'Sin categoría') AS category_name")
+            )
+            ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->where(function ($q) use ($categories, $keywords, $query) {
+                $normalizedQuery = mb_strtolower(trim(preg_replace('/[^a-z0-9áéíóúüñ\s]/iu', '', $query)));
 
-        $prompt = $found
-            ? "Explícalo de forma natural y cercana, como si hablaras con un cliente: {$found}"
-            : "Responde naturalmente explicando las funciones principales de TukiShop.";
+                // 🔹 1. Buscar por nombre o descripción usando las keywords
+                foreach ($keywords as $word) {
+                    $w = mb_strtolower(trim($word));
+                    if (strlen($w) < 3)
+                        continue;
+                    $fuzzy = substr($w, -1) === 's' ? substr($w, 0, -1) : "{$w}s";
+                    $q->orWhereRaw("LOWER(stores.name) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(stores.name) LIKE ?", ["%{$fuzzy}%"])
+                        ->orWhereRaw("LOWER(stores.description) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(stores.description) LIKE ?", ["%{$fuzzy}%"]);
+                }
 
-        $response = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-        ]);
+                // 🔹 2. Buscar por categorías si existen
+                foreach ($categories as $cat) {
+                    $c = mb_strtolower(trim($cat));
+                    $q->orWhereRaw("LOWER(store_categories.name) LIKE ?", ["%{$c}%"]);
+                }
 
-        return response()->json([
-            'message' => $response->choices[0]->message->content ?? "TukiShop te ayuda a comprar y vender productos fácilmente 😊",
-        ]);
-    }
+                // 🔹 3. Fallback: buscar cualquier palabra del mensaje original
+                $words = array_filter(explode(' ', $normalizedQuery), fn($w) => strlen($w) > 2);
+                foreach ($words as $w) {
+                    $q->orWhereRaw("LOWER(stores.name) REGEXP ?", ["(^| ){$w}( |$)"])
+                        ->orWhereRaw("LOWER(stores.description) REGEXP ?", ["(^| ){$w}( |$)"]);
+                }
+            });
 
-    // ============================================================
-    // 🔗 3. Enlaces naturales
-    // ============================================================
-    private function enlacesRelacionados(string $query, $client)
-    {
-        $links = [
-            'camisas' => '/products?category=camisas',
-            'ofertas' => '/offers',
-            'contacto' => '/contact',
-            'ayuda' => '/help',
-            'tienda' => '/stores',
-            'inicio' => '/',
-        ];
+        $foundStores = $storesQuery->limit(6)->get();
 
-        foreach ($links as $key => $url) {
-            if (str_contains($query, $key)) {
-                $prompt = "Dile al usuario de forma amistosa que puede visitar este enlace relacionado con '{$key}': {$url}";
-                $response = $client->chat()->create([
-                    'model' => 'gpt-4o-mini',
-                    'messages' => [['role' => 'user', 'content' => $prompt]],
-                ]);
+        if ($foundStores->isNotEmpty()) {
+            // 🧠 Normalizar el texto de búsqueda
+            $normalizedQuery = strtolower(trim(preg_replace('/[^a-z0-9áéíóúüñ\s]/iu', '', $query)));
 
+            // 🔎 Buscar coincidencia fuerte por nombre exacto o parcial alto
+            $exactMatch = $foundStores->first(function ($store) use ($normalizedQuery) {
+                $storeName = strtolower(trim($store->name ?? ''));
+                // Coincidencia exacta o muy similar
+                return $storeName === $normalizedQuery ||
+                    levenshtein($storeName, $normalizedQuery) <= 2 ||
+                    str_contains($storeName, $normalizedQuery) ||
+                    str_contains($normalizedQuery, $storeName);
+            });
+
+            if ($exactMatch) {
+                // 🧩 Si hay coincidencia clara, solo devolver esa
                 return response()->json([
-                    'message' => $response->choices[0]->message->content ?? "Podés visitar este enlace: {$url}",
-                    'link' => $url,
+                    'message' => "¡Perfecto! Encontré la tienda que buscabas 🏪",
+                    'stores' => [$exactMatch],
+                ]);
+            }
+
+            // 🧩 Si no hay coincidencia exacta, devuelve todas como sugerencias
+            return response()->json([
+                'message' => "Estas tiendas podrían interesarte 🏪",
+                'stores' => $foundStores->values(),
+            ]);
+        }
+
+
+
+        if (!empty($categories)) {
+            $storesQuery->where(function ($q) use ($categories) {
+                foreach ($categories as $cat) {
+                    $q->orWhereRaw("LOWER(store_categories.name) LIKE ?", ['%' . strtolower($cat) . '%']);
+                }
+            });
+        }
+
+        if (!empty($keywords)) {
+            $storesQuery->where(function ($q) use ($keywords) {
+                foreach ($keywords as $w) {
+                    $fuzzy = substr($w, -1) === 's' ? substr($w, 0, -1) : "{$w}s";
+                    $q->orWhereRaw("LOWER(stores.name) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(stores.name) LIKE ?", ["%{$fuzzy}%"])
+                        ->orWhereRaw("LOWER(stores.description) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(stores.description) LIKE ?", ["%{$fuzzy}%"]);
+                }
+            });
+        }
+
+        $foundStores = $storesQuery->limit(6)->get();
+
+        if ($foundStores->isNotEmpty()) {
+            return response()->json([
+                'message' => "Estas tiendas podrían interesarte 🏪",
+                'stores' => $foundStores->values(),
+            ]);
+        }
+
+        // ---------- 2) Buscar PRODUCTOS para inferir TIENDAS ----------
+        // Paso 2: buscar productos para inferir tiendas verificadas
+        $productQuery = DB::table('products')
+            ->join('stores', 'stores.id', '=', 'products.store_id')
+            ->leftJoin('product_category', 'product_category.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'categories.id', '=', 'product_category.category_id')
+            ->select(
+                'stores.id AS store_id',
+                'stores.name AS store_name',
+                'stores.image AS store_image',
+                'stores.banner AS store_banner',
+                'stores.rating AS store_rating',
+                DB::raw("COALESCE(categories.name, 'Sin categoría') AS product_category_name")
+            )
+            ->whereRaw("TRIM(products.status) = 'ACTIVE'")
+            ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+            ->where('stores.is_verified', true)
+            ->where(function ($q) use ($categories, $keywords) {
+                foreach (array_merge($categories, $keywords) as $w) {
+                    $fuzzy = substr($w, -1) === 's' ? substr($w, 0, -1) : "{$w}s";
+                    $q->orWhereRaw("LOWER(products.name) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(products.description) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(products.details) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(categories.name) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(stores.name) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(products.name) LIKE ?", ["%{$fuzzy}%"])
+                        ->orWhereRaw("LOWER(products.description) LIKE ?", ["%{$fuzzy}%"])
+                        ->orWhereRaw("LOWER(products.details) LIKE ?", ["%{$fuzzy}%"]);
+                }
+            });
+
+
+        // ✅ Filtro por categorías (sin excluir productos sin categoría)
+        if (!empty($categories)) {
+            $productQuery->where(function ($q) use ($categories) {
+                foreach ($categories as $cat) {
+                    $q->orWhereRaw("LOWER(categories.name) LIKE ?", ['%' . strtolower($cat) . '%'])
+                        ->orWhereRaw("LOWER(products.name) LIKE ?", ['%' . strtolower($cat) . '%'])
+                        ->orWhereRaw("LOWER(products.description) LIKE ?", ['%' . strtolower($cat) . '%']);
+                }
+            });
+        }
+
+        // ✅ Filtro por keywords (nombre, descripción y tienda relacionada)
+        if (!empty($keywords)) {
+            $productQuery->where(function ($q) use ($keywords) {
+                foreach ($keywords as $w) {
+                    $fuzzy = substr($w, -1) === 's' ? substr($w, 0, -1) : "{$w}s";
+                    $q->orWhereRaw("LOWER(products.name) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(products.description) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(products.details) LIKE ?", ["%{$w}%"])
+                        // 🧠 Extra: también busca por el nombre de la tienda
+                        ->orWhereRaw("LOWER(stores.name) LIKE ?", ["%{$w}%"]);
+                }
+            });
+        }
+
+        $productCandidates = $productQuery->limit(10)->get();
+
+        if ($productCandidates->isNotEmpty()) {
+            $storesFromProducts = $this->uniqueStoresFromProducts($productCandidates)->take(2)->values();
+
+            if ($storesFromProducts->isNotEmpty()) {
+                return response()->json([
+                    'message' => "No encontré tiendas directas, pero estas venden productos relacionados 🐾",
+                    'stores' => $storesFromProducts,
                 ]);
             }
         }
 
+        // ---------- 3) Fallback ----------
         return response()->json([
-            'message' => "No encontré un enlace directo, pero podés visitar /help para más información.",
+            'message' => "No encontré tiendas para esa temática. Te llevo al listado general de tiendas para que explores. 🙏",
+            'stores' => [],
+            'link' => '/search/stores',
         ]);
     }
 
-    // ============================================================
-    // 🤷 4. Fallback (más natural)
-    // ============================================================
-    private function respuestaGenerica(string $userMessage, $client)
+
+    private function uniqueStoresFromProducts($productRows)
     {
+        // $productRows: colección con campos store_id, store_name, store_image, store_banner, store_rating
+        $seen = [];
+        $unique = [];
+
+        foreach ($productRows as $row) {
+            if (!isset($seen[$row->store_id])) {
+                $seen[$row->store_id] = true;
+
+                $unique[] = (object) [
+                    'id' => $row->store_id,
+                    'name' => $row->store_name,
+                    'image' => $row->store_image,
+                    'banner' => $row->store_banner,
+                    'rating' => $row->store_rating,
+                    // opcional: 'category_name' => $row->product_category_name,
+                ];
+            }
+        }
+
+        return collect($unique);
+    }
+
+
+    private function navegar(string $userMessage, $client)
+    {
+        $routes = [
+            'inicio' => '/',
+            'home' => '/',
+            'ayuda' => '/help',
+            'carrito' => '/shoppingCart',
+            'wishlist' => '/wishlist',
+            'favoritos' => '/wishlist',
+            'perfil' => '/profile',
+            'cuenta' => '/profile',
+            'vender' => '/beSellerPage',
+            'tienda' => '/search/stores',
+            'mis ordenes' => '/profile',
+            'soporte' => '/help',
+            'contacto' => '/contact',
+            'problema' => '/reportProblem',
+        ];
+
+        // 🔍 Paso 1: detectar la sección solicitada
         $prompt = "
 Eres el asistente de TukiShop.
-El usuario dijo: '{$userMessage}'.
-No entendiste la intención, pero en vez de decir 'no entendí', responde de forma amable, 
-intentando mantener la conversación. Por ejemplo:
-- 'Mmm, no estoy seguro a qué te referís, ¿podrías contarme un poco más?'
-- 'Interesante 😄, ¿me podrías dar más detalles para ayudarte mejor?'
-Usa un tono cercano, simpático y natural.
+El usuario escribió: '{$userMessage}'.
+De la lista de secciones disponibles, elige a cuál debería referirse o ser redirigido.
+
+Lista de secciones:
+" . implode(", ", array_keys($routes)) . "
+
+Devuelve un JSON con formato:
+{
+  \"section\": \"una de las anteriores o null si no aplica\"
+}
 ";
 
-        $response = $client->chat()->create([
+        $navResponse = $client->chat()->create([
             'model' => 'gpt-4o-mini',
             'messages' => [['role' => 'user', 'content' => $prompt]],
         ]);
 
-        return response()->json([
-            'message' => $response->choices[0]->message->content ??
-                "No estoy del todo seguro de a qué te referís 😅, ¿podrías contarme un poco más?",
-            'results' => [],
+        $json = $navResponse->choices[0]->message->content ?? '{}';
+        $json = preg_replace('/^[^{]+|[^}]+$/', '', $json);
+        $parsed = json_decode($json, true);
+        $section = strtolower($parsed['section'] ?? '');
+        $link = $routes[$section] ?? null;
+
+        if (!$link) {
+            return response()->json([
+                'message' => "Parece que querés navegar en TukiShop, pero no estoy seguro de a dónde. 😊 ¿Podrías aclararme un poco más?",
+                'results' => [],
+                'navigate' => false,
+            ]);
+        }
+
+        // 🧠 Paso 2: Determinar si el usuario quiere navegar o solo preguntar
+        $intentPrompt = "
+Analiza este mensaje del usuario: '{$userMessage}'.
+¿Está pidiendo explícitamente ir o navegar a esa sección (por ejemplo, 'llevame', 'quiero ir', 'abrir', 'entrar', 'muéstrame')?
+Si solo pregunta dónde está o cómo acceder, responde que NO.
+
+Devuelve un JSON:
+{
+  \"navigate\": true | false
+}
+";
+
+        $intentResponse = $client->chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [['role' => 'user', 'content' => $intentPrompt]],
         ]);
+
+        $intentJson = $intentResponse->choices[0]->message->content ?? '{}';
+        $intentJson = preg_replace('/^[^{]+|[^}]+$/', '', $intentJson);
+        $intentParsed = json_decode($intentJson, true);
+        $shouldNavigate = $intentParsed['navigate'] ?? false;
+
+        // 🗣️ Mensaje amigable
+        $promptMsg = "
+Eres el asistente de TukiShop.
+Responde con un texto breve (1–2 líneas) explicando que puede acceder a la sección '{$section}'.
+Ejemplo: '¡Perfecto! Aquí podés ver tus productos favoritos ❤️' o 'Para vender en TukiShop, ingresá aquí 👇'.
+";
+
+        $msgResponse = $client->chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [['role' => 'user', 'content' => $promptMsg]],
+        ]);
+
+        $message = $msgResponse->choices[0]->message->content ?? "Aquí tenés el enlace que buscabas 👇";
+
+        // 🚀 Devolver respuesta adaptada
+        return response()->json([
+            'message' => $message,
+            'link' => $link,
+            'results' => [],
+            'navigate' => (bool) $shouldNavigate, // 👈 Nuevo campo
+        ]);
+    }
+
+
+
+
+    // ============================================================
+    // 💬 Conversación breve y natural
+    // ============================================================
+    private function conversar(string $userMessage, $client)
+    {
+        try {
+            $prompt = "
+Eres el asistente de TukiShop. 
+Habla con el usuario de forma corta, alegre y natural (máximo 2 líneas). 
+Usa emojis moderadamente y evita sonar robótico o muy formal.
+El usuario dijo: '{$userMessage}'.";
+
+            $response = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [['role' => 'user', 'content' => $prompt]],
+            ]);
+
+            $message = $response->choices[0]->message->content ?? "¡Hola! 😊 ¿En qué puedo ayudarte hoy?";
+
+            return response()->json([
+                'message' => $message,
+                'results' => [],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => "¡Hola! 😊 ¿Cómo estás? ¿Querés que te ayude a buscar algo?",
+                'results' => [],
+            ]);
+        }
     }
 }
