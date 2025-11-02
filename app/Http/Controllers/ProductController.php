@@ -8,24 +8,27 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
     // Retrieve all active products from active and verified stores.
-    public function index(Request $request)
-    {
-        $perPage = $request->query('per_page', 30);
+public function index(Request $request)
+{
+    $perPage = $request->query('per_page', 30);
 
-        $products = DB::table('products')
-            ->join('stores', 'stores.id', '=', 'products.store_id')
-            ->select('products.*', 'stores.name as store_name')
-            ->whereRaw("TRIM(products.status) = 'ACTIVE'")
-            ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
-            ->where('stores.is_verified', true)
-            ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
-            ->orderByDesc('products.created_at')
-            ->paginate($perPage);
+    $products = DB::table('products')
+        ->join('stores', 'stores.id', '=', 'products.store_id')
+        ->select(
+            'products.*',
+            'products.store_id as store_id',
+            'stores.name as store_name'
+        )
+        ->whereRaw("TRIM(products.status) = 'ACTIVE'")
+        ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+        ->where('stores.is_verified', true)
+        ->whereRaw("TRIM(products.status) <> 'ARCHIVED'")
+        ->orderByDesc('products.created_at')
+        ->paginate($perPage);
 
-        // Esto devuelve estructura JSON con meta y links automáticos:
-        // { data: [...], current_page: 1, last_page: 5, total: 150, per_page: 30 }
-        return response()->json($products);
-    }
+    return response()->json($products);
+}
+
 
 
     // Retrieve a specific product if its store is active and product is not archived.
@@ -515,6 +518,35 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+public function search(Request $request)
+{
+    $query = trim($request->input('q', ''));
+
+    if (strlen($query) < 2) {
+        return response()->json([]); // evita spam
+    }
+
+    $driver = DB::getDriverName(); // 'pgsql' o 'mysql'
+
+    $products = DB::table('products')
+        ->join('stores', 'stores.id', '=', 'products.store_id')
+        ->select('products.id', 'products.name', 'products.image_1_url', 'stores.name as store_name')
+        ->whereRaw("TRIM(products.status) = 'ACTIVE'")
+        ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
+        ->where('stores.is_verified', true)
+        ->where(function ($q) use ($query, $driver) {
+            if ($driver === 'pgsql') {
+                $q->where('products.name', 'ILIKE', "%{$query}%");
+            } else {
+                $q->where('products.name', 'LIKE', "%{$query}%");
+            }
+        })
+        ->limit(8)
+        ->get();
+
+    return response()->json($products);
+}
+
 
 
     // Search for products by name within a specific verified store.
