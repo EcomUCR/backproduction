@@ -8,18 +8,18 @@ use OpenAI;
 
 class ChatbotController extends Controller
 {
-   public function handle(Request $request)
-{
-    $request->validate([
-        'message' => 'required|string|max:500',
-    ]);
+    public function handle(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string|max:500',
+        ]);
 
-    $userMessage = trim($request->input('message'));
-    $client = \OpenAI::client(env('OPENAI_API_KEY'));
+        $userMessage = trim($request->input('message'));
+        $client = \OpenAI::client(env('OPENAI_API_KEY'));
 
-    try {
-        // 🧠 Paso 0: Detección temprana de intentos maliciosos
-        $securityPrompt = "
+        try {
+            // 🧠 Paso 0: Detección temprana de intentos maliciosos
+            $securityPrompt = "
 Eres el detector de seguridad de TukiShop.
 Analiza este mensaje del usuario: '{$userMessage}'.
 
@@ -38,33 +38,33 @@ Devuelve un JSON **válido y solo JSON**:
 }
 ";
 
-        $securityResponse = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [['role' => 'user', 'content' => $securityPrompt]],
-        ]);
-
-        $securityJson = $securityResponse->choices[0]->message->content ?? '{}';
-        $securityJson = preg_replace('/^[^{]+|[^}]+$/', '', $securityJson);
-        $securityParsed = json_decode($securityJson, true);
-        $isMalicious = $securityParsed['malicious'] ?? false;
-
-        if ($isMalicious) {
-            // 🚫 Redirige inmediatamente a la página de seguridad
-            return response()->json([
-                'message' => "🚨 Lo siento, detecté una solicitud potencialmente peligrosa. Por seguridad, la acción fue bloqueada.",
-                'link' => '/notAuthorized',
-                'navigate' => true,
-                'results' => [],
+            $securityResponse = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [['role' => 'user', 'content' => $securityPrompt]],
             ]);
-        }
 
-        // 🧠 Paso 1: Clasificar intención general
-        $intentResponse = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => "
+            $securityJson = $securityResponse->choices[0]->message->content ?? '{}';
+            $securityJson = preg_replace('/^[^{]+|[^}]+$/', '', $securityJson);
+            $securityParsed = json_decode($securityJson, true);
+            $isMalicious = $securityParsed['malicious'] ?? false;
+
+            if ($isMalicious) {
+                // 🚫 Redirige inmediatamente a la página de seguridad
+                return response()->json([
+                    'message' => "🚨 Lo siento, detecté una solicitud potencialmente peligrosa. Por seguridad, la acción fue bloqueada.",
+                    'link' => '/notAuthorized',
+                    'navigate' => true,
+                    'results' => [],
+                ]);
+            }
+
+            // 🧠 Paso 1: Clasificar intención general
+            $intentResponse = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => "
 Eres el asistente oficial de TukiShop.
 Tu tarea es determinar la intención principal del mensaje del usuario.
 
@@ -78,24 +78,24 @@ Devuelve SIEMPRE un JSON con formato:
   \"type\": \"chat\" | \"search\" | \"navigate\"
 }
 "
+                    ],
+                    ['role' => 'user', 'content' => $userMessage],
                 ],
-                ['role' => 'user', 'content' => $userMessage],
-            ],
-        ]);
+            ]);
 
-        $intentText = $intentResponse->choices[0]->message->content ?? '{}';
-        $intent = json_decode($intentText, true);
-        $type = $intent['type'] ?? 'search';
+            $intentText = $intentResponse->choices[0]->message->content ?? '{}';
+            $intent = json_decode($intentText, true);
+            $type = $intent['type'] ?? 'search';
 
-        // 🔀 Enrutamiento según tipo
-        if ($type === 'chat') {
-            return $this->conversar($userMessage, $client);
-        } elseif ($type === 'navigate') {
-            return $this->navegar($userMessage, $client);
-        }
+            // 🔀 Enrutamiento según tipo
+            if ($type === 'chat') {
+                return $this->conversar($userMessage, $client);
+            } elseif ($type === 'navigate') {
+                return $this->navegar($userMessage, $client);
+            }
 
-        // 🧩 Paso 2: Detectar categorías y palabras clave
-        $categoryAndKeywordPrompt = "
+            // 🧩 Paso 2: Detectar categorías y palabras clave
+            $categoryAndKeywordPrompt = "
 Eres un asistente de clasificación de productos para TukiShop.
 Dada esta lista de categorías:
 
@@ -117,34 +117,34 @@ Ejemplo de salida:
 }
 ";
 
-        $extractResponse = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [['role' => 'user', 'content' => $categoryAndKeywordPrompt]],
-        ]);
+            $extractResponse = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [['role' => 'user', 'content' => $categoryAndKeywordPrompt]],
+            ]);
 
-        $extractText = $extractResponse->choices[0]->message->content ?? '{}';
-        $extractText = preg_replace('/^[^{]+|[^}]+$/', '', $extractText);
-        $parsed = json_decode($extractText, true);
+            $extractText = $extractResponse->choices[0]->message->content ?? '{}';
+            $extractText = preg_replace('/^[^{]+|[^}]+$/', '', $extractText);
+            $parsed = json_decode($extractText, true);
 
-        $categories = $parsed['categories'] ?? [];
-        $keywords = $parsed['keywords'] ?? [];
+            $categories = $parsed['categories'] ?? [];
+            $keywords = $parsed['keywords'] ?? [];
 
-        if (str_contains(strtolower($userMessage), 'tienda') || str_contains(strtolower($userMessage), 'vendedor')) {
-            return $this->buscarTiendas($userMessage, $client, $categories, $keywords);
+            if (str_contains(strtolower($userMessage), 'tienda') || str_contains(strtolower($userMessage), 'vendedor')) {
+                return $this->buscarTiendas($userMessage, $client, $categories, $keywords);
+            }
+
+            return $this->buscarProductos($userMessage, $client, $categories, $keywords);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], 500);
         }
 
-        return $this->buscarProductos($userMessage, $client, $categories, $keywords);
-
-    } catch (\Throwable $e) {
-        return response()->json([
-            'error' => true,
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-        ], 500);
     }
-    
-}
 
 
     private function buscarProductos(string $query, $client, array $categories = [], array $keywords = [])
@@ -310,12 +310,13 @@ mencionando algunos productos como {$names}.";
                     $q->orWhereRaw("LOWER(store_categories.name) LIKE ?", ["%{$c}%"]);
                 }
 
-                // 🔹 3. Fallback: buscar cualquier palabra del mensaje original
                 $words = array_filter(explode(' ', $normalizedQuery), fn($w) => strlen($w) > 2);
+
                 foreach ($words as $w) {
-                    $q->orWhereRaw("LOWER(stores.name) REGEXP ?", ["(^| ){$w}( |$)"])
-                        ->orWhereRaw("LOWER(stores.description) REGEXP ?", ["(^| ){$w}( |$)"]);
+                    $q->orWhereRaw("LOWER(stores.name) LIKE ?", ["%{$w}%"])
+                        ->orWhereRaw("LOWER(stores.description) LIKE ?", ["%{$w}%"]);
                 }
+
             });
 
         $foundStores = $storesQuery->limit(6)->get();
@@ -659,49 +660,49 @@ El usuario dijo: '{$userMessage}'.";
         }
     }
     // -------- helpers de seguridad (añadir dentro de ChatbotController) ----------
-private function extract_json_object(string $text): ?array
-{
-    // intenta extraer desde la primera '{' hasta la última '}' de forma segura
-    $start = strpos($text, '{');
-    $end = strrpos($text, '}');
+    private function extract_json_object(string $text): ?array
+    {
+        // intenta extraer desde la primera '{' hasta la última '}' de forma segura
+        $start = strpos($text, '{');
+        $end = strrpos($text, '}');
 
-    if ($start === false || $end === false || $end <= $start) {
+        if ($start === false || $end === false || $end <= $start) {
+            return null;
+        }
+
+        $jsonStr = substr($text, $start, $end - $start + 1);
+        $parsed = json_decode($jsonStr, true);
+
+        return is_array($parsed) ? $parsed : null;
+    }
+
+    private function local_sql_fallback(string $message): ?string
+    {
+        // Si coincide con patrones SQL / comandos / inyección, devuelvo razón; si no, null.
+        $patterns = [
+            '/\b(SELECT|INSERT|UPDATE|DELETE|DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE|UNION|EXEC|EXECUTE)\b/i',
+            '/(--|;|\/\*|\*\/|@@|CHAR\(|NCHAR\(|CAST\(|CONVERT\()/i',
+            '/\b(login|password|passwd|secret|api_key|token)\b/i',
+            '/<\?php|\b(shell_exec|system|exec|passthru|popen)\b/i',
+        ];
+
+        foreach ($patterns as $p) {
+            if (preg_match($p, $message)) {
+                return "Coincidencia local con patrón peligroso: /" . trim($p, '/') . "/";
+            }
+        }
+
         return null;
     }
 
-    $jsonStr = substr($text, $start, $end - $start + 1);
-    $parsed = json_decode($jsonStr, true);
-
-    return is_array($parsed) ? $parsed : null;
-}
-
-private function local_sql_fallback(string $message): ?string
-{
-    // Si coincide con patrones SQL / comandos / inyección, devuelvo razón; si no, null.
-    $patterns = [
-        '/\b(SELECT|INSERT|UPDATE|DELETE|DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE|UNION|EXEC|EXECUTE)\b/i',
-        '/(--|;|\/\*|\*\/|@@|CHAR\(|NCHAR\(|CAST\(|CONVERT\()/i',
-        '/\b(login|password|passwd|secret|api_key|token)\b/i',
-        '/<\?php|\b(shell_exec|system|exec|passthru|popen)\b/i',
-    ];
-
-    foreach ($patterns as $p) {
-        if (preg_match($p, $message)) {
-            return "Coincidencia local con patrón peligroso: /" . trim($p, '/') . "/";
-        }
-    }
-
-    return null;
-}
-
-/**
- * Llama al modelo de seguridad y aplica fallback local. Devuelve array:
- * ['malicious' => bool, 'reason' => string|null, 'raw_model' => string|null]
- */
-private function checkSecurity(string $userMessage, $client): array
-{
-    // prompt compacto (puedes dejar el tuyo si prefieres)
-    $securityPrompt = "
+    /**
+     * Llama al modelo de seguridad y aplica fallback local. Devuelve array:
+     * ['malicious' => bool, 'reason' => string|null, 'raw_model' => string|null]
+     */
+    private function checkSecurity(string $userMessage, $client): array
+    {
+        // prompt compacto (puedes dejar el tuyo si prefieres)
+        $securityPrompt = "
 Eres el detector de seguridad de TukiShop.
 Analiza este mensaje del usuario: '{$userMessage}'.
 
@@ -709,56 +710,57 @@ Devuelve un JSON válido EXACTO:
 { \"malicious\": true|false, \"reason\": \"breve explicación o null\" }
 ";
 
-    try {
-        $securityResponse = $client->chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [['role' => 'user', 'content' => $securityPrompt]],
-            'max_tokens' => 200,
-        ]);
+        try {
+            $securityResponse = $client->chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [['role' => 'user', 'content' => $securityPrompt]],
+                'max_tokens' => 200,
+            ]);
 
-        $raw = $securityResponse->choices[0]->message->content ?? '';
+            $raw = $securityResponse->choices[0]->message->content ?? '';
 
-        // intento parse robusto
-        $parsed = $this->extract_json_object($raw);
+            // intento parse robusto
+            $parsed = $this->extract_json_object($raw);
 
-        // si parse falla, intento json_decode directo (por seguridad)
-        if ($parsed === null) {
-            $decoded = json_decode($raw, true);
-            if (is_array($decoded)) $parsed = $decoded;
-        }
-
-        // Si todavía es nulo, usamos fallback local (regex)
-        if ($parsed === null) {
-            $reason = $this->local_sql_fallback($userMessage);
-            if ($reason !== null) {
-                return ['malicious' => true, 'reason' => $reason, 'raw_model' => $raw];
+            // si parse falla, intento json_decode directo (por seguridad)
+            if ($parsed === null) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded))
+                    $parsed = $decoded;
             }
-            // si no hay razón local, asumimos no-malicioso pero devolvemos raw para logging
-            return ['malicious' => false, 'reason' => null, 'raw_model' => $raw];
-        }
 
-        // parsed ok
-        $isMalicious = $parsed['malicious'] ?? false;
-        $reason = $parsed['reason'] ?? null;
+            // Si todavía es nulo, usamos fallback local (regex)
+            if ($parsed === null) {
+                $reason = $this->local_sql_fallback($userMessage);
+                if ($reason !== null) {
+                    return ['malicious' => true, 'reason' => $reason, 'raw_model' => $raw];
+                }
+                // si no hay razón local, asumimos no-malicioso pero devolvemos raw para logging
+                return ['malicious' => false, 'reason' => null, 'raw_model' => $raw];
+            }
 
-        // Si modelo respondió ambiguo (e.g., malicious=false) pero local regex detecta algo, prioridad al local
-        if (!$isMalicious) {
+            // parsed ok
+            $isMalicious = $parsed['malicious'] ?? false;
+            $reason = $parsed['reason'] ?? null;
+
+            // Si modelo respondió ambiguo (e.g., malicious=false) pero local regex detecta algo, prioridad al local
+            if (!$isMalicious) {
+                $local = $this->local_sql_fallback($userMessage);
+                if ($local !== null) {
+                    return ['malicious' => true, 'reason' => "Fallback local: {$local}", 'raw_model' => $raw];
+                }
+            }
+
+            return ['malicious' => (bool) $isMalicious, 'reason' => $reason, 'raw_model' => $raw];
+
+        } catch (\Throwable $e) {
+            // En caso de error con la API, aplicamos fallback local
             $local = $this->local_sql_fallback($userMessage);
             if ($local !== null) {
-                return ['malicious' => true, 'reason' => "Fallback local: {$local}", 'raw_model' => $raw];
+                return ['malicious' => true, 'reason' => "Fallo modelo, fallback local: {$local}", 'raw_model' => null];
             }
+            return ['malicious' => false, 'reason' => null, 'raw_model' => null];
         }
-
-        return ['malicious' => (bool)$isMalicious, 'reason' => $reason, 'raw_model' => $raw];
-
-    } catch (\Throwable $e) {
-        // En caso de error con la API, aplicamos fallback local
-        $local = $this->local_sql_fallback($userMessage);
-        if ($local !== null) {
-            return ['malicious' => true, 'reason' => "Fallo modelo, fallback local: {$local}", 'raw_model' => null];
-        }
-        return ['malicious' => false, 'reason' => null, 'raw_model' => null];
     }
-}
 
 }
