@@ -75,11 +75,6 @@ Route::get('/debug-cloudinary', function () {
 });
 
 //Cupones
-Route::get('/coupons', [CouponController::class, 'index']);
-Route::post('/coupons', [CouponController::class, 'store']);
-Route::get('/coupons/{id}', [CouponController::class, 'show']);
-Route::put('/coupons/{id}', [CouponController::class, 'update']);
-Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
 Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
 
 // Registro y login
@@ -306,5 +301,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/{id}', [ReportController::class, 'show']); // ver detalle
     Route::put('/reports/{id}', [ReportController::class, 'update']); // actualizar estado / notas
     Route::delete('/reports/{id}', [ReportController::class, 'destroy']); // eliminar
+
+    //Cupones
+    Route::get('/coupons', [CouponController::class, 'index']);
+Route::post('/coupons', [CouponController::class, 'store']);
+Route::get('/coupons/{id}', [CouponController::class, 'show']);
+Route::put('/coupons/{id}', [CouponController::class, 'update']);
+Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
 });
 
