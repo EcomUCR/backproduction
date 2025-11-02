@@ -17,14 +17,17 @@ class OrderController extends Controller
     }
 
     $orders = Order::where('user_id', $user->id)
-        ->with([
-            'items.product' => function ($query) {
-                $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url')
-                      ->with(['store:id,name']);
-            },
-        ])
-        ->orderByDesc('created_at')
-        ->get();
+    ->with([
+        'items' => function ($q) {
+            $q->select('id', 'order_id', 'product_id', 'store_id', 'quantity', 'unit_price', 'discount_pct');
+        },
+        'items.product' => function ($query) {
+            $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url')
+                  ->with(['store:id,name']);
+        },
+    ])
+    ->orderByDesc('created_at')
+    ->get();
 
     return response()->json($orders);
 }
