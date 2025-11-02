@@ -103,9 +103,7 @@ Usuario dijo: '{$userMessage}'.
     private function buscarProductos(string $query, $client)
     {
         $query = trim($query);
-
-        // 🔹 Separar el texto del usuario en palabras individuales
-        $keywords = preg_split('/\s+/', strtolower($query)); // ej. ['juegos', 'de', 'cartas', 'unicornios']
+        $keywords = preg_split('/\s+/', strtolower($query));
 
         $products = DB::table('products')
             ->join('stores', 'stores.id', '=', 'products.store_id')
@@ -119,58 +117,61 @@ Usuario dijo: '{$userMessage}'.
                 'products.discount_price',
                 'products.image_1_url',
                 'stores.name as store_name',
-                DB::raw("COALESCE(categories.name, 'Sin categoría') as category_name")
+                DB::raw("COALESCE(categories.name::text, 'Sin categoría') as category_name")
             )
-            ->whereRaw("TRIM(products.status) = 'ACTIVE'")
-            ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
-            ->where('stores.is_verified', true)
+            ->where('products.status', 'ACTIVE')
+            ->where('stores.status', 'ACTIVE')
+            ->whereRaw('stores.is_verified = true::boolean')
             ->where(function ($q) use ($keywords) {
                 foreach ($keywords as $word) {
-                    $q->orWhereRaw("LOWER(products.name) LIKE ?", ["%{$word}%"])
-                        ->orWhereRaw("LOWER(products.description) LIKE ?", ["%{$word}%"])
-                        ->orWhereRaw("LOWER(products.details) LIKE ?", ["%{$word}%"])
-                        ->orWhereRaw("LOWER(categories.name) LIKE ?", ["%{$word}%"])
-                        ->orWhereRaw("LOWER(stores.name) LIKE ?", ["%{$word}%"]);
+                    $q->orWhereRaw("LOWER(products.name) ILIKE ?", ["%{$word}%"])
+                        ->orWhereRaw("LOWER(products.description) ILIKE ?", ["%{$word}%"])
+                        ->orWhereRaw("LOWER(products.details) ILIKE ?", ["%{$word}%"])
+                        ->orWhereRaw("LOWER(categories.name) ILIKE ?", ["%{$word}%"])
+                        ->orWhereRaw("LOWER(stores.name) ILIKE ?", ["%{$word}%"]);
                 }
             })
             ->limit(10)
             ->get();
 
         if ($products->isEmpty()) {
-            // 🧠 Si no encuentra nada exacto, intentar una segunda búsqueda más laxa (solo con las primeras palabras)
+            $simplified = substr($query, 0, 6);
             $fallback = DB::table('products')
                 ->join('stores', 'stores.id', '=', 'products.store_id')
-                ->select('products.id', 'products.name', 'products.image_1_url', 'products.price', 'products.discount_price', 'stores.name as store_name')
-                ->whereRaw("TRIM(products.status) = 'ACTIVE'")
-                ->whereRaw("TRIM(stores.status) = 'ACTIVE'")
-                ->where('stores.is_verified', true)
-                ->where(function ($q) use ($query) {
-                    $simplified = substr($query, 0, 6); // 🔹 buscar por raíz (ej: 'unicorn')
-                    $q->whereRaw("LOWER(products.name) LIKE ?", ["%{$simplified}%"])
-                        ->orWhereRaw("LOWER(products.description) LIKE ?", ["%{$simplified}%"]);
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.image_1_url',
+                    'products.price',
+                    'products.discount_price',
+                    'stores.name as store_name'
+                )
+                ->where('products.status', 'ACTIVE')
+                ->where('stores.status', 'ACTIVE')
+                ->whereRaw('stores.is_verified = true::boolean')
+                ->where(function ($q) use ($simplified) {
+                    $q->whereRaw("LOWER(products.name) ILIKE ?", ["%{$simplified}%"])
+                        ->orWhereRaw("LOWER(products.description) ILIKE ?", ["%{$simplified}%"]);
                 })
                 ->limit(10)
                 ->get();
 
-            if ($fallback->isNotEmpty()) {
-                $products = $fallback;
-            } else {
+            if ($fallback->isEmpty()) {
                 return response()->json([
                     'message' => "No encontré resultados exactos para '{$query}', pero puedo ayudarte a buscar algo similar.",
                     'results' => [],
                 ]);
             }
+
+            $products = $fallback;
         }
 
-        // 🧠 Darle a GPT algunos nombres para una respuesta natural
-        // 🧠 Darle a GPT algunos nombres para una respuesta natural
         $names = $products->pluck('name')->take(3)->implode(', ');
         $prompt = "Eres el asistente de TukiShop. 
 Genera una respuesta natural, cálida y breve (máximo 2 líneas) para el usuario que buscó '{$query}'.
 Menciona de forma fluida algunos productos como {$names}, 
 pero sin dar descripciones largas ni muchos detalles. 
 Evita repetir ideas o sonar exagerado.";
-
 
         $response = $client->chat()->create([
             'model' => 'gpt-4o-mini',
@@ -184,6 +185,7 @@ Evita repetir ideas o sonar exagerado.";
             'results' => $products,
         ]);
     }
+
 
 
     // ============================================================
