@@ -5,26 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
 class CouponController extends Controller
 {
     /**
      * 🧾 Listar cupones
      * - ADMIN: ve todos
-     * - SELLER: solo ve los de su tienda
+     * - SELLER: solo los de su tienda
      */
     public function index(Request $request)
     {
         $user = $request->user();
 
-        // Admin ve todos
         if ($user->role === 'ADMIN') {
             $coupons = Coupon::with(['store', 'category', 'product', 'user'])
                 ->orderByDesc('created_at')
                 ->get();
-        } 
-        // Seller ve solo los de su tienda
-        else if ($user->role === 'SELLER') {
+        } elseif ($user->role === 'SELLER') {
             $store = $user->store;
             if (!$store) {
                 return response()->json(['message' => 'El vendedor no tiene una tienda asociada.'], 403);
@@ -34,8 +32,7 @@ class CouponController extends Controller
                 ->where('store_id', $store->id)
                 ->orderByDesc('created_at')
                 ->get();
-        } 
-        else {
+        } else {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -51,42 +48,58 @@ class CouponController extends Controller
     {
         $user = $request->user();
 
+        // ✅ 1) Validación base
         $validated = $request->validate([
-            'code' => 'required|string|max:50|unique:coupons,code',
-            'description' => 'nullable|string',
-            'type' => 'required|in:PERCENTAGE,FIXED,FREE_SHIPPING',
-            'value' => 'required|numeric|min:0',
-            'min_purchase' => 'nullable|numeric|min:0',
-            'max_discount' => 'nullable|numeric|min:0',
-            'store_id' => 'nullable|exists:stores,id',
-            'category_id' => 'nullable|exists:categories,id',
-            'product_id' => 'nullable|exists:products,id',
-            'user_id' => 'nullable|exists:users,id',
-            'usage_limit' => 'required|integer|min:1',
-            'usage_per_user' => 'required|integer|min:1',
-            'expires_at' => 'nullable|date',
-            'active' => 'boolean',
+            'code'           => ['required', 'string', 'max:50'],
+            'description'    => 'nullable|string',
+            'type'           => ['required', Rule::in(['PERCENTAGE', 'FIXED', 'FREE_SHIPPING'])],
+            'value'          => ['required', 'numeric', 'min:0'],
+            'min_purchase'   => 'nullable|numeric|min:0',
+            'max_discount'   => 'nullable|numeric|min:0',
+            'store_id'       => 'nullable|exists:stores,id', // ADMIN la puede enviar
+            'category_id'    => 'nullable|exists:categories,id',
+            'product_id'     => 'nullable|exists:products,id',
+            'user_id'        => 'nullable|exists:users,id',
+            'usage_limit'    => ['required', 'integer', 'min:1'],
+            'usage_per_user' => ['required', 'integer', 'min:1'],
+            'expires_at'     => 'nullable|date',
+            'active'         => 'boolean',
         ]);
 
-        // Verificar rol y asignar tienda si es vendedor
+        // ✅ 2) Determinar tienda
         if ($user->role === 'SELLER') {
             $store = $user->store;
             if (!$store) {
                 return response()->json(['message' => 'El vendedor no tiene una tienda asociada.'], 403);
             }
-            $validated['store_id'] = $store->id;
+            $storeId = $store->id;
+        } elseif ($user->role === 'ADMIN') {
+            if (empty($validated['store_id'])) {
+                return response()->json(['message' => 'store_id es requerido para crear cupones como ADMIN.'], 422);
+            }
+            $storeId = (int) $validated['store_id'];
+        } else {
+            return response()->json(['message' => 'Rol no autorizado.'], 403);
         }
 
-        // Validar unicidad del código
-        $existing = Coupon::where('code', $validated['code'])->first();
-        if ($existing) {
-            return response()->json([
-                'message' => 'El código de cupón ya existe.',
-                'coupon' => $existing,
-            ], 409);
+        // ✅ 3) Unicidad por tienda
+        $exists = Coupon::where('code', $validated['code'])
+            ->where('store_id', $storeId)
+            ->exists();
+
+        if ($exists) {
+            return response()->json(['message' => 'Ya existe un cupón con ese código en esta tienda.'], 422);
         }
 
+        // ✅ 4) Ajuste FREE_SHIPPING
+        if ($validated['type'] === 'FREE_SHIPPING') {
+            $validated['value'] = 0;
+        }
+
+        // ✅ 5) Crear cupón
+        $validated['store_id'] = $storeId;
         $coupon = Coupon::create($validated);
+
         return response()->json($coupon, 201);
     }
 
@@ -98,7 +111,7 @@ class CouponController extends Controller
         $user = $request->user();
         $coupon = Coupon::with(['store', 'category', 'product', 'user'])->findOrFail($id);
 
-        // Solo admins o el dueño del cupón (vendedor)
+        // Autorización
         if (
             $user->role !== 'ADMIN' &&
             (!$user->store || $coupon->store_id !== $user->store->id)
@@ -117,7 +130,7 @@ class CouponController extends Controller
         $user = $request->user();
         $coupon = Coupon::findOrFail($id);
 
-        // Solo admin o dueño del cupón
+        // Autorización
         if (
             $user->role !== 'ADMIN' &&
             (!$user->store || $coupon->store_id !== $user->store->id)
@@ -125,21 +138,39 @@ class CouponController extends Controller
             return response()->json(['message' => 'No autorizado para actualizar este cupón.'], 403);
         }
 
+        // ✅ Validación
         $validated = $request->validate([
-            'code' => 'sometimes|string|max:50|unique:coupons,code,' . $coupon->id,
-            'description' => 'nullable|string',
-            'type' => 'sometimes|in:PERCENTAGE,FIXED,FREE_SHIPPING',
-            'value' => 'sometimes|numeric|min:0',
-            'min_purchase' => 'nullable|numeric|min:0',
-            'max_discount' => 'nullable|numeric|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            'product_id' => 'nullable|exists:products,id',
-            'user_id' => 'nullable|exists:users,id',
-            'usage_limit' => 'sometimes|integer|min:1',
-            'usage_per_user' => 'sometimes|integer|min:1',
-            'expires_at' => 'nullable|date',
-            'active' => 'boolean',
+            'code'           => ['sometimes', 'string', 'max:50'],
+            'description'    => 'nullable|string',
+            'type'           => ['sometimes', Rule::in(['PERCENTAGE', 'FIXED', 'FREE_SHIPPING'])],
+            'value'          => ['sometimes', 'numeric', 'min:0'],
+            'min_purchase'   => 'nullable|numeric|min:0',
+            'max_discount'   => 'nullable|numeric|min:0',
+            'category_id'    => 'nullable|exists:categories,id',
+            'product_id'     => 'nullable|exists:products,id',
+            'user_id'        => 'nullable|exists:users,id',
+            'usage_limit'    => ['sometimes', 'integer', 'min:1'],
+            'usage_per_user' => ['sometimes', 'integer', 'min:1'],
+            'expires_at'     => 'nullable|date',
+            'active'         => 'boolean',
         ]);
+
+        // ✅ Verificar código duplicado
+        if (array_key_exists('code', $validated)) {
+            $exists = Coupon::where('code', $validated['code'])
+                ->where('store_id', $coupon->store_id)
+                ->where('id', '!=', $coupon->id)
+                ->exists();
+
+            if ($exists) {
+                return response()->json(['message' => 'Ya existe otro cupón con ese código en esta tienda.'], 422);
+            }
+        }
+
+        // ✅ Si es FREE_SHIPPING → valor 0
+        if (($validated['type'] ?? $coupon->type) === 'FREE_SHIPPING') {
+            $validated['value'] = 0;
+        }
 
         $coupon->update($validated);
         return response()->json($coupon);
@@ -153,7 +184,6 @@ class CouponController extends Controller
         $user = $request->user();
         $coupon = Coupon::findOrFail($id);
 
-        // Solo admin o dueño
         if (
             $user->role !== 'ADMIN' &&
             (!$user->store || $coupon->store_id !== $user->store->id)
@@ -171,10 +201,10 @@ class CouponController extends Controller
     public function validateCoupon(Request $request)
     {
         $validated = $request->validate([
-            'code' => 'required|string',
-            'user_id' => 'nullable|integer',
-            'total' => 'required|numeric|min:0',
-            'store_id' => 'nullable|integer', // 👈 para validar tienda si aplica
+            'code'      => 'required|string',
+            'user_id'   => 'nullable|integer',
+            'total'     => 'required|numeric|min:0',
+            'store_id'  => 'nullable|integer',
         ]);
 
         $coupon = Coupon::where('code', $validated['code'])
@@ -185,7 +215,7 @@ class CouponController extends Controller
             return response()->json(['message' => 'Cupón no encontrado o inactivo'], 404);
         }
 
-        // 🚫 Verificar si el cupón pertenece a otra tienda
+        // 🚫 Validar tienda
         if (
             $coupon->store_id &&
             isset($validated['store_id']) &&
@@ -204,6 +234,7 @@ class CouponController extends Controller
             ], 400);
         }
 
+        // ✅ Calcular descuento
         $discount = 0;
 
         if ($coupon->type === 'PERCENTAGE') {
@@ -216,9 +247,9 @@ class CouponController extends Controller
         }
 
         return response()->json([
-            'valid' => true,
-            'discount' => round($discount, 2),
-            'coupon' => $coupon,
+            'valid'     => true,
+            'discount'  => round($discount, 2),
+            'coupon'    => $coupon,
         ]);
     }
 }

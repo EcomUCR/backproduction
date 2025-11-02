@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-// Controllers
+// Controllerss
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -19,6 +19,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ContactMessageController;
@@ -77,11 +78,6 @@ Route::get('/debug-cloudinary', function () {
 });
 
 //Cupones
-Route::get('/coupons', [CouponController::class, 'index']);
-Route::post('/coupons', [CouponController::class, 'store']);
-Route::get('/coupons/{id}', [CouponController::class, 'show']);
-Route::put('/coupons/{id}', [CouponController::class, 'update']);
-Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
 Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
 
 // Registro y login
@@ -150,6 +146,10 @@ Route::get('/store/{store_id}/offers', [ProductController::class, 'offersByStore
 //Reseñas de tiendas
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
 Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 'summary']);
+
+//Reseñas de productos
+Route::get('/products/{product_id}/reviews', [ProductReviewController::class, 'indexByProduct']);
+Route::get('/products/{product_id}/reviews/summary', [ProductReviewController::class, 'summary']);
 
 //Banners
 Route::get('/banners', [BannerController::class, 'index']);
@@ -288,6 +288,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // 🌟 Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']);
 
+    // 🌟 Reseñas de productos
+  Route::post('/products/{product_id}/reviews', [ProductReviewController::class, 'store']);
     // 👤 Perfiles
     Route::get('/profiles/{id}', [ProfileController::class, 'show']);
 
@@ -308,5 +310,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/{id}', [ReportController::class, 'show']); // ver detalle
     Route::put('/reports/{id}', [ReportController::class, 'update']); // actualizar estado / notas
     Route::delete('/reports/{id}', [ReportController::class, 'destroy']); // eliminar
+
+    //Cupones
+    Route::get('/coupons', [CouponController::class, 'index']);
+    Route::post('/coupons', [CouponController::class, 'store']);
+    Route::get('/coupons/{id}', [CouponController::class, 'show']);
+    Route::put('/coupons/{id}', [CouponController::class, 'update']);
+    Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
 });
 
