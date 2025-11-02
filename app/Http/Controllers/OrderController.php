@@ -9,22 +9,28 @@ class OrderController extends Controller
 {
     // Retrieve all orders of the authenticated user along with their products.
     public function index(Request $request)
-    {
-        $user = $request->user();
+{
+    $user = $request->user();
 
-        if (!$user) {
-            return response()->json(['message' => 'Usuario no autenticado'], 401);
-        }
-
-        $orders = Order::where('user_id', $user->id)
-            ->with([
-                'items.product:id,store_id,name,price,discount_price,image_1_url',
-            ])
-            ->orderByDesc('created_at')
-            ->get();
-
-        return response()->json($orders);
+    if (!$user) {
+        return response()->json(['message' => 'Usuario no autenticado'], 401);
     }
+
+    $orders = Order::where('user_id', $user->id)
+    ->with([
+        'items' => function ($q) {
+            $q->select('id', 'order_id', 'product_id', 'store_id', 'quantity', 'unit_price', 'discount_pct');
+        },
+        'items.product' => function ($query) {
+            $query->select('id', 'store_id', 'name', 'price', 'discount_price', 'image_1_url')
+                  ->with(['store:id,name']);
+        },
+    ])
+    ->orderByDesc('created_at')
+    ->get();
+
+    return response()->json($orders);
+}
 
     // Retrieve a specific order along with its associated products.
     public function show($id)
