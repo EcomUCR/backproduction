@@ -38,6 +38,43 @@ class ProductReviewController extends Controller
         return response()->json($productReview, 201);
     }
 
+    public function indexByProduct($product_id)
+{
+    $reviews = ProductReview::with('user:id,first_name,last_name,username,image')
+        ->where('product_id', $product_id)
+        ->latest()
+        ->get();
+
+    return response()->json($reviews);
+}
+
+public function summary($product_id)
+{
+    $reviews = ProductReview::where('product_id', $product_id)->get();
+
+    if ($reviews->count() === 0) {
+        return response()->json([
+            'average' => 0,
+            'total' => 0,
+            'distribution' => [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0],
+        ]);
+    }
+
+    $distribution = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+    foreach ($reviews as $review) {
+        $distribution[$review->rating]++;
+    }
+
+    $average = round($reviews->avg('rating'), 2);
+
+    return response()->json([
+        'average' => $average,
+        'total' => $reviews->count(),
+        'distribution' => $distribution,
+    ]);
+}
+
+
     // Update an existing product review.
     public function update(Request $request, $id)
     {

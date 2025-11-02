@@ -146,6 +146,10 @@ Route::get('/store/{store_id}/offers', [ProductController::class, 'offersByStore
 Route::get('/stores/{store_id}/reviews', [StoreReviewController::class, 'reviewsByStore']); // listar reseñas por tienda
 Route::get('/stores/{store_id}/reviews/summary', [StoreReviewController::class, 'summary']);
 
+//Reseñas de productos
+Route::get('/products/{product_id}/reviews', [ProductReviewController::class, 'indexByProduct']);
+Route::get('/products/{product_id}/reviews/summary', [ProductReviewController::class, 'summary']);
+
 //Banners
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
@@ -283,6 +287,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // 🌟 Reseñas de tiendas
     Route::post('/store-reviews', [StoreReviewController::class, 'store']);
 
+    // 🌟 Reseñas de productos
+  Route::post('/products/{product_id}/reviews', [ProductReviewController::class, 'store']);
     // 👤 Perfiles
     Route::get('/profiles/{id}', [ProfileController::class, 'show']);
 
@@ -306,9 +312,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Cupones
     Route::get('/coupons', [CouponController::class, 'index']);
-Route::post('/coupons', [CouponController::class, 'store']);
-Route::get('/coupons/{id}', [CouponController::class, 'show']);
-Route::put('/coupons/{id}', [CouponController::class, 'update']);
-Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
+    Route::post('/coupons', [CouponController::class, 'store']);
+    Route::get('/coupons/{id}', [CouponController::class, 'show']);
+    Route::put('/coupons/{id}', [CouponController::class, 'update']);
+    Route::delete('/coupons/{id}', [CouponController::class, 'destroy']);
 });
 
