@@ -258,7 +258,7 @@ class StoreController extends Controller
                         'user_id' => $user->id,
                         'role' => $user->role,
                         'type' => 'STORE_UPDATED_BY_ADMIN',
-                        'title' => '⚙️ Tu tienda fue actualizada por un administrador',
+                        'title' => ' Tu tienda fue actualizada por un administrador',
                         'message' => "Un administrador ha realizado cambios en tu tienda '{$store->name}'. 
                                       Si no reconoces esta acción, contáctanos para más información.",
                         'related_id' => $store->id,
@@ -272,7 +272,7 @@ class StoreController extends Controller
                         ],
                     ]);
 
-                    $subject = '⚙️ Tu tienda ha sido actualizada por un administrador';
+                    $subject = ' Tu tienda ha sido actualizada por un administrador';
                     $body = view('emails.store-updated-by-admin-html', [
                         'store_name' => $store->name,
                         'owner_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->username,
