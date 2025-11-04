@@ -28,89 +28,98 @@ class StoreReviewController extends Controller
 
     // Create a new store review, send notification and email to the store owner.
     public function store(Request $request)
-    {
+{
+    try {
+        $validatedData = $request->validate([
+            'store_id' => 'required|exists:stores,id',
+            'user_id' => 'required|exists:users,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string',
+            'like' => 'nullable|boolean',
+            'dislike' => 'nullable|boolean',
+        ]);
+
+        // 🧾 Crear reseña
+        $storeReview = StoreReview::create($validatedData);
+
+        // 🏬 Obtener tienda y usuarios
+        $store = Store::with('user')->findOrFail($validatedData['store_id']);
+        $seller = $store->user;
+        $reviewer = User::findOrFail($validatedData['user_id']);
+
+        // 🔄 Actualizar promedio del rating de la tienda
+        $store->updateRatingFromReviews();
+
+        // ✉️ Preparar correo
+        $subject = 'Has recibido una nueva reseña en tu tienda | TukiShop';
+        $to = $seller->email;
+
+        $body = view('emails.store-new-review', [
+            'store_name' => $store->name,
+            'reviewer_name' => trim(($reviewer->first_name ?? '') . ' ' . ($reviewer->last_name ?? '')) ?: $reviewer->username,
+            'reviewer_image' => $reviewer->image ?? null,
+            'rating' => $storeReview->rating,
+            'comment' => $storeReview->comment ?? '(Sin comentario)',
+            'date' => $storeReview->created_at->format('d/m/Y'),
+            'store_dashboard_url' => url("/store/{$store->id}")
+        ])->render();
+
         try {
-            $validatedData = $request->validate([
-                'store_id' => 'required|exists:stores,id',
-                'user_id' => 'required|exists:users,id',
-                'rating' => 'required|integer|min:1|max:5',
-                'comment' => 'nullable|string',
-                'like' => 'nullable|boolean',
-                'dislike' => 'nullable|boolean',
-            ]);
-
-            $storeReview = StoreReview::create($validatedData);
-
-            $store = Store::with('user')->findOrFail($validatedData['store_id']);
-            $seller = $store->user;
-            $reviewer = User::findOrFail($validatedData['user_id']);
-
-            $subject = 'Has recibido una nueva reseña en tu tienda | TukiShop';
-            $to = $seller->email;
-
-            $body = view('emails.store-new-review', [
-                'store_name' => $store->name,
-                'reviewer_name' => trim(($reviewer->first_name ?? '') . ' ' . ($reviewer->last_name ?? '')) ?: $reviewer->username,
-                'reviewer_image' => $reviewer->image ?? null,
-                'rating' => $storeReview->rating,
-                'comment' => $storeReview->comment ?? '(Sin comentario)',
-                'date' => $storeReview->created_at->format('d/m/Y'),
-                'store_dashboard_url' => url("/store/{$store->id}")
-            ])->render();
-
-            try {
-                BrevoMailer::send($to, $subject, $body);
-            } catch (\Throwable $th) {
-                Log::warning('⚠️ Error al enviar correo de reseña: ' . $th->getMessage());
-            }
-
-            Notification::create([
-                'user_id' => $seller->id,
-                'role' => 'SELLER',
-                'type' => 'REVIEW',
-                'title' => 'Nueva reseña en tu tienda',
-                'message' => "{$reviewer->first_name} dejó una nueva reseña en tu tienda «{$store->name}».",
-                'related_id' => $storeReview->id,
-                'related_type' => 'store_review',
-                'priority' => 'NORMAL',
-                'data' => json_encode([
-                    'rating' => $storeReview->rating,
-                    'comment' => $storeReview->comment,
-                    'date' => $storeReview->created_at->toDateTimeString(),
-                ]),
-            ]);
-
-            Notification::create([
-                'user_id' => $seller->id,
-                'role' => 'SELLER',
-                'type' => 'STORE_REVIEW',
-                'title' => 'Tu tienda ha recibido una nueva reseña',
-                'message' => "La tienda «{$store->name}» ha recibido una nueva reseña de {$reviewer->first_name}.",
-                'related_id' => $store->id,
-                'related_type' => 'store',
-                'priority' => 'NORMAL',
-                'data' => json_encode([
-                    'store_name' => $store->name,
-                    'reviewer' => ($reviewer->first_name ?? '') . ' ' . ($reviewer->last_name ?? ''),
-                    'rating' => $storeReview->rating,
-                    'comment' => $storeReview->comment,
-                    'review_id' => $storeReview->id,
-                ]),
-            ]);
-
-            return response()->json([
-                'message' => 'Reseña creada correctamente',
-                'review' => $storeReview
-            ], 201);
-
+            BrevoMailer::send($to, $subject, $body);
         } catch (\Throwable $th) {
-            return response()->json([
-                'error' => true,
-                'message' => $th->getMessage(),
-                'trace' => $th->getFile() . ':' . $th->getLine()
-            ], 500);
+            Log::warning('⚠️ Error al enviar correo de reseña: ' . $th->getMessage());
         }
+
+        // 🔔 Crear notificaciones
+        Notification::create([
+            'user_id' => $seller->id,
+            'role' => 'SELLER',
+            'type' => 'REVIEW',
+            'title' => 'Nueva reseña en tu tienda',
+            'message' => "{$reviewer->first_name} dejó una nueva reseña en tu tienda «{$store->name}».",
+            'related_id' => $storeReview->id,
+            'related_type' => 'store_review',
+            'priority' => 'NORMAL',
+            'data' => json_encode([
+                'rating' => $storeReview->rating,
+                'comment' => $storeReview->comment,
+                'date' => $storeReview->created_at->toDateTimeString(),
+            ]),
+        ]);
+
+        Notification::create([
+            'user_id' => $seller->id,
+            'role' => 'SELLER',
+            'type' => 'STORE_REVIEW',
+            'title' => 'Tu tienda ha recibido una nueva reseña',
+            'message' => "La tienda «{$store->name}» ha recibido una nueva reseña de {$reviewer->first_name}.",
+            'related_id' => $store->id,
+            'related_type' => 'store',
+            'priority' => 'NORMAL',
+            'data' => json_encode([
+                'store_name' => $store->name,
+                'reviewer' => ($reviewer->first_name ?? '') . ' ' . ($reviewer->last_name ?? ''),
+                'rating' => $storeReview->rating,
+                'comment' => $storeReview->comment,
+                'review_id' => $storeReview->id,
+            ]),
+        ]);
+
+        return response()->json([
+            'message' => 'Reseña creada correctamente',
+            'review' => $storeReview,
+            'store_rating' => $store->rating, // opcional: devolver el nuevo promedio
+        ], 201);
+
+    } catch (\Throwable $th) {
+        return response()->json([
+            'error' => true,
+            'message' => $th->getMessage(),
+            'trace' => $th->getFile() . ':' . $th->getLine()
+        ], 500);
     }
+}
+
 
     // Update an existing store review.
     public function update(Request $request, $id)
