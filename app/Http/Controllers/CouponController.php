@@ -256,21 +256,28 @@ class CouponController extends Controller
         ], 400);
     }
 
-    // 💰 Calcular subtotal de los productos válidos
+    // 💰 Calcular subtotal de los productos válidos (con validación segura de precios)
     $subtotal = 0;
     $debugProducts = [];
 
     foreach ($validItems as $item) {
-        $price = $item->product->discount_price ?? $item->product->price;
+        $product = $item->product;
+        if (!$product) continue;
+
+        // Usa discount_price solo si existe y es > 0, si no usa price
+        $price = ($product->discount_price && $product->discount_price > 0)
+            ? $product->discount_price
+            : $product->price;
+
         $subtotal += $price * $item->quantity;
 
         $debugProducts[] = [
-            'id'       => $item->product->id,
-            'name'     => $item->product->name,
+            'id'       => $product->id,
+            'name'     => $product->name,
             'price'    => $price,
             'quantity' => $item->quantity,
             'subtotal' => $price * $item->quantity,
-            'store_id' => $item->product->store_id,
+            'store_id' => $product->store_id,
         ];
     }
 
@@ -293,7 +300,7 @@ class CouponController extends Controller
             break;
 
         case 'FIXED':
-            // Aplicar descuento hasta el subtotal, sin exceder el valor del cupón
+            // Aplicar descuento fijo hasta el subtotal aplicable (no solo al primer producto)
             $discount = min($coupon->value, $subtotal);
             break;
 
@@ -319,7 +326,9 @@ class CouponController extends Controller
             return [
                 'id'       => $item->product->id,
                 'name'     => $item->product->name,
-                'price'    => $item->product->discount_price ?? $item->product->price,
+                'price'    => ($item->product->discount_price && $item->product->discount_price > 0)
+                    ? $item->product->discount_price
+                    : $item->product->price,
                 'quantity' => $item->quantity,
             ];
         })->values(),
@@ -335,6 +344,5 @@ class CouponController extends Controller
         ],
     ]);
 }
-
 
 }
