@@ -197,100 +197,135 @@ class CouponController extends Controller
      * 🧠 Validar cupón antes de aplicarlo
      */
     public function validateCoupon(Request $request)
-    {
-        $validated = $request->validate([
-            'code'      => 'required|string',
-            'user_id'   => 'nullable|integer',
-            'total'     => 'required|numeric|min:0',
-            'store_id'  => 'nullable|integer',
-        ]);
+{
+    $validated = $request->validate([
+        'code'      => 'required|string',
+        'user_id'   => 'nullable|integer',
+        'total'     => 'required|numeric|min:0',
+        'store_id'  => 'nullable|integer',
+    ]);
 
-        $user = $request->user();
+    $user = $request->user();
 
-        $coupon = Coupon::where('code', $validated['code'])
-            ->where('active', true)
-            ->first();
+    $coupon = Coupon::where('code', $validated['code'])
+        ->where('active', true)
+        ->first();
 
-        if (!$coupon) {
-            return response()->json(['message' => 'Cupón no encontrado o inactivo'], 404);
-        }
+    if (!$coupon) {
+        return response()->json(['message' => 'Cupón no encontrado o inactivo'], 404);
+    }
 
-        if ($coupon->isExpired()) {
-            return response()->json(['message' => 'El cupón ha expirado'], 400);
-        }
+    if ($coupon->isExpired()) {
+        return response()->json(['message' => 'El cupón ha expirado'], 400);
+    }
 
-        // 🛒 Cargar carrito
-        $cart = \App\Models\Cart::where('user_id', $user?->id)
-            ->with('items.product')
-            ->first();
+    // 🛒 Cargar carrito del usuario
+    $cart = \App\Models\Cart::where('user_id', $user?->id)
+        ->with('items.product')
+        ->first();
 
-        if (!$cart || $cart->items->isEmpty()) {
-            return response()->json(['message' => 'El carrito está vacío'], 400);
-        }
+    if (!$cart || $cart->items->isEmpty()) {
+        return response()->json(['message' => 'El carrito está vacío'], 400);
+    }
 
-        // 🧩 Filtrar productos válidos
-        $validItems = $cart->items->filter(function ($item) use ($coupon) {
-            $product = $item->product;
-            if (!$product) return false;
+    // 🧩 Filtrar productos válidos (comparación segura con casting a int)
+    $validItems = $cart->items->filter(function ($item) use ($coupon) {
+        $product = $item->product;
+        if (!$product) return false;
 
-            if ($coupon->product_id && $coupon->product_id !== $product->id) return false;
-            if ($coupon->category_id && $product->category_id !== $coupon->category_id) return false;
-            if ($coupon->store_id && $product->store_id !== $coupon->store_id) return false;
+        $couponStore = (int) ($coupon->store_id ?? 0);
+        $couponCategory = (int) ($coupon->category_id ?? 0);
+        $couponProduct = (int) ($coupon->product_id ?? 0);
 
-            return true;
-        });
+        $productStore = (int) ($product->store_id ?? 0);
+        $productCategory = (int) ($product->category_id ?? 0);
+        $productId = (int) ($product->id ?? 0);
 
-        if ($validItems->isEmpty()) {
-            return response()->json([
-                'message' => 'El cupón no aplica a los productos de tu carrito.'
-            ], 400);
-        }
+        // Comparaciones con casting para evitar falsos negativos
+        if ($couponProduct && $couponProduct !== $productId) return false;
+        if ($couponCategory && $couponCategory !== $productCategory) return false;
+        if ($couponStore && $couponStore !== $productStore) return false;
 
-        // 💰 Subtotal de productos válidos
-        $subtotal = 0;
-        foreach ($validItems as $item) {
-            $price = $item->product->discount_price ?? $item->product->price;
-            $subtotal += $price * $item->quantity;
-        }
+        return true;
+    });
 
-        if ($coupon->min_purchase && $subtotal < $coupon->min_purchase) {
-            return response()->json([
-                'message' => "El total de productos aplicables debe ser al menos ₡" . number_format($coupon->min_purchase, 2)
-            ], 400);
-        }
+    if ($validItems->isEmpty()) {
+        return response()->json([
+            'message' => 'El cupón no aplica a los productos de tu carrito.'
+        ], 400);
+    }
 
-        // ✅ Calcular descuento
-        $discount = 0;
+    // 💰 Calcular subtotal de productos válidos
+    $subtotal = 0;
+    $debugProducts = [];
 
-        if ($coupon->type === 'PERCENTAGE') {
+    foreach ($validItems as $item) {
+        $price = $item->product->discount_price ?? $item->product->price;
+        $subtotal += $price * $item->quantity;
+
+        $debugProducts[] = [
+            'id'       => $item->product->id,
+            'name'     => $item->product->name,
+            'price'    => $price,
+            'quantity' => $item->quantity,
+            'subtotal' => $price * $item->quantity,
+            'store_id' => $item->product->store_id,
+        ];
+    }
+
+    // 🚫 Validar monto mínimo
+    if ($coupon->min_purchase && $subtotal < $coupon->min_purchase) {
+        return response()->json([
+            'message' => "El total de productos aplicables debe ser al menos ₡" . number_format($coupon->min_purchase, 2)
+        ], 400);
+    }
+
+    // ✅ Calcular descuento
+    $discount = 0;
+
+    switch ($coupon->type) {
+        case 'PERCENTAGE':
             $discount = ($subtotal * $coupon->value) / 100;
             if ($coupon->max_discount && $discount > $coupon->max_discount) {
                 $discount = $coupon->max_discount;
             }
-        } elseif ($coupon->type === 'FIXED') {
-            $discount = min($coupon->value, $subtotal);
-        } elseif ($coupon->type === 'FREE_SHIPPING') {
-            $discount = 0;
-        }
+            break;
 
-        return response()->json([
-            'valid'      => true,
-            'discount'   => round($discount, 2),
-            'coupon'     => $coupon,
-            'applied_to' => $validItems->map(function ($item) {
-                return [
-                    'id'       => $item->product->id,
-                    'name'     => $item->product->name,
-                    'price'    => $item->product->discount_price ?? $item->product->price,
-                    'quantity' => $item->quantity,
-                ];
-            })->values(),
-            'context' => [
-                'applies_to' => $coupon->product_id ? 'product' :
-                    ($coupon->category_id ? 'category' :
-                    ($coupon->store_id ? 'store' : 'global')),
-                'scope_id' => $coupon->product_id ?? $coupon->category_id ?? $coupon->store_id,
-            ],
-        ]);
+        case 'FIXED':
+            // Rebaja hasta el total de productos válidos, sin exceder el valor del cupón
+            $discount = min($coupon->value, $subtotal);
+            break;
+
+        case 'FREE_SHIPPING':
+            $discount = 0;
+            break;
     }
+
+    // 🧾 Respuesta final
+    return response()->json([
+        'valid'      => true,
+        'discount'   => round($discount, 2),
+        'coupon'     => $coupon,
+        'applied_to' => $validItems->map(function ($item) {
+            return [
+                'id'       => $item->product->id,
+                'name'     => $item->product->name,
+                'price'    => $item->product->discount_price ?? $item->product->price,
+                'quantity' => $item->quantity,
+            ];
+        })->values(),
+        'context' => [
+            'applies_to' => $coupon->product_id ? 'product' :
+                ($coupon->category_id ? 'category' :
+                    ($coupon->store_id ? 'store' : 'global')),
+            'scope_id' => $coupon->product_id ?? $coupon->category_id ?? $coupon->store_id,
+        ],
+        // 🧩 Datos de depuración (puedes eliminarlo luego)
+        'debug' => [
+            'subtotal_aplicable' => round($subtotal, 2),
+            'productos_validos'  => $debugProducts,
+        ],
+    ]);
+}
+
 }
