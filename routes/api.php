@@ -77,9 +77,6 @@ Route::get('/debug-cloudinary', function () {
     ];
 });
 
-//Cupones
-Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
-
 // Registro y login
 Route::post('/users', [UserController::class, 'store']);
 Route::post('/login', [UserController::class, 'login']);
@@ -225,6 +222,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/users/{id}/status', [UserController::class, 'updateStatus']);
 
+    //Cupones
+    Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
 
     // 🏬 Tiendas
     Route::get('/stores/user/{user_id}', [StoreController::class, 'showByUser']);
