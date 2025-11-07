@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Coupon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class CouponController extends Controller
@@ -56,7 +55,7 @@ class CouponController extends Controller
             'value'          => ['required', 'numeric', 'min:0'],
             'min_purchase'   => 'nullable|numeric|min:0',
             'max_discount'   => 'nullable|numeric|min:0',
-            'store_id'       => 'nullable|exists:stores,id', // ADMIN la puede enviar
+            'store_id'       => 'nullable|exists:stores,id',
             'category_id'    => 'nullable|exists:categories,id',
             'product_id'     => 'nullable|exists:products,id',
             'user_id'        => 'nullable|exists:users,id',
@@ -92,8 +91,9 @@ class CouponController extends Controller
         }
 
         // ✅ 4) Ajuste FREE_SHIPPING
-        if ($validated['type'] === 'FREE_SHIPPING') {
+        if (($validated['type'] ?? null) === 'FREE_SHIPPING') {
             $validated['value'] = 0;
+            $validated['max_discount'] = null;
         }
 
         // ✅ 5) Crear cupón
@@ -111,7 +111,6 @@ class CouponController extends Controller
         $user = $request->user();
         $coupon = Coupon::with(['store', 'category', 'product', 'user'])->findOrFail($id);
 
-        // Autorización
         if (
             $user->role !== 'ADMIN' &&
             (!$user->store || $coupon->store_id !== $user->store->id)
@@ -130,7 +129,6 @@ class CouponController extends Controller
         $user = $request->user();
         $coupon = Coupon::findOrFail($id);
 
-        // Autorización
         if (
             $user->role !== 'ADMIN' &&
             (!$user->store || $coupon->store_id !== $user->store->id)
@@ -138,7 +136,6 @@ class CouponController extends Controller
             return response()->json(['message' => 'No autorizado para actualizar este cupón.'], 403);
         }
 
-        // ✅ Validación
         $validated = $request->validate([
             'code'           => ['sometimes', 'string', 'max:50'],
             'description'    => 'nullable|string',
@@ -155,7 +152,7 @@ class CouponController extends Controller
             'active'         => 'boolean',
         ]);
 
-        // ✅ Verificar código duplicado
+        // Duplicado
         if (array_key_exists('code', $validated)) {
             $exists = Coupon::where('code', $validated['code'])
                 ->where('store_id', $coupon->store_id)
@@ -167,9 +164,10 @@ class CouponController extends Controller
             }
         }
 
-        // ✅ Si es FREE_SHIPPING → valor 0
-        if (($validated['type'] ?? $coupon->type) === 'FREE_SHIPPING') {
+        // FREE_SHIPPING -> valor 0
+        if (($validated['type'] ?? null) === 'FREE_SHIPPING') {
             $validated['value'] = 0;
+            $validated['max_discount'] = null;
         }
 
         $coupon->update($validated);
@@ -207,6 +205,8 @@ class CouponController extends Controller
             'store_id'  => 'nullable|integer',
         ]);
 
+        $user = $request->user();
+
         $coupon = Coupon::where('code', $validated['code'])
             ->where('active', true)
             ->first();
@@ -215,22 +215,47 @@ class CouponController extends Controller
             return response()->json(['message' => 'Cupón no encontrado o inactivo'], 404);
         }
 
-        // 🚫 Validar tienda
-        if (
-            $coupon->store_id &&
-            isset($validated['store_id']) &&
-            $validated['store_id'] != $coupon->store_id
-        ) {
-            return response()->json(['message' => 'Este cupón no aplica a esta tienda'], 403);
-        }
-
         if ($coupon->isExpired()) {
             return response()->json(['message' => 'El cupón ha expirado'], 400);
         }
 
-        if ($coupon->min_purchase && $validated['total'] < (float) $coupon->min_purchase) {
+        // 🛒 Cargar carrito
+        $cart = \App\Models\Cart::where('user_id', $user?->id)
+            ->with('items.product')
+            ->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return response()->json(['message' => 'El carrito está vacío'], 400);
+        }
+
+        // 🧩 Filtrar productos válidos
+        $validItems = $cart->items->filter(function ($item) use ($coupon) {
+            $product = $item->product;
+            if (!$product) return false;
+
+            if ($coupon->product_id && $coupon->product_id !== $product->id) return false;
+            if ($coupon->category_id && $product->category_id !== $coupon->category_id) return false;
+            if ($coupon->store_id && $product->store_id !== $coupon->store_id) return false;
+
+            return true;
+        });
+
+        if ($validItems->isEmpty()) {
             return response()->json([
-                'message' => "El total debe ser al menos ₡" . number_format((float) $coupon->min_purchase, 2)
+                'message' => 'El cupón no aplica a los productos de tu carrito.'
+            ], 400);
+        }
+
+        // 💰 Subtotal de productos válidos
+        $subtotal = 0;
+        foreach ($validItems as $item) {
+            $price = $item->product->discount_price ?? $item->product->price;
+            $subtotal += $price * $item->quantity;
+        }
+
+        if ($coupon->min_purchase && $subtotal < $coupon->min_purchase) {
+            return response()->json([
+                'message' => "El total de productos aplicables debe ser al menos ₡" . number_format($coupon->min_purchase, 2)
             ], 400);
         }
 
@@ -238,18 +263,34 @@ class CouponController extends Controller
         $discount = 0;
 
         if ($coupon->type === 'PERCENTAGE') {
-            $discount = ($validated['total'] * $coupon->value) / 100;
+            $discount = ($subtotal * $coupon->value) / 100;
             if ($coupon->max_discount && $discount > $coupon->max_discount) {
                 $discount = $coupon->max_discount;
             }
         } elseif ($coupon->type === 'FIXED') {
-            $discount = $coupon->value;
+            $discount = min($coupon->value, $subtotal);
+        } elseif ($coupon->type === 'FREE_SHIPPING') {
+            $discount = 0;
         }
 
         return response()->json([
-            'valid'     => true,
-            'discount'  => round($discount, 2),
-            'coupon'    => $coupon,
+            'valid'      => true,
+            'discount'   => round($discount, 2),
+            'coupon'     => $coupon,
+            'applied_to' => $validItems->map(function ($item) {
+                return [
+                    'id'       => $item->product->id,
+                    'name'     => $item->product->name,
+                    'price'    => $item->product->discount_price ?? $item->product->price,
+                    'quantity' => $item->quantity,
+                ];
+            })->values(),
+            'context' => [
+                'applies_to' => $coupon->product_id ? 'product' :
+                    ($coupon->category_id ? 'category' :
+                    ($coupon->store_id ? 'store' : 'global')),
+                'scope_id' => $coupon->product_id ?? $coupon->category_id ?? $coupon->store_id,
+            ],
         ]);
     }
 }
