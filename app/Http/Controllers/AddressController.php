@@ -102,8 +102,12 @@ class AddressController extends Controller
             return response()->json(['error' => 'Usuario no autenticado'], 401);
         }
 
-        $address = Address::where('user_id', $user->id)->findOrFail($id);
-        $address->delete();
+       $address = Address::where('user_id', $user->id)
+    ->where('id', $id)
+    ->firstOrFail();
+
+$address->delete();
+
 
         return response()->json([
             'success' => true,
