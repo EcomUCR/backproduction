@@ -37,6 +37,8 @@ use App\Http\Controllers\PageBannerController;
 // use App\Http\Controllers\StoreController;
 // use App\Http\Controllers\StoreBannerController;
 use App\Http\Controllers\StoreReviewController;
+use App\Http\Controllers\StoreCategoryController;
+
 // use App\Http\Controllers\StoreSocialController;
 
 use App\Http\Controllers\PaymentController;
@@ -84,6 +86,12 @@ Route::post('/login', [UserController::class, 'login']);
 // Categorías
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
+
+// Categorías de Tiendas
+Route::get('/store-categories', [StoreCategoryController::class, 'index']);
+Route::get('/store-categories/{id}', [StoreCategoryController::class, 'show']);
+
+
 
 // Password reset
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('guest');
