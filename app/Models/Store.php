@@ -27,7 +27,6 @@ class Store extends Model
         'is_verified',
         'rating',
         'verification_date',
-        'rating',
         'status',
     ];
 
@@ -35,11 +34,11 @@ class Store extends Model
 
     protected $casts = [
         'is_verified' => 'boolean',
-        'rating' => 'float', 
+        'rating' => 'float',
         'verification_date' => 'datetime',
     ];
 
-    // Relaciones
+    // Relaciones principales
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -65,7 +64,13 @@ class Store extends Model
         return $this->hasMany(StoreReview::class);
     }
 
-    // 🧠 Método opcional para actualizar promedio de rating desde reseñas
+    // 🆕 Relación con la categoría
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\StoreCategory::class, 'category_id');
+    }
+
+    // 🧠 Método opcional para actualizar promedio de rating
     public function updateRatingFromReviews(): void
     {
         $average = $this->reviews()->avg('rating') ?? 0;
