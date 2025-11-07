@@ -207,6 +207,7 @@ class CouponController extends Controller
 
     $user = $request->user();
 
+    // 🔹 Buscar cupón activo
     $coupon = Coupon::where('code', $validated['code'])
         ->where('active', true)
         ->first();
@@ -219,7 +220,7 @@ class CouponController extends Controller
         return response()->json(['message' => 'El cupón ha expirado'], 400);
     }
 
-    // 🛒 Cargar carrito del usuario
+    // 🛒 Obtener carrito del usuario
     $cart = \App\Models\Cart::where('user_id', $user?->id)
         ->with('items.product')
         ->first();
@@ -228,20 +229,20 @@ class CouponController extends Controller
         return response()->json(['message' => 'El carrito está vacío'], 400);
     }
 
-    // 🧩 Filtrar productos válidos (comparación segura con casting a int)
+    // 🧩 Filtrar productos válidos (con casting seguro)
     $validItems = $cart->items->filter(function ($item) use ($coupon) {
         $product = $item->product;
         if (!$product) return false;
 
-        $couponStore = (int) ($coupon->store_id ?? 0);
+        // Cast seguro a int
+        $couponStore    = (int) ($coupon->store_id ?? 0);
         $couponCategory = (int) ($coupon->category_id ?? 0);
-        $couponProduct = (int) ($coupon->product_id ?? 0);
+        $couponProduct  = (int) ($coupon->product_id ?? 0);
 
-        $productStore = (int) ($product->store_id ?? 0);
+        $productStore    = (int) ($product->store_id ?? 0);
         $productCategory = (int) ($product->category_id ?? 0);
-        $productId = (int) ($product->id ?? 0);
+        $productId       = (int) ($product->id ?? 0);
 
-        // Comparaciones con casting para evitar falsos negativos
         if ($couponProduct && $couponProduct !== $productId) return false;
         if ($couponCategory && $couponCategory !== $productCategory) return false;
         if ($couponStore && $couponStore !== $productStore) return false;
@@ -255,7 +256,7 @@ class CouponController extends Controller
         ], 400);
     }
 
-    // 💰 Calcular subtotal de productos válidos
+    // 💰 Calcular subtotal de los productos válidos
     $subtotal = 0;
     $debugProducts = [];
 
@@ -273,14 +274,14 @@ class CouponController extends Controller
         ];
     }
 
-    // 🚫 Validar monto mínimo
+    // 🚫 Validar monto mínimo de compra
     if ($coupon->min_purchase && $subtotal < $coupon->min_purchase) {
         return response()->json([
             'message' => "El total de productos aplicables debe ser al menos ₡" . number_format($coupon->min_purchase, 2)
         ], 400);
     }
 
-    // ✅ Calcular descuento
+    // ✅ Calcular descuento final
     $discount = 0;
 
     switch ($coupon->type) {
@@ -292,7 +293,7 @@ class CouponController extends Controller
             break;
 
         case 'FIXED':
-            // Rebaja hasta el total de productos válidos, sin exceder el valor del cupón
+            // Aplicar descuento hasta el subtotal, sin exceder el valor del cupón
             $discount = min($coupon->value, $subtotal);
             break;
 
@@ -301,7 +302,15 @@ class CouponController extends Controller
             break;
     }
 
-    // 🧾 Respuesta final
+    // 🪵 Log opcional para depuración
+    \Log::info('DEBUG CUPON', [
+        'coupon' => $coupon->code,
+        'subtotal_aplicable' => $subtotal,
+        'descuento' => $discount,
+        'productos_validos' => $debugProducts,
+    ]);
+
+    // 🧾 Respuesta
     return response()->json([
         'valid'      => true,
         'discount'   => round($discount, 2),
@@ -320,12 +329,12 @@ class CouponController extends Controller
                     ($coupon->store_id ? 'store' : 'global')),
             'scope_id' => $coupon->product_id ?? $coupon->category_id ?? $coupon->store_id,
         ],
-        // 🧩 Datos de depuración (puedes eliminarlo luego)
         'debug' => [
             'subtotal_aplicable' => round($subtotal, 2),
             'productos_validos'  => $debugProducts,
         ],
     ]);
 }
+
 
 }
