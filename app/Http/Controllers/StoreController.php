@@ -26,7 +26,7 @@ class StoreController extends Controller
             return response()->json(['message' => 'Tienda no encontrada para este usuario'], 404);
         }
 
-        return response()->json($store);
+        return response()->json(['store' => $store]);
     }
 
     // Show a specific store by ID.
