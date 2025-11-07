@@ -8,10 +8,12 @@ use Illuminate\Http\Request;
 class StoreController extends Controller
 {
     // List all stores.
-    public function index()
-    {
-        return response()->json(Store::all());
-    }
+   public function index()
+{
+    $stores = Store::with('category')->get();
+    return response()->json($stores);
+}
+
 
     // Show store associated with a specific user.
     public function showByUser($user_id)
