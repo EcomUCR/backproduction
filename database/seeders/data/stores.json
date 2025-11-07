@@ -5,21 +5,22 @@
         "name": "Unstable Games",
         "slug": "unstable-games-1",
         "description": "Durante los últimos años, la misión de nuestro equipo ha sido diseñar juegos altamente interactivos que merezcan la pena jugar una y otra vez. Queremos que nuestros juegos unan a las personas, les ayuden a expresarse y, en definitiva, a hacer del mundo un lugar mejor.\n\nSomos un equipo de creadores de corazón, y hemos identificado cuatro valores fundamentales que nos guían. Estos valores nos han ayudado en todo momento a la hora de colaborar, superar nuestros límites creativos y construir nuestra marca.",
-        "image": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761595989/marketplace/products/ycb5efofsjmawnxbgfet.png",
-        "banner": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1760228829/marketplace/products/lahlpvfwzv6bei9myrj8.png",
-        "category_id": 1,
-        "business_name": "Gollo gsdfsdfollo",
-        "tax_id": "mimimi",
+        "image": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761933759/marketplace/products/akxtx2xgidnre3q2op5z.png",
+        "banner": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761885148/marketplace/products/ccfqzzensopdnibnaedn.png",
+        "category_id": 14,
+        "business_name": "Unstable S.A.",
+        "tax_id": "208120085",
         "legal_type": null,
         "registered_address": "50 metros sur de la papelería La Principal, San Pedro, San José, Costa Rica",
         "address": "50m sur del Banco Popular, San Pedro de Poas, Alajuela",
         "support_email": "unstable@outlook.com",
-        "support_phone": "234234",
+        "support_phone": "8735 5629",
         "is_verified": true,
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-12 00:26:22",
-        "updated_at": "2025-10-29 20:39:52"
+        "updated_at": "2025-11-07 16:32:27",
+        "rating": "4.30"
     },
     {
         "id": 2,
@@ -29,7 +30,7 @@
         "description": "CasaNova es la tienda perfecta para equipar tu hogar con estilo y funcionalidad. Desde utensilios de cocina hasta muebles decorativos y productos de limpieza, encontrarás todo lo necesario para tu día a día. Además, su sección de jardinería te permitirá transformar tu espacio exterior en un oasis.",
         "image": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761715861/marketplace/products/mu5myhiz2zqlo11fyw6y.webp",
         "banner": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761595825/marketplace/products/juhfkcgm0dvtpal2qe3y.webp",
-        "category_id": 1,
+        "category_id": 13,
         "business_name": "CASA NOVA",
         "tax_id": "234234234",
         "legal_type": null,
@@ -41,7 +42,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-12 01:09:24",
-        "updated_at": "2025-10-29 08:05:45"
+        "updated_at": "2025-11-07 17:27:39",
+        "rating": "0.00"
     },
     {
         "id": 3,
@@ -51,7 +53,7 @@
         "description": "TecnoPlus es el paraíso para los amantes de la tecnología. Encuentra desde computadoras, consolas y accesorios de gaming hasta equipos de oficina y herramientas electrónicas. También ofrece una selección de música digital y equipos de sonido para todos los gustos.",
         "image": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761595938/marketplace/products/ffoozcxapwb62hwhoaxo.webp",
         "banner": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1760238264/marketplace/products/bsrakehei4fvu2trlotj.jpg",
-        "category_id": 1,
+        "category_id": 19,
         "business_name": null,
         "tax_id": null,
         "legal_type": null,
@@ -63,7 +65,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-12 03:00:11",
-        "updated_at": "2025-10-27 20:12:19"
+        "updated_at": "2025-11-07 17:27:08",
+        "rating": "0.00"
     },
     {
         "id": 4,
@@ -73,7 +76,7 @@
         "description": "VitalStyle combina moda, salud y belleza en un solo lugar. Explora ropa moderna, productos de cuidado personal, suplementos, alimentos saludables y todo lo que necesitas para mantener un estilo de vida activo y equilibrado. Ideal para quienes buscan bienestar integral.",
         "image": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1760671884/marketplace/products/b9puuurzlrybpshqmyct.png",
         "banner": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1760671887/marketplace/products/mleq9k0zrqmpwyde0cv4.png",
-        "category_id": 1,
+        "category_id": 2,
         "business_name": null,
         "tax_id": null,
         "legal_type": null,
@@ -85,7 +88,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-12 04:03:49",
-        "updated_at": "2025-10-25 17:48:36"
+        "updated_at": "2025-11-07 16:45:12",
+        "rating": "0.00"
     },
     {
         "id": 5,
@@ -107,7 +111,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-12 05:20:51",
-        "updated_at": "2025-10-25 18:25:01"
+        "updated_at": "2025-10-25 18:25:01",
+        "rating": "0.00"
     },
     {
         "id": 6,
@@ -117,7 +122,7 @@
         "description": "TodoMax Outlet es la tienda donde encuentras de todo, ¡y siempre a precios irresistibles! Desde productos automotrices, artículos para mascotas, limpieza general, hasta alimentos y decoraciones extras que no encajan en otras tiendas. Ideal para compras rápidas y económicas.",
         "image": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1760249557/marketplace/products/dqkl0wwqeqqslplqumke.jpg",
         "banner": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1760249560/marketplace/products/mynowwmrbqurr2tbbe9o.png",
-        "category_id": 1,
+        "category_id": 2,
         "business_name": null,
         "tax_id": null,
         "legal_type": null,
@@ -129,7 +134,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-12 06:08:57",
-        "updated_at": "2025-10-19 02:02:29"
+        "updated_at": "2025-11-07 17:27:55",
+        "rating": "0.00"
     },
     {
         "id": 7,
@@ -139,7 +145,7 @@
         "description": "gfhfgh",
         "image": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761413526/marketplace/products/omk23gfukmtrdwl78lhe.png",
         "banner": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761413528/marketplace/products/mtp9cnvxbjxiuwlikeeh.png",
-        "category_id": 1,
+        "category_id": 10,
         "business_name": null,
         "tax_id": null,
         "legal_type": null,
@@ -147,11 +153,12 @@
         "address": null,
         "support_email": null,
         "support_phone": null,
-        "is_verified": false,
+        "is_verified": true,
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-17 22:36:46",
-        "updated_at": "2025-10-27 20:06:49"
+        "updated_at": "2025-11-07 17:28:59",
+        "rating": "0.00"
     },
     {
         "id": 16,
@@ -173,7 +180,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-22 22:45:45",
-        "updated_at": "2025-10-27 20:06:57"
+        "updated_at": "2025-10-27 20:06:57",
+        "rating": "0.00"
     },
     {
         "id": 33,
@@ -195,7 +203,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-23 14:32:19",
-        "updated_at": "2025-10-27 20:06:23"
+        "updated_at": "2025-10-27 20:06:23",
+        "rating": "0.00"
     },
     {
         "id": 36,
@@ -217,7 +226,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-26 01:15:03",
-        "updated_at": "2025-10-26 01:15:03"
+        "updated_at": "2025-10-26 01:15:03",
+        "rating": "0.00"
     },
     {
         "id": 37,
@@ -239,7 +249,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-27 03:29:07",
-        "updated_at": "2025-10-27 20:06:41"
+        "updated_at": "2025-10-27 20:06:41",
+        "rating": "0.00"
     },
     {
         "id": 38,
@@ -261,7 +272,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-27 20:43:28",
-        "updated_at": "2025-10-29 18:54:32"
+        "updated_at": "2025-10-29 18:54:32",
+        "rating": "0.00"
     },
     {
         "id": 39,
@@ -283,7 +295,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-27 20:51:38",
-        "updated_at": "2025-10-29 18:54:16"
+        "updated_at": "2025-10-29 18:54:16",
+        "rating": "0.00"
     },
     {
         "id": 40,
@@ -305,7 +318,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-27 20:55:44",
-        "updated_at": "2025-10-29 18:53:52"
+        "updated_at": "2025-10-29 18:53:52",
+        "rating": "0.00"
     },
     {
         "id": 41,
@@ -327,7 +341,8 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-27 20:59:11",
-        "updated_at": "2025-10-27 20:59:11"
+        "updated_at": "2025-10-27 20:59:11",
+        "rating": "0.00"
     },
     {
         "id": 42,
@@ -349,12 +364,13 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-27 21:09:25",
-        "updated_at": "2025-10-29 18:54:06"
+        "updated_at": "2025-10-29 18:54:06",
+        "rating": "0.00"
     },
     {
         "id": 43,
         "user_id": 82,
-        "name": "mimimi",
+        "name": "MimiMimi",
         "slug": "mimimi-82",
         "description": null,
         "image": null,
@@ -371,6 +387,122 @@
         "verification_date": null,
         "status": "ACTIVE",
         "created_at": "2025-10-29 20:17:16",
-        "updated_at": "2025-10-29 20:40:22"
+        "updated_at": "2025-10-30 02:28:31",
+        "rating": "0.00"
+    },
+    {
+        "id": 44,
+        "user_id": 85,
+        "name": "890890",
+        "slug": "890890-85",
+        "description": null,
+        "image": null,
+        "banner": null,
+        "category_id": 1,
+        "business_name": null,
+        "tax_id": null,
+        "legal_type": null,
+        "registered_address": null,
+        "address": null,
+        "support_email": null,
+        "support_phone": null,
+        "is_verified": false,
+        "verification_date": null,
+        "status": "ACTIVE",
+        "created_at": "2025-10-29 23:56:49",
+        "updated_at": "2025-10-29 23:56:49",
+        "rating": "0.00"
+    },
+    {
+        "id": 45,
+        "user_id": 86,
+        "name": "Hola",
+        "slug": "hola-86",
+        "description": null,
+        "image": null,
+        "banner": null,
+        "category_id": 1,
+        "business_name": null,
+        "tax_id": null,
+        "legal_type": null,
+        "registered_address": null,
+        "address": null,
+        "support_email": null,
+        "support_phone": null,
+        "is_verified": false,
+        "verification_date": null,
+        "status": "ACTIVE",
+        "created_at": "2025-10-30 00:06:02",
+        "updated_at": "2025-10-30 00:06:02",
+        "rating": "0.00"
+    },
+    {
+        "id": 46,
+        "user_id": 89,
+        "name": "blabla",
+        "slug": "blabla-89",
+        "description": null,
+        "image": null,
+        "banner": null,
+        "category_id": 1,
+        "business_name": null,
+        "tax_id": null,
+        "legal_type": null,
+        "registered_address": null,
+        "address": null,
+        "support_email": null,
+        "support_phone": null,
+        "is_verified": false,
+        "verification_date": null,
+        "status": "ACTIVE",
+        "created_at": "2025-11-01 00:00:17",
+        "updated_at": "2025-11-01 00:00:17",
+        "rating": "0.00"
+    },
+    {
+        "id": 47,
+        "user_id": 90,
+        "name": "asdasd",
+        "slug": "asdasd-90",
+        "description": null,
+        "image": null,
+        "banner": null,
+        "category_id": 1,
+        "business_name": null,
+        "tax_id": null,
+        "legal_type": null,
+        "registered_address": null,
+        "address": null,
+        "support_email": null,
+        "support_phone": null,
+        "is_verified": false,
+        "verification_date": null,
+        "status": "ACTIVE",
+        "created_at": "2025-11-01 00:02:44",
+        "updated_at": "2025-11-01 00:02:44",
+        "rating": "0.00"
+    },
+    {
+        "id": 48,
+        "user_id": 98,
+        "name": "Thony_artstudio",
+        "slug": "thony-artstudio-98",
+        "description": null,
+        "image": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1762235910/marketplace/products/echehzrcspmwkp73ma6e.png",
+        "banner": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1762235912/marketplace/products/y1ng2yunpmgs8dzgttg0.jpg",
+        "category_id": 2,
+        "business_name": null,
+        "tax_id": null,
+        "legal_type": null,
+        "registered_address": null,
+        "address": null,
+        "support_email": "anthony.cuberosoto@ucr.ac.cr",
+        "support_phone": "8714 2740",
+        "is_verified": true,
+        "verification_date": null,
+        "status": "ACTIVE",
+        "created_at": "2025-11-04 05:55:13",
+        "updated_at": "2025-11-07 17:28:20",
+        "rating": "0.00"
     }
 ]

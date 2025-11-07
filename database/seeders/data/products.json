@@ -16,7 +16,8 @@
         "updated_at": "2025-10-19 17:18:15",
         "status": "ARCHIVED",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 2,
@@ -29,13 +30,14 @@
         "description": "¿Listo para convertir una fiesta cualquiera en una aventura divertida y descontrolada? **Wrong Party** es el juego de mesa en español que desafía tu ingenio y tu capacidad para improvisar en situaciones totalmente inesperadas. Olvida las reglas tradicionales: aquí, lo importante es adaptarte rápido y sacarle el máximo provecho a cada carta, que te meterá en escenarios absurdos, conversaciones incómodas y momentos hilarantes.\n\nIdeal para grupos de amigos o familias que buscan romper el hielo y llenar la noche de risas, Wrong Party combina estrategia, creatividad y mucho sentido del humor. Cada ronda te obliga a pensar rápido, tomar decisiones imprevisibles y, sobre todo, pasar un buen rato sin importar quién gane. \n\nCon un diseño vibrante y dinámico, este juego en español es perfecto para cualquier reunión social, desde cenas informales hasta fiestas épicas. Prepárate para situaciones disparatadas, traiciones divertidas y desafíos que pondrán a prueba no solo tu habilidad para jugar, sino también tu talento para disfrutar sin filtros.\n\n¿Estás listo para la fiesta equivocada? Wrong Party te espera para hacer de cada momento, el mejor caos. ¡Que comience el juego!",
         "price": "13550.00",
         "discount_price": "0.00",
-        "stock": 5,
+        "stock": 4,
         "is_featured": true,
         "created_at": "2025-10-12 00:36:47",
-        "updated_at": "2025-10-19 17:17:54",
+        "updated_at": "2025-11-04 02:54:28",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Disfruta con tus amigos este juego de mesa.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 3,
@@ -54,7 +56,8 @@
         "updated_at": "2025-10-25 14:07:41",
         "status": "ARCHIVED",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 4,
@@ -70,10 +73,11 @@
         "stock": 5,
         "is_featured": false,
         "created_at": "2025-10-12 00:43:13",
-        "updated_at": "2025-10-19 16:44:44",
+        "updated_at": "2025-11-04 02:50:36",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Volvió el juego que aman, con esta nueva expansión.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 5,
@@ -92,7 +96,8 @@
         "updated_at": "2025-10-12 01:29:00",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 6,
@@ -111,7 +116,8 @@
         "updated_at": "2025-10-16 04:53:26",
         "status": "ARCHIVED",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 7,
@@ -130,7 +136,8 @@
         "updated_at": "2025-10-16 05:55:56",
         "status": "ARCHIVED",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 8,
@@ -149,7 +156,8 @@
         "updated_at": "2025-10-16 06:01:24",
         "status": "ARCHIVED",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 9,
@@ -162,13 +170,14 @@
         "description": "Transforma la limpieza diaria en una experiencia fresca y segura con el Desinfectante Carbolina Hogar Lavanda, presentación de 3780 ml. Su potente fórmula elimina bacterias, virus y gérmenes, garantizando un ambiente impecable y saludable para tu familia. Ideal para diversas superficies del hogar, desde pisos hasta baños y cocinas, su acción desinfectante es eficaz sin ser agresiva.\n\nAdemás de su poder germicida, Carbolina Hogar impregna cada rincón con una delicada fragancia a lavanda, que brinda una sensación de calma y frescura prolongada. Su práctico envase de gran capacidad asegura limpieza eficiente y economía, perfecto para hogares que buscan higiene a gran escala.\n\nConfía en Desinfectante Carbolina Hogar Lavanda para mantener tus espacios no solo relucientes sino también protegidos, mientras disfrutas del toque natural y relajante de la lavanda en cada uso. ¡Limpieza profunda y bienestar en un solo producto!",
         "price": "3020.00",
         "discount_price": "2500.00",
-        "stock": 21,
+        "stock": 11,
         "is_featured": true,
         "created_at": "2025-10-12 02:10:53",
-        "updated_at": "2025-10-12 02:10:53",
+        "updated_at": "2025-11-07 07:02:48",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Con su olor a lavanda no solo limpia sino que deja la casa con un olor fresco.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 10,
@@ -184,10 +193,11 @@
         "stock": 37,
         "is_featured": false,
         "created_at": "2025-10-12 02:18:47",
-        "updated_at": "2025-10-12 02:18:47",
+        "updated_at": "2025-11-04 03:02:24",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Con el cloro asegúrate de la limpieza completa de pisos y baños.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 11,
@@ -203,10 +213,11 @@
         "stock": 52,
         "is_featured": false,
         "created_at": "2025-10-12 02:20:29",
-        "updated_at": "2025-10-20 00:53:04",
+        "updated_at": "2025-11-04 05:37:02",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "ideal para la limpieza.",
+        "sold_count": 0,
+        "rating": 2.7
     },
     {
         "id": 12,
@@ -222,10 +233,11 @@
         "stock": 24,
         "is_featured": false,
         "created_at": "2025-10-12 02:23:29",
-        "updated_at": "2025-10-12 02:23:29",
+        "updated_at": "2025-11-04 03:00:07",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Su olor de lavanda queda en el piso dando un aroma fresco a tu casa.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 13,
@@ -241,10 +253,11 @@
         "stock": 23,
         "is_featured": false,
         "created_at": "2025-10-12 02:25:50",
-        "updated_at": "2025-10-12 02:25:50",
+        "updated_at": "2025-11-04 02:59:38",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Ideal para limpiar zonas difíciles.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 14,
@@ -260,10 +273,11 @@
         "stock": 39,
         "is_featured": false,
         "created_at": "2025-10-12 02:28:10",
-        "updated_at": "2025-10-12 02:28:10",
+        "updated_at": "2025-11-04 02:59:12",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Ideal para la limpieza a fondo de muebles y otras superficies.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 15,
@@ -282,7 +296,8 @@
         "updated_at": "2025-10-12 02:29:59",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 16,
@@ -301,7 +316,8 @@
         "updated_at": "2025-10-12 02:31:21",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 17,
@@ -317,10 +333,11 @@
         "stock": 21,
         "is_featured": false,
         "created_at": "2025-10-12 02:33:14",
-        "updated_at": "2025-10-12 02:33:14",
+        "updated_at": "2025-11-04 02:57:12",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Hecho con los mejores materiales para asegurar que sus zapatos queden limpios antes de entrar a casa.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 18,
@@ -339,7 +356,8 @@
         "updated_at": "2025-10-16 05:50:34",
         "status": "ARCHIVED",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 19,
@@ -355,10 +373,11 @@
         "stock": 70,
         "is_featured": false,
         "created_at": "2025-10-12 02:35:25",
-        "updated_at": "2025-10-12 02:35:25",
+        "updated_at": "2025-11-04 02:56:11",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Ideal para guardar las fotos de los seres queridos y momentos inolvidables.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 20,
@@ -371,13 +390,14 @@
         "description": "Descubre el Kit de Jardinería de 83 piezas de LC Store, el aliado perfecto para transformar cualquier espacio en un oasis verde. Este completo set está diseñado tanto para jardineros principiantes como para expertos, incluyendo todas las herramientas esenciales para plantar, cuidar y embellecer tu jardín con facilidad y precisión. \n\nEn cada kit encontrarás desde palas, trasplantadores y rastrillos, hasta tijeras podadoras y guantes de alta resistencia, todo fabricado con materiales duraderos y ergonómicos para garantizar comodidad y efectividad en cada uso. Además, sus prácticos accesorios como etiquetas para plantas, regaderas compactas y una carpeta organizadora te ayudarán a mantener todo ordenado y a cuidar tus plantas como un verdadero profesional.\n\nYa sea que prefieras flores, hortalizas o hierbas aromáticas, este kit te ofrece la libertad y las herramientas necesarias para crear un espacio vibrante y lleno de vida. Con el Kit de Jardinería de 83 piezas de LC Store, cada estación será una nueva oportunidad para conectar con la naturaleza y ver florecer tu pasión por la jardinería. ¡Haz que tu jardín sea el reflejo de tu creatividad y dedicación!",
         "price": "20000.00",
         "discount_price": "0.00",
-        "stock": 39,
+        "stock": 38,
         "is_featured": true,
         "created_at": "2025-10-12 02:41:33",
-        "updated_at": "2025-10-12 02:41:33",
+        "updated_at": "2025-11-04 03:03:23",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Gran set de jardinería, hecho con los mejores materiales para asegurarse de su duración y la calidad del trabajo.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 21,
@@ -396,7 +416,8 @@
         "updated_at": "2025-10-12 02:43:28",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 22,
@@ -412,10 +433,11 @@
         "stock": 49,
         "is_featured": false,
         "created_at": "2025-10-12 02:44:35",
-        "updated_at": "2025-10-12 02:44:35",
+        "updated_at": "2025-11-04 02:55:32",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Hechos de material resistente para ser usados hasta en la jardinería mas difícil.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 23,
@@ -434,7 +456,8 @@
         "updated_at": "2025-10-12 02:45:49",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 24,
@@ -450,10 +473,11 @@
         "stock": 71,
         "is_featured": false,
         "created_at": "2025-10-12 02:52:47",
-        "updated_at": "2025-10-12 02:52:47",
+        "updated_at": "2025-11-04 01:54:53",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Multiusos, ya sea para productos de limpieza o para jardinería.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 25,
@@ -464,15 +488,16 @@
         "image_2_url": null,
         "image_3_url": null,
         "description": "Sumérgete en el mundo del gaming con la Dell G15 5511, una laptop diseñada para ofrecer un rendimiento imparable y una experiencia inmersiva sin igual. Equipado con un poderoso procesador Intel Core i7 de última generación y una tarjeta gráfica NVIDIA GeForce RTX, este equipo despliega gráficos ultra realistas y una velocidad asombrosa para que ningún desafío te detenga.\n\nSu pantalla de 15.6 pulgadas Full HD con tecnología antirreflejo ofrece imágenes nítidas y colores vibrantes, perfecta para largas sesiones de juego sin fatiga visual. Además, su sistema de refrigeración avanzado mantiene la temperatura bajo control, garantizando rendimiento óptimo incluso en las batallas más intensas.\n\nCon un diseño robusto y agresivo, iluminado por un teclado retroiluminado RGB personalizable, la Dell G15 5511 combina estilo y funcionalidad. Almacena tus juegos y archivos con rapidez gracias a su SSD ultrarrápido y disfruta de una conectividad completa para periféricos y accesorios.\n\nIdeal para gamers que exigen potencia y movilidad, esta laptop es tu compañera perfecta para dominar cualquier partida con velocidad, precisión y estilo. ¡Prepárate para llevar tu juego al siguiente nivel con la Dell G15 5511!",
-        "price": "1200000.00",
+        "price": "120000.00",
         "discount_price": "1000000.00",
         "stock": 41,
         "is_featured": false,
         "created_at": "2025-10-12 03:05:45",
-        "updated_at": "2025-10-12 03:05:45",
+        "updated_at": "2025-11-04 03:17:29",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "La mejor computadora portátil del momento, con colores únicos y vividos.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 26,
@@ -488,10 +513,11 @@
         "stock": 49,
         "is_featured": false,
         "created_at": "2025-10-12 03:06:55",
-        "updated_at": "2025-10-12 03:06:55",
+        "updated_at": "2025-11-04 03:16:49",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Disfruta de lo mas avanzado en teléfonos con el nuevo Samsug Galaxy.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 27,
@@ -504,13 +530,14 @@
         "description": "Descubre el poder y la elegancia en su máxima expresión con el Apple MacBook Air M2 de 13 pulgadas. Este portátil ultraligero redefine la experiencia informática, combinando un diseño ultrafino y sofisticado con la potencia del revolucionario chip M2. Su pantalla Retina de 13 pulgadas ofrece colores vibrantes y detalles nítidos, ideal para creativos, estudiantes y profesionales que buscan calidad visual sin compromisos.\n\nEl MacBook Air M2 brinda un rendimiento fluido y eficiente, capaz de manejar desde tareas cotidianas hasta proyectos complejos gracias a su CPU y GPU avanzadas. Su batería de larga duración te acompaña todo el día, asegurando productividad sin interrupciones. Además, cuenta con un sistema térmico mejorado que mantiene el equipo fresco y silencioso.\n\nDiseñado para simplificar tu vida, incorpora un teclado Magic Keyboard cómodo y silencioso, Touch ID para acceso rápido y seguro, y un conjunto de puertos que facilitan la conexión con tus dispositivos favoritos. Disponible en elegantes colores, el MacBook Air M2 es la combinación perfecta de estilo, funcionalidad y tecnología de vanguardia para quienes siempre buscan ir un paso adelante.",
         "price": "529900.00",
         "discount_price": "504900.00",
-        "stock": 74,
+        "stock": 72,
         "is_featured": true,
         "created_at": "2025-10-12 03:08:35",
-        "updated_at": "2025-10-12 03:08:35",
+        "updated_at": "2025-11-07 07:08:46",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "De las portátiles mas útiles y funcionales del mercado para diseño.",
+        "sold_count": 0,
+        "rating": 1
     },
     {
         "id": 28,
@@ -526,10 +553,11 @@
         "stock": 50,
         "is_featured": false,
         "created_at": "2025-10-12 03:10:45",
-        "updated_at": "2025-10-12 03:10:45",
+        "updated_at": "2025-11-04 03:15:22",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Los mejores audífonos inalámbricos el mercado.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 29,
@@ -545,10 +573,11 @@
         "stock": 31,
         "is_featured": false,
         "created_at": "2025-10-12 03:12:07",
-        "updated_at": "2025-10-12 03:12:07",
+        "updated_at": "2025-11-04 03:13:46",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "De los mejores mouses en el mercado creado para dar la mayor comodidad.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 30,
@@ -561,13 +590,14 @@
         "description": "Descubre la nueva era del entretenimiento con la **Consola PS5 Digital Slim**, diseñada para los amantes del gaming que buscan potencia, estilo y innovación en un solo dispositivo. Esta versión digital, sin lector de discos, ofrece un diseño más compacto y elegante, ideal para espacios modernos y minimalistas.\n\nEquipado con un procesador ultrarrápido y una arquitectura de última generación, la PS5 Digital Slim te sumerge en mundos hiperrealistas con gráficos impresionantes y tiempos de carga casi inexistentes gracias a su almacenamiento SSD. Compatible con juegos digitales de la PlayStation Store, tendrás acceso inmediato a una amplia biblioteca de aventuras, acción, deportes y más.\n\nDisfruta de una experiencia audiovisual envolvente con el audio 3D Tempest y controla cada movimiento con el innovador mando DualSense, que aporta sensaciones táctiles y gatillos adaptativos para un realismo sin precedentes.\n\nIdeal para jugadores que prefieren la comodidad y la rapidez del formato digital, esta consola no incluye juegos, pero abre la puerta a un universo infinito de posibilidades para descargar y disfrutar al instante. La PS5 Digital Slim es el corazón de tu próximo nivel gamer. ¿Estás listo para jugar?",
         "price": "269900.00",
         "discount_price": "235000.00",
-        "stock": 11,
+        "stock": 6,
         "is_featured": true,
         "created_at": "2025-10-12 03:15:17",
-        "updated_at": "2025-10-12 03:15:17",
+        "updated_at": "2025-11-04 03:19:55",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Incluye un control en la caja.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 31,
@@ -583,10 +613,11 @@
         "stock": 21,
         "is_featured": false,
         "created_at": "2025-10-12 03:16:31",
-        "updated_at": "2025-10-12 03:16:31",
+        "updated_at": "2025-11-04 03:12:40",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "juega en linea o en solitario con la nueva switch 2.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 32,
@@ -602,10 +633,11 @@
         "stock": 11,
         "is_featured": false,
         "created_at": "2025-10-12 03:19:47",
-        "updated_at": "2025-10-12 03:19:47",
+        "updated_at": "2025-11-04 03:11:55",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Cómoda y útil para la oficina o mara casa.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 33,
@@ -621,10 +653,11 @@
         "stock": 39,
         "is_featured": false,
         "created_at": "2025-10-12 03:21:11",
-        "updated_at": "2025-10-12 03:21:11",
+        "updated_at": "2025-11-04 03:10:13",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Los mejores audífonos de cable del mercado.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 34,
@@ -640,10 +673,11 @@
         "stock": 16,
         "is_featured": false,
         "created_at": "2025-10-12 03:22:22",
-        "updated_at": "2025-10-12 03:22:22",
+        "updated_at": "2025-11-04 03:09:25",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Disfruta de la sensación de manejar y practica con este set de manejo gamer.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 35,
@@ -662,7 +696,8 @@
         "updated_at": "2025-10-12 03:24:16",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 36,
@@ -681,7 +716,8 @@
         "updated_at": "2025-10-12 03:31:01",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 37,
@@ -700,7 +736,8 @@
         "updated_at": "2025-10-12 03:32:36",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 38,
@@ -719,7 +756,8 @@
         "updated_at": "2025-10-12 03:35:20",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 39,
@@ -732,13 +770,14 @@
         "description": "Transforma tu espacio de trabajo con nuestro Mini Organizador de Suministros de Oficina, el aliado perfecto para mantener todo en orden y al alcance. Este compacto pero espacioso organizador está diseñado para optimizar tu escritorio sin ocupar mucho espacio. Con múltiples compartimentos de diferentes tamaños, puedes guardar desde bolígrafos, clips y notas adhesivas, hasta tijeras y cargadores, todo en un solo lugar.\n\nFabricado con materiales resistentes y un acabado moderno, aporta un toque elegante y profesional a cualquier ambiente. Su diseño inteligente facilita el acceso rápido a tus herramientas de trabajo, evitando distracciones y aumentando tu productividad. Ideal para oficinas en casa, escritorios pequeños o incluso áreas de estudio.\n\nOlvídate del caos y disfruta de un entorno despejado que invita a la concentración y la creatividad. El Mini Organizador de Suministros de Oficina no solo es funcional, sino también una pieza decorativa que realza tu espacio. ¡Haz que cada día laboral sea más eficiente y agradable con este práctico y estilizado organizador!",
         "price": "18500.00",
         "discount_price": "16300.00",
-        "stock": 71,
+        "stock": 69,
         "is_featured": true,
         "created_at": "2025-10-12 03:37:10",
-        "updated_at": "2025-10-12 03:37:10",
+        "updated_at": "2025-11-04 03:19:34",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Organiza los objetos de tu oficia con este organizador compacto pero útil.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 40,
@@ -754,10 +793,11 @@
         "stock": 53,
         "is_featured": false,
         "created_at": "2025-10-12 03:38:23",
-        "updated_at": "2025-10-12 03:38:23",
+        "updated_at": "2025-11-04 03:08:43",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Incluye un cartucho de cada tinta para que puedas imprimir con los mejores colores.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 41,
@@ -773,10 +813,11 @@
         "stock": 49,
         "is_featured": false,
         "created_at": "2025-10-12 03:41:24",
-        "updated_at": "2025-10-12 03:41:24",
+        "updated_at": "2025-11-04 03:08:06",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "ideal para trabajos pesados que ocupen de fuerza.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 42,
@@ -792,10 +833,11 @@
         "stock": 26,
         "is_featured": false,
         "created_at": "2025-10-12 03:44:39",
-        "updated_at": "2025-10-12 03:44:39",
+        "updated_at": "2025-11-04 03:05:51",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "incluye los lentes especiales de seguridad.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 43,
@@ -811,10 +853,11 @@
         "stock": 21,
         "is_featured": false,
         "created_at": "2025-10-12 03:46:13",
-        "updated_at": "2025-10-12 03:46:13",
+        "updated_at": "2025-11-04 03:05:11",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Ideal para trabajos que necesiten cortes precisos.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 44,
@@ -830,10 +873,11 @@
         "stock": 49,
         "is_featured": false,
         "created_at": "2025-10-12 03:48:53",
-        "updated_at": "2025-10-12 03:48:53",
+        "updated_at": "2025-11-04 03:04:39",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Incluye el equipo de seguridad especial.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 45,
@@ -849,10 +893,11 @@
         "stock": 81,
         "is_featured": true,
         "created_at": "2025-10-12 03:50:34",
-        "updated_at": "2025-10-12 03:50:34",
+        "updated_at": "2025-11-04 03:18:42",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Deja un acabado limpio y prolijo con la lijadora Orbital.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 47,
@@ -863,15 +908,16 @@
         "image_2_url": null,
         "image_3_url": null,
         "description": "Descubre el equilibrio perfecto entre tradición y tecnología con el Piano Digital Yamaha P-125. Diseñado para músicos que buscan calidad profesional en un formato compacto, este instrumento ofrece un sonido auténtico y una experiencia de toque realista gracias a su teclado Graded Hammer Standard (GHS), que simula la sensibilidad y peso de un piano acústico.\n\nCon sus 24 voces de alta fidelidad, el P-125 permite explorar una amplia variedad de estilos, desde clásicas melodías hasta ritmos modernos. Su sistema de altavoces integrados de última generación proporciona un sonido claro y envolvente que llena cualquier espacio, ya sea en casa o en el escenario.\n\nAdemás, incluye funciones avanzadas como conectividad USB para grabar y reproducir, dúo para tocar en pareja, y metrónomo ajustable, ideales para la práctica y el desarrollo musical. Su diseño elegante y robusto, junto con controles intuitivos, hacen del Yamaha P-125 un compañero ideal para pianistas de todos los niveles.\n\nEleva tu pasión por la música con el Yamaha P-125, donde la tradición pianística se encuentra con la innovación digital para ofrecerte una experiencia única y envolvente.",
-        "price": "1564030.00",
-        "discount_price": "1243000.00",
+        "price": "850000.00",
+        "discount_price": "0.00",
         "stock": 51,
         "is_featured": true,
         "created_at": "2025-10-12 03:55:40",
-        "updated_at": "2025-10-12 03:55:40",
+        "updated_at": "2025-11-04 03:18:10",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Aprende a tocar piano con el digita Yamaha y encanta a todos con su sonido único.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 48,
@@ -890,7 +936,8 @@
         "updated_at": "2025-10-12 03:57:36",
         "status": "ACTIVET",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 49,
@@ -909,7 +956,8 @@
         "updated_at": "2025-10-12 03:59:26",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 50,
@@ -928,7 +976,8 @@
         "updated_at": "2025-10-12 04:00:31",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 51,
@@ -947,7 +996,8 @@
         "updated_at": "2025-10-12 04:01:42",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 52,
@@ -966,7 +1016,8 @@
         "updated_at": "2025-10-12 04:02:49",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 53,
@@ -985,7 +1036,8 @@
         "updated_at": "2025-10-12 04:12:54",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 54,
@@ -1004,7 +1056,8 @@
         "updated_at": "2025-10-12 04:13:52",
         "status": "ARCHIVED",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 55,
@@ -1020,10 +1073,11 @@
         "stock": 77,
         "is_featured": false,
         "created_at": "2025-10-12 04:15:53",
-        "updated_at": "2025-10-12 04:15:53",
+        "updated_at": "2025-11-04 01:47:43",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Bello pantalón elegante para mujeres ideal para reuniones formales.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 56,
@@ -1039,10 +1093,11 @@
         "stock": 49,
         "is_featured": false,
         "created_at": "2025-10-12 04:17:56",
-        "updated_at": "2025-10-12 04:17:56",
+        "updated_at": "2025-11-04 01:47:01",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Bella falda floral, adecuada para cualquier ocasión y combina con todo.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 57,
@@ -1058,10 +1113,11 @@
         "stock": 49,
         "is_featured": false,
         "created_at": "2025-10-12 04:20:00",
-        "updated_at": "2025-10-12 04:20:00",
+        "updated_at": "2025-11-04 01:46:16",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Cómodo y mantiene la temperatura bastante bien en climas muy frio.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 58,
@@ -1074,13 +1130,14 @@
         "description": "Descubre la magia etérea con el bálsamo labial **Ethereal Glow – Corpse Bride**, una joya inspirada en la belleza fantasmal y encantadora de la novia cadáver. Este bálsamo no solo hidrata profundamente, sino que envuelve tus labios en un delicado brillo translúcido, que captura la luz como un suspiro de otro mundo. Su fórmula suave, enriquecida con extractos naturales y minerales brillantes, aporta un resplandor frío y misterioso que recuerda a la luna en una noche de niebla.\n\nPerfecto para quienes buscan un toque sutil pero inolvidable, Ethereal Glow convierte tus labios en un lienzo encantado, ideal para cualquier ocasión donde quieras destacar sin perder ese aire enigmático y elegante. Además, su aroma ligeramente dulce con notas florales evoca pétalos olvidados en un jardín encantado, transportándote a un universo de sueños y romance sobrenatural.\n\nDéjate envolver por la esencia única de **Ethereal Glow Lip Balm – Corpse Bride** y lleva contigo un destello de magia eterna en cada sonrisa. ¡Una experiencia sublime para labios que cuentan historias más allá de la realidad!",
         "price": "3000.00",
         "discount_price": "2400.00",
-        "stock": 91,
+        "stock": 20,
         "is_featured": true,
         "created_at": "2025-10-12 04:23:31",
-        "updated_at": "2025-10-12 04:23:31",
+        "updated_at": "2025-11-05 00:48:12",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Deja una sensación de hidratación en los labios aparte trae un anillo conmemorativo a la película con un grabado en el.",
+        "sold_count": 0,
+        "rating": 4.5
     },
     {
         "id": 59,
@@ -1096,10 +1153,11 @@
         "stock": 79,
         "is_featured": true,
         "created_at": "2025-10-12 04:28:27",
-        "updated_at": "2025-10-12 04:28:27",
+        "updated_at": "2025-11-04 03:27:01",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "set de dos lip serums y dos lip olis en colaboración con The Nightmare Before Christmas, con olor y colores variados.",
+        "sold_count": 0,
+        "rating": 5
     },
     {
         "id": 60,
@@ -1115,10 +1173,11 @@
         "stock": 52,
         "is_featured": false,
         "created_at": "2025-10-12 04:31:10",
-        "updated_at": "2025-10-12 04:31:10",
+        "updated_at": "2025-11-04 01:43:58",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Deja unos reflejos brillantes y resalta la belleza.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 61,
@@ -1134,10 +1193,11 @@
         "stock": 66,
         "is_featured": false,
         "created_at": "2025-10-12 04:32:47",
-        "updated_at": "2025-10-12 04:32:47",
+        "updated_at": "2025-11-04 01:44:34",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Deja los labios hidratados y con un brillo único.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 62,
@@ -1156,7 +1216,8 @@
         "updated_at": "2025-10-12 04:36:53",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 63,
@@ -1175,7 +1236,8 @@
         "updated_at": "2025-10-12 04:39:27",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 64,
@@ -1194,7 +1256,8 @@
         "updated_at": "2025-10-12 04:40:22",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 65,
@@ -1213,7 +1276,8 @@
         "updated_at": "2025-10-12 04:41:40",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 66,
@@ -1232,7 +1296,8 @@
         "updated_at": "2025-10-12 04:42:46",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 67,
@@ -1251,7 +1316,8 @@
         "updated_at": "2025-10-12 04:43:49",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 68,
@@ -1270,7 +1336,8 @@
         "updated_at": "2025-10-12 04:48:41",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 69,
@@ -1289,7 +1356,8 @@
         "updated_at": "2025-10-12 04:50:19",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 70,
@@ -1308,7 +1376,8 @@
         "updated_at": "2025-10-12 04:51:27",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 71,
@@ -1327,7 +1396,8 @@
         "updated_at": "2025-10-12 04:53:15",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 72,
@@ -1346,7 +1416,8 @@
         "updated_at": "2025-10-12 04:54:35",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 73,
@@ -1365,7 +1436,8 @@
         "updated_at": "2025-10-12 05:04:43",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 74,
@@ -1384,7 +1456,8 @@
         "updated_at": "2025-10-12 05:06:34",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 75,
@@ -1403,7 +1476,8 @@
         "updated_at": "2025-10-12 05:08:28",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 76,
@@ -1422,7 +1496,8 @@
         "updated_at": "2025-10-12 05:09:39",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 77,
@@ -1441,7 +1516,8 @@
         "updated_at": "2025-10-12 05:10:57",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 78,
@@ -1460,7 +1536,8 @@
         "updated_at": "2025-10-12 05:30:15",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 79,
@@ -1479,7 +1556,8 @@
         "updated_at": "2025-10-12 05:31:30",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 80,
@@ -1498,7 +1576,8 @@
         "updated_at": "2025-10-12 05:32:30",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 81,
@@ -1517,7 +1596,8 @@
         "updated_at": "2025-10-12 05:34:23",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 82,
@@ -1536,7 +1616,8 @@
         "updated_at": "2025-10-12 05:35:10",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 83,
@@ -1555,7 +1636,8 @@
         "updated_at": "2025-10-12 05:39:01",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 84,
@@ -1574,7 +1656,8 @@
         "updated_at": "2025-10-12 05:40:34",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 85,
@@ -1593,7 +1676,8 @@
         "updated_at": "2025-10-12 05:42:19",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 86,
@@ -1612,7 +1696,8 @@
         "updated_at": "2025-10-12 05:43:32",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 87,
@@ -1631,7 +1716,8 @@
         "updated_at": "2025-10-12 05:45:27",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 88,
@@ -1650,7 +1736,8 @@
         "updated_at": "2025-10-12 05:47:25",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 89,
@@ -1669,7 +1756,8 @@
         "updated_at": "2025-10-12 05:49:46",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 90,
@@ -1688,7 +1776,8 @@
         "updated_at": "2025-10-12 05:50:54",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 91,
@@ -1707,7 +1796,8 @@
         "updated_at": "2025-10-12 05:51:55",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 92,
@@ -1726,7 +1816,8 @@
         "updated_at": "2025-10-12 05:52:52",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 93,
@@ -1745,7 +1836,8 @@
         "updated_at": "2025-10-12 05:55:18",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 94,
@@ -1764,7 +1856,8 @@
         "updated_at": "2025-10-12 05:56:15",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 95,
@@ -1783,7 +1876,8 @@
         "updated_at": "2025-10-12 05:59:31",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 96,
@@ -1802,7 +1896,8 @@
         "updated_at": "2025-10-12 06:00:38",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 97,
@@ -1821,7 +1916,8 @@
         "updated_at": "2025-10-12 06:02:01",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 98,
@@ -1840,7 +1936,8 @@
         "updated_at": "2025-10-12 06:03:03",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 99,
@@ -1859,7 +1956,8 @@
         "updated_at": "2025-10-12 06:04:16",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 100,
@@ -1878,7 +1976,8 @@
         "updated_at": "2025-10-12 06:06:15",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 101,
@@ -1897,7 +1996,8 @@
         "updated_at": "2025-10-12 06:15:26",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 102,
@@ -1916,7 +2016,8 @@
         "updated_at": "2025-10-12 06:16:59",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 103,
@@ -1935,7 +2036,8 @@
         "updated_at": "2025-10-12 06:17:53",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 104,
@@ -1954,7 +2056,8 @@
         "updated_at": "2025-10-12 06:18:44",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 105,
@@ -1970,10 +2073,11 @@
         "stock": 47,
         "is_featured": false,
         "created_at": "2025-10-12 06:19:43",
-        "updated_at": "2025-10-12 06:19:43",
+        "updated_at": "2025-11-04 03:22:24",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "El mejor trapo para limpiar autos en todo el mercado, hacho con los mejores materiales.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 106,
@@ -1989,10 +2093,11 @@
         "stock": 42,
         "is_featured": false,
         "created_at": "2025-10-12 06:22:35",
-        "updated_at": "2025-10-12 06:22:35",
+        "updated_at": "2025-11-04 03:21:52",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Las mas seguras del mercado para brindarle a tu perro la salud que se merece, la mejor.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 107,
@@ -2005,13 +2110,14 @@
         "description": "Descubre el juguete láser para gato, la forma perfecta de mantener a tu felino activo, feliz y entretenido durante horas. Este pequeño dispositivo emite un puntero láser seguro que proyecta una luz roja brillante, diseñada especialmente para estimular el instinto cazador de tu gato. Con solo encenderlo, tu gato desplegará su agilidad y rapidez persiguiendo ese punto luminoso que se desliza por paredes, suelos y muebles, promoviendo el ejercicio físico que necesita para mantenerse saludable.\n\nSu diseño compacto y fácil de usar permite controlar el movimiento del láser con gran precisión, desde patrones simples hasta trayectorias impredecibles que desafían a tu felino. Además, su tamaño portátil te invita a jugar en cualquier lugar, ya sea en casa o de viaje.\n\nEste juguete láser no solo ofrece diversión, sino que también fortalece el vínculo entre tú y tu gato, creando momentos de juego compartido llenos de energía y alegría. Ideal para combatir el aburrimiento y reducir el estrés felino. ¡Convierte cada día en una aventura fascinante y llena movimiento con este irresistible juego láser para tu compañero peludo!",
         "price": "3500.00",
         "discount_price": "0.00",
-        "stock": 50,
+        "stock": 49,
         "is_featured": true,
         "created_at": "2025-10-12 06:23:32",
-        "updated_at": "2025-10-12 06:23:32",
+        "updated_at": "2025-11-04 03:24:10",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Ideal para jugar con tus gatos y darles el ejercicio y la diversión que merecen.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 108,
@@ -2030,7 +2136,8 @@
         "updated_at": "2025-10-12 06:24:35",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 109,
@@ -2046,10 +2153,11 @@
         "stock": 76,
         "is_featured": true,
         "created_at": "2025-10-12 06:26:21",
-        "updated_at": "2025-10-12 06:26:21",
+        "updated_at": "2025-11-04 03:23:17",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Hecha con los mejores materiales para asegurar el descansó de tu mascota.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 110,
@@ -2068,7 +2176,8 @@
         "updated_at": "2025-10-12 06:27:43",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 111,
@@ -2084,10 +2193,11 @@
         "stock": 7,
         "is_featured": false,
         "created_at": "2025-10-13 19:34:20",
-        "updated_at": "2025-10-13 19:34:20",
+        "updated_at": "2025-11-04 01:54:13",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "\"cloro\"",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 112,
@@ -2103,10 +2213,11 @@
         "stock": 123,
         "is_featured": false,
         "created_at": "2025-10-15 04:59:55",
-        "updated_at": "2025-10-20 04:26:26",
+        "updated_at": "2025-11-04 01:53:52",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "test",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 113,
@@ -2119,13 +2230,14 @@
         "description": "Descubre la magia de Lip Oil Amuse, un elixir hidratante que transforma tus labios en un lienzo de suavidad y brillo irresistible. Su fórmula ultra ligera y nutritiva combina aceites naturales que envuelven tus labios en un abrazo sedoso, reparando y protegiendo la delicada piel mientras realzan su color natural con un toque translúcido y radiante.\n\nCada aplicación es una experiencia sensorial gracias a su textura delicadamente untuosa y aroma sutilmente dulce, que despierta tus sentidos y añade un instante de placer al cuidado diario. Lip Oil Amuse no solo hidrata profundamente, sino que también ofrece un acabado brillante, como un espejo, que añade volumen y frescura inmediata.\n\nPerfecto para llevar solo o encima de tu labial favorito, este aceite se adapta a cualquier estilo, desde el look natural y fresco hasta el más sofisticado y glamuroso. Ideal para quienes buscan un cuidado labial que combine belleza y nutrición en un solo producto.\n\nCon Lip Oil Amuse, lame tus labios de una manera diferente: llena de vida, brillo y salud, para que tu sonrisa sea tan vibrante como tú. ¡Atrévete a brillar con cada aplicación!",
         "price": "1500.00",
         "discount_price": "1000.00",
-        "stock": 151,
+        "stock": 149,
         "is_featured": true,
-        "created_at": null,
-        "updated_at": null,
+        "created_at": "2025-10-30 00:31:51",
+        "updated_at": "2025-11-07 07:12:04",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Los mejores lip oils que se puedan encontrar, duraderos, no pegajosos y con olor y consistencias agradables para todos.",
+        "sold_count": 0,
+        "rating": 5
     },
     {
         "id": 114,
@@ -2140,11 +2252,12 @@
         "discount_price": "5000.00",
         "stock": 3,
         "is_featured": false,
-        "created_at": null,
+        "created_at": "2025-10-30 00:31:52",
         "updated_at": "2025-10-20 19:03:02",
         "status": "DRAFT",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 116,
@@ -2159,11 +2272,12 @@
         "discount_price": "1000.00",
         "stock": 75,
         "is_featured": true,
-        "created_at": null,
-        "updated_at": null,
+        "created_at": "2025-10-30 00:31:52",
+        "updated_at": "2025-11-04 01:48:35",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Deja una sensación de frescura en la cara durante todo el día.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 117,
@@ -2178,11 +2292,12 @@
         "discount_price": "0.00",
         "stock": 50,
         "is_featured": false,
-        "created_at": null,
-        "updated_at": null,
+        "created_at": "2025-10-30 00:31:52",
+        "updated_at": "2025-11-04 01:44:17",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Tiene un olor agradable y deja una sensación de limpieza en la cara.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 122,
@@ -2198,10 +2313,11 @@
         "stock": 10,
         "is_featured": false,
         "created_at": "2025-10-19 17:19:29",
-        "updated_at": "2025-10-19 17:19:29",
+        "updated_at": "2025-11-04 02:47:12",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Llama a tus amigos y disfruten de este juego todos juntos.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 123,
@@ -2217,10 +2333,11 @@
         "stock": 10,
         "is_featured": false,
         "created_at": "2025-10-19 17:21:32",
-        "updated_at": "2025-10-19 17:21:32",
+        "updated_at": "2025-11-04 02:46:39",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Consigue tu dado favorito y úsalo en tus jugadas para una mayor suerte.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 124,
@@ -2236,10 +2353,11 @@
         "stock": 10,
         "is_featured": false,
         "created_at": "2025-10-19 17:23:08",
-        "updated_at": "2025-10-19 17:23:08",
+        "updated_at": "2025-11-04 05:37:20",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Consíguelas todas.",
+        "sold_count": 0,
+        "rating": 3.5
     },
     {
         "id": 125,
@@ -2255,10 +2373,11 @@
         "stock": 5,
         "is_featured": false,
         "created_at": "2025-10-19 17:24:34",
-        "updated_at": "2025-10-19 17:24:34",
+        "updated_at": "2025-11-04 02:45:34",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Diviértete con tus amigos y pongan aprueba sus habilidades con este juego.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 126,
@@ -2274,10 +2393,11 @@
         "stock": 3,
         "is_featured": false,
         "created_at": "2025-10-19 17:25:34",
-        "updated_at": "2025-10-23 06:00:19",
+        "updated_at": "2025-11-04 02:44:56",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Cómodo y portátil para usar en bolsos, llaves y mas.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 127,
@@ -2293,10 +2413,11 @@
         "stock": 5,
         "is_featured": false,
         "created_at": "2025-10-19 17:26:10",
-        "updated_at": "2025-10-19 17:26:10",
+        "updated_at": "2025-11-04 02:44:17",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "lindo y enojado.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 128,
@@ -2309,13 +2430,14 @@
         "description": "¡Lleva a tus personajes favoritos de Command of Nature dondequiera que vayas! Perfectamente portátil, el llavero de peluche Timber Charm no reversible se puede enganchar a tu mochila, bolso, mosquetón, lonchera y más.",
         "price": "4100.00",
         "discount_price": "1700.00",
-        "stock": 6,
+        "stock": 1,
         "is_featured": false,
         "created_at": "2025-10-19 17:27:00",
-        "updated_at": "2025-10-19 17:27:00",
+        "updated_at": "2025-11-07 07:08:46",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Hecho con la mejor tela del mercado.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 129,
@@ -2331,10 +2453,11 @@
         "stock": 3,
         "is_featured": false,
         "created_at": "2025-10-19 17:27:33",
-        "updated_at": "2025-10-19 17:27:33",
+        "updated_at": "2025-11-04 02:42:47",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Suave y cómodo para dormir y jugar.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 130,
@@ -2350,10 +2473,11 @@
         "stock": 5,
         "is_featured": false,
         "created_at": "2025-10-19 17:28:16",
-        "updated_at": "2025-10-19 17:28:16",
+        "updated_at": "2025-11-04 02:42:24",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Material:\nTela",
+        "sold_count": 0,
+        "rating": 4.3
     },
     {
         "id": 131,
@@ -2366,13 +2490,14 @@
         "description": "Sumérgete en el mundo de Casting Shadows usando tus figuras de vinilo mientras juegas y exhibiéndolas como juguetes de escritorio cuando te veas obligado a reincorporarte al mundo real.\nEl paquete incluye:\n\nCasting Shadows: Set de figuras de vinilo de Ashe Firecrest y Ashe the Inferno\nCasting Shadows: Dread Terrashell y Dread the Ironclad - Set de figuras de vinilo",
         "price": "20500.00",
         "discount_price": "12300.00",
-        "stock": 7,
+        "stock": 6,
         "is_featured": false,
         "created_at": "2025-10-19 17:29:53",
-        "updated_at": "2025-10-19 18:06:54",
+        "updated_at": "2025-11-04 02:42:16",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Bellas figuras de colección, consíguelas todas.",
+        "sold_count": 0,
+        "rating": 4
     },
     {
         "id": 132,
@@ -2388,10 +2513,11 @@
         "stock": 8,
         "is_featured": false,
         "created_at": "2025-10-19 17:30:54",
-        "updated_at": "2025-10-19 17:30:54",
+        "updated_at": "2025-11-04 02:41:44",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Cómodo y único.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 133,
@@ -2407,10 +2533,11 @@
         "stock": 16,
         "is_featured": true,
         "created_at": "2025-10-19 17:31:53",
-        "updated_at": "2025-10-19 17:31:53",
+        "updated_at": "2025-11-04 02:54:07",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Aprende a jugar con el juego base.",
+        "sold_count": 0,
+        "rating": 5
     },
     {
         "id": 134,
@@ -2426,10 +2553,11 @@
         "stock": 16,
         "is_featured": false,
         "created_at": "2025-10-19 17:32:57",
-        "updated_at": "2025-10-19 17:32:57",
+        "updated_at": "2025-11-04 02:41:27",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "El juego que ya conocen y aman con una nueva edición, diamante.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 135,
@@ -2442,13 +2570,14 @@
         "description": "¡Prepárate para desatar un caos mágico con **Unicornios Inestables: Expansión Apocalipsis Arcoíris**! Esta aventura explosiva lleva tu juego a un nuevo nivel de diversión y locura colorida. Añade nuevos unicornios con poderes deslumbrantes y habilidades impredecibles que transforman cada partida en una experiencia única y cargada de sorpresas.\n\nSumérgete en un mundo post-apocalíptico donde los arcoíris son la última esperanza... o el mayor desastre. Desde unicornios mutantes con rayos láser y explosiones de purpurina hasta aliados improbables y peligrosos jinetes, esta expansión amplía el universo de Unicornios Inestables con cartas llenas de estrategia, humor y acción frenética.\n\nIdeal para quienes buscan retos frescos y risas garantizadas, **Apocalipsis Arcoíris** revitaliza tus partidas con nuevas reglas, estrategias y combos nunca antes vistos. ¿Estás listo para cabalgar hacia el fin del mundo con estilo y un toque de locura multicolor? ¡No dejes que este apocalipsis te pille desprevenido!",
         "price": "7700.00",
         "discount_price": "0.00",
-        "stock": 11,
+        "stock": 10,
         "is_featured": false,
         "created_at": "2025-10-19 17:33:49",
-        "updated_at": "2025-10-19 17:33:49",
+        "updated_at": "2025-11-04 02:40:38",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Bello juego de la expansión de apocalipsis arcoíris.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 136,
@@ -2464,10 +2593,11 @@
         "stock": 11,
         "is_featured": false,
         "created_at": "2025-10-19 17:34:39",
-        "updated_at": "2025-10-19 18:10:00",
+        "updated_at": "2025-11-04 02:39:33",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "disfruta esta expansión de aventuras.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 137,
@@ -2480,13 +2610,14 @@
         "description": "¡Sumérgete en un mundo de fantasía y magia con *Unicornios Inestables: Expansión Dragones*! Esta expansión en español añade una oleada de poderosos dragones al caótico reino de los unicornios, llevando tus partidas a un nuevo nivel de diversión y estrategia. \n\nPrepárate para enfrentar criaturas míticas que escupen fuego y vuelan en majestuosos combates que harán que cada turno sea impredecible y lleno de emoción. Con nuevas cartas, habilidades y efectos sorprendentes, los dragones reavivarán la batalla con movimientos inesperados y estrategias explosivas.\n\n¿Podrás dominar la alianza entre unicornios y dragones o sucumbirás ante el poder de estas legendarias criaturas? Enfrenta desafíos únicos y disfruta de partidas llenas de risas, intrigas y magia desbordante. \n\n*Unicornios Inestables: Expansión Dragones* es el complemento perfecto para quienes buscan ampliar su universo unicornio con fuego, vuelo y mucha diversión. ¡Desata la tormenta dracónica y haz que cada juego sea inolvidable!",
         "price": "7700.00",
         "discount_price": "0.00",
-        "stock": 9,
+        "stock": 8,
         "is_featured": true,
         "created_at": "2025-10-19 17:35:27",
-        "updated_at": "2025-10-19 17:35:27",
+        "updated_at": "2025-11-04 02:53:10",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Disfruta de esta expansión de unicornios inestables, ahora con dragones.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 138,
@@ -2499,13 +2630,14 @@
         "description": "Sumérgete en un mundo donde la magia se vuelve caótica con **Unicornios Inestables: Expansión Pesadillas**. Esta expansión oscura y vibrante añade nuevas cartas, retos y criaturas que transforman tu juego en una travesía llena de misterio y peligro. Los unicornios, antes símbolos de pureza y fantasía, ahora enfrentan sus peores temores en un reino donde las pesadillas cobran vida.\n\nDescubre poderes inexplorados, donde la cordura y la imaginación chocan en cada partida. Nuevas mecánicas retan tu estrategia y ponen a prueba tu habilidad para controlar el caos. Con ilustraciones impactantes que capturan la esencia de lo surrealista y lo inquietante, esta expansión te lleva más allá del arcoíris hacia un universo donde tus aliados pueden volverse en tu contra y los sueños se tornan en sombras.\n\nIdeal para quienes aman los giros inesperados y las emociones fuertes, **Expansión Pesadillas** amplía la experiencia de Unicornios Inestables, haciendo cada partida única, impredecible y llena de adrenalina. ¿Estás listo para enfrentar lo oscuro que habita en los sueños? ¡Desata la tormenta mágica y domina tus pesadillas!",
         "price": "7700.00",
         "discount_price": "0.00",
-        "stock": 6,
+        "stock": 5,
         "is_featured": true,
         "created_at": "2025-10-19 17:36:23",
-        "updated_at": "2025-10-19 17:36:23",
+        "updated_at": "2025-11-04 02:51:39",
         "status": "ACTIVE",
-        "details": null,
-        "sold_count": 0
+        "details": "Disfruta la expansión de pesadilla de unicornios inestables.",
+        "sold_count": 0,
+        "rating": 0
     },
     {
         "id": 139,
@@ -2521,9 +2653,150 @@
         "stock": 6,
         "is_featured": false,
         "created_at": "2025-10-29 01:02:57",
-        "updated_at": "2025-10-29 01:02:57",
+        "updated_at": "2025-11-02 06:15:45",
+        "status": "ARCHIVED",
+        "details": null,
+        "sold_count": 0,
+        "rating": 0
+    },
+    {
+        "id": 141,
+        "store_id": 7,
+        "sku": "SKU-1761785186033",
+        "name": "123",
+        "image_1_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761785192/marketplace/products/izyxaytsfulq4hap9mwz.png",
+        "image_2_url": null,
+        "image_3_url": null,
+        "description": "Descubre el poder de la simplicidad con **123**, un producto diseñado para transformar tu día a día con eficiencia y estilo. En un mundo donde lo complicado abunda, **123** llega como la solución perfecta: rápido, práctico y confiable. Su diseño inteligente y minimalista se adapta a cualquier entorno, desde el hogar hasta la oficina, brindándote una experiencia intuitiva que facilita tus tareas diarias.\n\nImagina completar tus actividades en solo tres pasos sencillos, sin complicaciones ni pérdidas de tiempo. Gracias a su tecnología avanzada, **123** garantiza resultados precisos y consistentes, ayudándote a alcanzar tus metas con confianza. Además, su construcción duradera asegura un rendimiento óptimo a largo plazo, acompañándote en cada desafío.\n\nPerfecto para quienes valoran la rapidez y la efectividad sin renunciar a un toque de elegancia, **123** es más que un producto; es tu aliado ideal para simplificar la rutina y potenciar tu productividad. No esperes más para experimentar la combinación perfecta de funcionalidad y diseño. ¡Con **123**, lo sencillo siempre gana!",
+        "price": "123.00",
+        "discount_price": "123.00",
+        "stock": 123,
+        "is_featured": false,
+        "created_at": "2025-10-30 00:46:33",
+        "updated_at": "2025-11-04 06:06:31",
         "status": "ACTIVE",
         "details": null,
-        "sold_count": 0
+        "sold_count": 0,
+        "rating": 2
+    },
+    {
+        "id": 142,
+        "store_id": 1,
+        "sku": "SKU-1761873927958",
+        "name": "Test",
+        "image_1_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761873928/marketplace/products/ugyz9xivtgozisptavgd.png",
+        "image_2_url": null,
+        "image_3_url": null,
+        "description": null,
+        "price": "1000.00",
+        "discount_price": "0.00",
+        "stock": 0,
+        "is_featured": false,
+        "created_at": "2025-10-31 01:25:28",
+        "updated_at": "2025-11-02 06:15:34",
+        "status": "ARCHIVED",
+        "details": null,
+        "sold_count": 0,
+        "rating": 0
+    },
+    {
+        "id": 145,
+        "store_id": 1,
+        "sku": "SKU-1761934607969",
+        "name": "Mimimimimimomo",
+        "image_1_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761934617/marketplace/products/ssuzcwxsjdhb2tvrhmcu.webp",
+        "image_2_url": null,
+        "image_3_url": null,
+        "description": "Claro, para ayudarte mejor, ¿podrías proporcionarme más detalles sobre el producto \"asdasdasd\"? Por ejemplo, qué tipo de producto es, sus características principales, su uso o cualquier información relevante. Así podré crear una descripción más precisa y atractiva.",
+        "price": "123123.00",
+        "discount_price": "0.00",
+        "stock": 0,
+        "is_featured": false,
+        "created_at": "2025-10-31 18:16:58",
+        "updated_at": "2025-10-31 22:43:06",
+        "status": "ARCHIVED",
+        "details": null,
+        "sold_count": 0,
+        "rating": 0
+    },
+    {
+        "id": 146,
+        "store_id": 4,
+        "sku": "SKU-1761947718512",
+        "name": "Abrigo rojo de mujer",
+        "image_1_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761947718/marketplace/products/rsfqcrlncluaizd8wahn.png",
+        "image_2_url": null,
+        "image_3_url": null,
+        "description": "Descubre la elegancia y el estilo en cada detalle con nuestro abrigo rojo de mujer, diseñado para destacar en cualquier ocasión. Confeccionado con tejidos de alta calidad, este abrigo ofrece una suavidad y calidez excepcionales, ideales para los días más fríos. Su vibrante color rojo intenso no solo aporta un toque de audacia y sofisticación, sino que también ilumina cualquier look con confianza y personalidad.\n\nEl corte entallado realza la silueta femenina, ofreciendo un equilibrio perfecto entre confort y elegancia. Detalles como botones forrados, un cinturón ajustable y un cuello amplio aportan un aire clásico y moderno a la vez. Además, sus bolsillos laterales son funcionales y discretos, perfectos para mantener las manos cálidas o guardar pequeños objetos esenciales.\n\nIdeal para combinar con prendas tanto casuales como formales, este abrigo rojo es la pieza clave para transformar tu armario esta temporada. Ya sea para una salida urbana, una reunión de trabajo o una cita especial, su diseño versátil y atemporal te hará sentir segura y radiante dondequiera que vayas. Atrévete a iluminar tu día con un toque de color y sofisticación que solo nuestro abrigo rojo puede ofrecer.",
+        "price": "10000.00",
+        "discount_price": "0.00",
+        "stock": 40,
+        "is_featured": false,
+        "created_at": "2025-10-31 21:55:19",
+        "updated_at": "2025-11-04 01:45:18",
+        "status": "ACTIVE",
+        "details": "Totalmente nuevo, de un color rojo sangre tan llamativo como hermoso.",
+        "sold_count": 0,
+        "rating": 0
+    },
+    {
+        "id": 147,
+        "store_id": 1,
+        "sku": "SKU-1761950012264",
+        "name": "Dildo",
+        "image_1_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761950021/marketplace/products/svqfxx7y5lraur40hcmi.png",
+        "image_2_url": null,
+        "image_3_url": null,
+        "description": "Descubre una experiencia de placer única con nuestro dildo, diseñado para brindar sensaciones intensas y confort absoluto. Fabricado con materiales de alta calidad, suaves al tacto y seguros para el cuerpo, este accesorio combina realismo y ergonomía para estimular tus sentidos de manera delicada pero profunda. Su forma cuidadosamente moldeada se adapta a tus curvas naturales, ofreciendo una inserción cómoda y satisfactoria, mientras su textura proporciona un roce sensacional que despierta cada rincón de tu piel.\n\nPerfecto tanto para exploración personal como para juegos en pareja, este dildo es versátil y fácil de limpiar, asegurando higiene y durabilidad en cada uso. Su tamaño ideal y flexibilidad lo convierten en el compañero perfecto para descubrir nuevas formas de placer, siempre respetando tus tiempos y deseos. Atrévete a explorar tu sexualidad con confianza y disfruta de momentos íntimos llenos de pasión, comodidad y autenticidad. Un accesorio imprescindible que revoluciona tus momentos de intimidad con discreción y estilo.",
+        "price": "10000.00",
+        "discount_price": "0.00",
+        "stock": 0,
+        "is_featured": false,
+        "created_at": "2025-10-31 22:33:42",
+        "updated_at": "2025-10-31 22:43:11",
+        "status": "ARCHIVED",
+        "details": "Forma\n-Tucan\n-47 centimetros",
+        "sold_count": 0,
+        "rating": 0
+    },
+    {
+        "id": 148,
+        "store_id": 1,
+        "sku": "SKU-1761978378366",
+        "name": "Prueba de botón",
+        "image_1_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1761978377/marketplace/products/fhfv4uzzrkexgba76ros.png",
+        "image_2_url": null,
+        "image_3_url": null,
+        "description": "La prueba de botón es una herramienta esencial que garantiza la seguridad y el correcto funcionamiento de tus sistemas eléctricos y electrónicos. Imagina un pequeño dispositivo compacto y fácil de usar, diseñado para medir con precisión la conductividad y la respuesta inmediata de circuitos, reemplazando métodos tradicionales con eficiencia y rapidez. Ideal para técnicos, electricistas y aficionados, esta prueba permite detectar fallas o confirmaciones en un solo toque, simplificando diagnósticos complejos en segundos.\n\nFabricada con materiales resistentes y tecnología avanzada, la prueba de botón ofrece resultados confiables y claros, incluso en condiciones desafiantes. Su diseño ergonómico y portable la convierte en la compañera perfecta para inspecciones en campo o en taller, combinando practicidad y alto rendimiento. Además, su operación intuitiva no requiere configuraciones complicadas, facilitando su uso tanto para profesionales experimentados como para principiantes.\n\nConfía en la prueba de botón para mantener la seguridad de tus instalaciones y equipos, detectando posibles fallos antes de que se conviertan en problemas mayores. Un pequeño gesto, un gran control.",
+        "price": "1000.00",
+        "discount_price": "0.00",
+        "stock": 5,
+        "is_featured": false,
+        "created_at": "2025-11-01 06:26:18",
+        "updated_at": "2025-11-02 06:15:24",
+        "status": "ARCHIVED",
+        "details": "Este es un producto de pruebaaaaaaaaaaaassss",
+        "sold_count": 0,
+        "rating": 0
+    },
+    {
+        "id": 149,
+        "store_id": 48,
+        "sku": "SKU-1762236661603",
+        "name": "Photoshop",
+        "image_1_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1762236666/marketplace/products/uoh3b0waz6a2azxhv58z.png",
+        "image_2_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1762236746/marketplace/products/z9c9y6ejfclvycxarksk.png",
+        "image_3_url": "https://res.cloudinary.com/dpbghs8ep/image/upload/v1762236747/marketplace/products/o2pb6nakqyyqnpwao1j0.png",
+        "description": "Descubre el poder ilimitado de tu creatividad con **Photoshop en español**, la herramienta definitiva para diseñadores, fotógrafos y artistas digitales. Esta versión intuitiva y completamente en español te permite transformar tus ideas en impresionantes obras visuales con una facilidad sorprendente. Desde la corrección de color y el retoque fotográfico hasta la creación de ilustraciones y composiciones complejas, Photoshop te ofrece un lienzo infinito donde cada píxel cobra vida.\n\nExplora funciones avanzadas como capas, máscaras, filtros y una amplia gama de pinceles personalizables que se adaptan a tu estilo único. Su interfaz amigable en español facilita el acceso a herramientas profesionales, acelerando tu flujo de trabajo sin barreras idiomáticas. Además, la integración con otras aplicaciones de Adobe potencia tu productividad, permitiéndote llevar tus proyectos a un nuevo nivel.\n\nYa seas un principiante con ganas de aprender o un experto en busca de innovación, **Photoshop en español** es tu aliado perfecto para expresar tu visión creativa con precisión y detalle excepcionales. ¡Da rienda suelta a tu imaginación y crea sin límites!",
+        "price": "1.00",
+        "discount_price": "0.00",
+        "stock": 4,
+        "is_featured": false,
+        "created_at": "2025-11-04 06:11:06",
+        "updated_at": "2025-11-04 06:12:28",
+        "status": "ACTIVE",
+        "details": null,
+        "sold_count": 0,
+        "rating": 0
     }
 ]
