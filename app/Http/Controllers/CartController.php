@@ -142,18 +142,22 @@ class CartController extends Controller
 
     // Update the quantity of a specific item in the authenticated user's cart.
     public function updateItem(Request $request, $id)
-    {
-        $request->validate(['quantity' => 'required|integer|min:1']);
-        $user = $request->user();
+{
+    $request->validate(['quantity' => 'required|integer|min:1']);
+    $user = $request->user();
 
-        $cart = Cart::where('user_id', $user->id)->firstOrFail();
-        $item = $cart->items()->where('id', $id)->firstOrFail();
+    $cart = Cart::where('user_id', $user->id)->firstOrFail();
+    $item = $cart->items()->where('id', $id)->firstOrFail();
 
-        $item->update(['quantity' => $request->quantity]);
+    $item->update(['quantity' => $request->quantity]);
+    $item->load('product.store');
 
-        $cart->load(['items.product.store:id,name']);
-        return response()->json(['message' => 'Cantidad actualizada', 'cart' => $cart]);
-    }
+    return response()->json([
+        'message' => 'Cantidad actualizada',
+        'item' => $item
+    ]);
+}
+
 
     // Remove a specific item from the authenticated user's cart.
     public function removeItem($id)
