@@ -70,6 +70,9 @@ class CheckoutItemController extends Controller
 
                 // 🔻 Rebajar stock en base de datos
                 $product->decrement('stock', $quantity);
+                
+                // 🔺 Incrementar contador de vendidos
+                $product->increment('sold_count', $quantity);
 
                 // 🚨 Advertencia si el precio unitario no fue definido
                 if ($unitPrice === 0) {
