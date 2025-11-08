@@ -1,0 +1,194 @@
+[
+  {
+    "id": 1,
+    "name": "Supermercado"
+  },
+  {
+    "id": 2,
+    "name": "Abarrotes"
+  },
+  {
+    "id": 3,
+    "name": "Segunda mano"
+  },
+  {
+    "id": 4,
+    "name": "Farmacia"
+  },
+  {
+    "id": 5,
+    "name": "Óptica"
+  },
+  {
+    "id": 6,
+    "name": "Macrobiotica"
+  },
+  {
+    "id": 7,
+    "name": "Productos orgánicos"
+  },
+  {
+    "id": 8,
+    "name": "Cuidado personal"
+  },
+  {
+    "id": 9,
+    "name": "Boutique de ropa"
+  },
+  {
+    "id": 10,
+    "name": "Zapatería"
+  },
+  {
+    "id": 11,
+    "name": "Joyería"
+  },
+  {
+    "id": 12,
+    "name": "Bisutería"
+  },
+  {
+    "id": 13,
+    "name": "Accesorios de moda"
+  },
+  {
+    "id": 14,
+    "name": "Relojería"
+  },
+  {
+    "id": 15,
+    "name": "Ropa deportiva"
+  },
+  {
+    "id": 16,
+    "name": "Ropa infantil"
+  },
+  {
+    "id": 17,
+    "name": "Electrónica"
+  },
+  {
+    "id": 18,
+    "name": "Celulares"
+  },
+  {
+    "id": 19,
+    "name": "Gaming"
+  },
+  {
+    "id": 20,
+    "name": "Electrodomésticos"
+  },
+  {
+    "id": 21,
+    "name": "Audio y sonido"
+  },
+  {
+    "id": 22,
+    "name": "Mueblería"
+  },
+  {
+    "id": 23,
+    "name": "Hogar y decoración"
+  },
+  {
+    "id": 24,
+    "name": "Iluminación"
+  },
+  {
+    "id": 25,
+    "name": "Ferretería"
+  },
+  {
+    "id": 26,
+    "name": "Jardinería"
+  },
+  {
+    "id": 27,
+    "name": "Colchonería"
+  },
+  {
+    "id": 28,
+    "name": "Juguetería"
+  },
+  {
+    "id": 29,
+    "name": "Artículos para bebés"
+  },
+  {
+    "id": 30,
+    "name": "Librería"
+  },
+  {
+    "id": 31,
+    "name": "Arte"
+  },
+  {
+    "id": 32,
+    "name": "Bicicletería"
+  },
+  {
+    "id": 33,
+    "name": "Automotriz"
+  },
+  {
+    "id": 34,
+    "name": "Alimentos"
+  },
+  {
+    "id": 35,
+    "name": "Gourmet"
+  },
+  {
+    "id": 36,
+    "name": "Licorería"
+  },
+  {
+    "id": 37,
+    "name": "Cultura Vegana"
+  },
+  {
+    "id": 38,
+    "name": "Cultura Vegetariana"
+  },
+  {
+    "id": 39,
+    "name": "Tienda de mascotas"
+  },
+  {
+    "id": 40,
+    "name": "Floristería"
+  },
+  {
+    "id": 41,
+    "name": "Tienda de regalos"
+  },
+  {
+    "id": 42,
+    "name": "Fotografía"
+  },
+  {
+    "id": 43,
+    "name": "Equipos médicos"
+  },
+  {
+    "id": 44,
+    "name": "Oficina y papelería"
+  },
+  {
+    "id": 45,
+    "name": "Tecnología"
+  },
+  {
+    "id": 46,
+    "name": "Emprendimiento"
+  },
+  {
+    "id": 47,
+    "name": "Outlet"
+  },
+  {
+    "id": 48,
+    "name": "Bazar"
+  }
+]
